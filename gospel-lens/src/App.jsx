@@ -24,6 +24,7 @@ import {
 // Block types:
 //  { type: "p", text }
 //  { type: "heading", text }
+//  { type: "list", items: [] }                  -> plain bullet list, no label
 //  { type: "quote", text, attribution }        -> "Wisdom of the Day" box
 //  { type: "scripture", reference, verses: [] } -> "Scripture Focus" box
 //  { type: "reflection", items: [] }            -> reflection questions
@@ -825,6 +826,42 @@ const POSTS = [
       p("In our own lives, we will face moments of doubt or discouragement. Let us hold fast to the truth of God's Word, knowing that He is faithful and will never leave us. May it be said of us, at the end of our lives, that we, too, fought the good fight, finished the race, and kept the faith."),
     ],
   },
+  {
+    id: 26,
+    title: "Planning Ahead",
+    author: null,
+    date: "July 16, 2026",
+    category: "Devotional",
+    readTime: "4 min read",
+    excerpt:
+      "You make plans for the day, the year, the decade — but Scripture is clear about whose purpose actually prevails. Here's how to hold your dreams with an open hand.",
+    blocks: [
+      p("Think about your upcoming plans for the day, week, year, and beyond."),
+      {
+        type: "list",
+        items: [
+          "Maybe you want to start a business.",
+          "Maybe you want to raise a family.",
+          "Maybe you want to write a book.",
+          "Maybe you want to travel the world.",
+          "Maybe you want to move to a place.",
+          "Maybe you want to stay where you are.",
+          "Maybe you want to start a ministry.",
+          "Maybe you want to volunteer in your city.",
+          "Maybe you want to plant a garden.",
+          "Maybe you want to pay off debt.",
+        ],
+      },
+      p("Scripture tells us …"),
+      { type: "scripture", reference: "Proverbs 19:21 NIV", verses: ["Many are the plans in a person's heart, but it is the Lord's purpose that prevails."] },
+      p("Making plans isn't a bad thing. In fact, the Bible tells us that we will harvest what we plant (Galatians 6:7), so we should be diligent—not lazy—to wisely prepare for the future. But we must simultaneously hold those plans loosely, because God knows the full picture of our lives."),
+      p("God is always working in and through His people, giving them the desire and power to do what pleases Him (Philippians 2:13). But sometimes, we require rerouting. Sometimes what we want isn't in His plan."),
+      p("But even when we don't get what we've hoped for, He always has our good and His glory in mind."),
+      p("Jesus modeled how to surrender His own plans by literally giving His life up for us—for our freedom. And, even though it wasn't easy, our lives and our futures look different because God's purpose prevailed."),
+      p("So today, make a list of some of your plans and dreams. Then hold your hands out in front of you, and visualize giving all of your dreams and plans over to God. Picture all of those plans evaporating from your hands. Then, ask God to show you which plans He wants to give back to you and if there are any new dreams He's longing for you to receive."),
+      { type: "prayer", text: "God, sometimes it's hard to surrender my life to You. I make the mistake of thinking my plans are better than Yours. I know Your purpose for me is far greater than I can imagine, so I want to release all control to You. I invite You into my decision-making. Please inspire every move and thought I make. In Jesus' name, Amen." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1181,6 +1218,19 @@ function PostBody({ blocks }) {
           );
         }
 
+        if (block.type === "list") {
+          return (
+            <ul key={i} className="not-prose space-y-2 pl-1">
+              {block.items.map((item, ii) => (
+                <li key={ii} className="flex gap-3 text-[18px] leading-relaxed text-[#2E323B]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#B08D57] mt-3 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
         if (block.type === "quote") {
           return (
             <div key={i} className="not-prose bg-[#1C1F26] text-[#F8F7F3] rounded-sm px-7 py-6 my-8">
@@ -1342,9 +1392,6 @@ function VerseOfDay() {
 function AboutView() {
   return (
     <section className="max-w-2xl mx-auto px-6 sm:px-8 pt-20 pb-28">
-      <Eyebrow center>
-        <span className="mx-auto">The Person Behind The Lens</span>
-      </Eyebrow>
       <h1
         className="text-[#1C1F26] text-4xl sm:text-5xl leading-[1.15] text-center mb-12"
         style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
