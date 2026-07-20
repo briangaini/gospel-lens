@@ -8,6 +8,10 @@ import {
   Search,
   Quote,
   Sparkles,
+  Share2,
+  Link2,
+  Check,
+  Sunrise,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -26,6 +30,16 @@ import {
 //  { type: "heart", text }                       -> "Write this on your heart"
 //  { type: "closing", text }                     -> italic sign-off
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// NEWSLETTER CONFIG
+// Leave BUTTONDOWN_USERNAME blank to keep the current demo-only signup box
+// (it just shows "Subscribed ✓" without saving anything). Once you create a
+// free account at buttondown.com, put your username here (the part after
+// buttondown.com/ in your dashboard URL) and the form becomes fully working
+// — no other code changes needed.
+// ---------------------------------------------------------------------------
+const BUTTONDOWN_USERNAME = "";
 
 const p = (text) => ({ type: "p", text });
 
@@ -813,7 +827,107 @@ const POSTS = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// SLUGS — turns a post title into a clean, shareable URL fragment, e.g.
+// "We Will Worship and We Will Reign" -> "we-will-worship-and-we-will-reign"
+// ---------------------------------------------------------------------------
+
+function slugify(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+function getPostBySlug(slug) {
+  return POSTS.find((post) => slugify(post.title) === slug) || null;
+}
+
 const CATEGORIES = ["All", "Foundations", "Teaching", "Devotional"];
+
+
+
+// ---------------------------------------------------------------------------
+// VERSE OF THE DAY — KJV (public domain), rotates once every 24 hours based
+// on the calendar day, so everyone sees the same verse and it changes at
+// midnight local time. Add more verses any time — the rotation just gets
+// longer before repeating.
+// ---------------------------------------------------------------------------
+
+const VERSES_OF_DAY = [
+  { text: "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.", reference: "John 3:16" },
+  { text: "For by grace you have been saved through faith. And this is not your own doing; it is the gift of God, not a result of works, so that no one may boast.", reference: "Ephesians 2:8-9" },
+  { text: "I can do all things through him who strengthens me.", reference: "Philippians 4:13" },
+  { text: "Trust in the LORD with all your heart, and do not lean on your own understanding. In all your ways acknowledge him, and he will make straight your paths.", reference: "Proverbs 3:5-6" },
+  { text: "The LORD is my shepherd; I shall not want.", reference: "Psalm 23:1" },
+  { text: "But he was pierced for our transgressions; he was crushed for our iniquities; upon him was the chastisement that brought us peace, and with his wounds we are healed.", reference: "Isaiah 53:5" },
+  { text: "And we know that for those who love God all things work together for good, for those who are called according to his purpose.", reference: "Romans 8:28" },
+  { text: "Have I not commanded you? Be strong and courageous. Do not be frightened, and do not be dismayed, for the LORD your God is with you wherever you go.", reference: "Joshua 1:9" },
+  { text: "Come to me, all who labor and are heavy laden, and I will give you rest.", reference: "Matthew 11:28" },
+  { text: "The LORD is near to the brokenhearted and saves the crushed in spirit.", reference: "Psalm 34:18" },
+  { text: "Therefore, if anyone is in Christ, he is a new creation. The old has passed away; behold, the new has come.", reference: "2 Corinthians 5:17" },
+  { text: "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God.", reference: "Philippians 4:6" },
+  { text: "For I know the plans I have for you, declares the LORD, plans for welfare and not for evil, to give you a future and a hope.", reference: "Jeremiah 29:11" },
+  { text: "This is the day that the LORD has made; let us rejoice and be glad in it.", reference: "Psalm 118:24" },
+  { text: "Jesus said to him, \"I am the way, and the truth, and the life. No one comes to the Father except through me.\"", reference: "John 14:6" },
+  { text: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand.", reference: "Isaiah 41:10" },
+  { text: "But they who wait for the LORD shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint.", reference: "Isaiah 40:31" },
+  { text: "Let not your hearts be troubled. Believe in God; believe also in me.", reference: "John 14:1" },
+  { text: "Create in me a clean heart, O God, and renew a right spirit within me.", reference: "Psalm 51:10" },
+  { text: "For God gave us a spirit not of fear but of power and love and self-control.", reference: "2 Timothy 1:7" },
+  { text: "Delight yourself in the LORD, and he will give you the desires of your heart.", reference: "Psalm 37:4" },
+  { text: "And my God will supply every need of yours according to his riches in glory in Christ Jesus.", reference: "Philippians 4:19" },
+  { text: "Draw near to God, and he will draw near to you.", reference: "James 4:8" },
+  { text: "Cast your burden on the LORD, and he will sustain you; he will never permit the righteous to be moved.", reference: "Psalm 55:22" },
+  { text: "Rejoice in the Lord always; again I will say, rejoice.", reference: "Philippians 4:4" },
+  { text: "The steadfast love of the LORD never ceases; his mercies never come to an end; they are new every morning; great is your faithfulness.", reference: "Lamentations 3:22-23" },
+  { text: "And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.", reference: "Philippians 4:7" },
+  { text: "Behold, I stand at the door and knock. If anyone hears my voice and opens the door, I will come in to him and eat with him, and he with me.", reference: "Revelation 3:20" },
+  { text: "Though you have not seen him, you love him. Though you do not now see him, you believe in him and rejoice with joy that is inexpressible and filled with glory.", reference: "1 Peter 1:8" },
+  { text: "He has told you, O man, what is good; and what does the LORD require of you but to do justice, and to love kindness, and to walk humbly with your God?", reference: "Micah 6:8" },
+  { text: "I have been crucified with Christ. It is no longer I who live, but Christ who lives in me. And the life I now live in the flesh I live by faith in the Son of God, who loved me and gave himself for me.", reference: "Galatians 2:20" },
+  { text: "Now faith is the assurance of things hoped for, the conviction of things not seen.", reference: "Hebrews 11:1" },
+  { text: "Because, if you confess with your mouth that Jesus is Lord and believe in your heart that God raised him from the dead, you will be saved.", reference: "Romans 10:9" },
+  { text: "We love because he first loved us.", reference: "1 John 4:19" },
+  { text: "God is our refuge and strength, a very present help in trouble.", reference: "Psalm 46:1" },
+  { text: "But seek first the kingdom of God and his righteousness, and all these things will be added to you.", reference: "Matthew 6:33" },
+  { text: "Whatever you do, work heartily, as for the Lord and not for men.", reference: "Colossians 3:23" },
+  { text: "Do not be conformed to this world, but be transformed by the renewal of your mind, that by testing you may discern what is the will of God, what is good and acceptable and perfect.", reference: "Romans 12:2" },
+  { text: "But he said to me, \"My grace is sufficient for you, for my power is made perfect in weakness.\" Therefore I will boast all the more gladly of my weaknesses, so that the power of Christ may rest upon me.", reference: "2 Corinthians 12:9" },
+];
+
+function getVerseOfDay() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  return VERSES_OF_DAY[dayOfYear % VERSES_OF_DAY.length];
+}
+
+// Curated posts for the "Start Here" section — the clearest explanations
+// of the gospel itself, pulled out from the general post stream.
+const FOUNDATIONAL_POST_IDS = [1, 12, 19];
+
+// ---------------------------------------------------------------------------
+// READING TIME — calculated from actual word count (~200 wpm) instead of
+// a hand-typed estimate, so it stays accurate as posts get edited.
+// ---------------------------------------------------------------------------
+
+function estimateReadTime(post) {
+  const words = post.blocks.reduce((total, block) => {
+    if (block.type === "p" || block.type === "quote" || block.type === "heart" || block.type === "prayer" || block.type === "encourage" || block.type === "closing" || block.type === "heading") {
+      return total + block.text.split(/\s+/).filter(Boolean).length;
+    }
+    if (block.type === "scripture") {
+      return total + block.verses.join(" ").split(/\s+/).filter(Boolean).length;
+    }
+    if (block.type === "reflection" || block.type === "share") {
+      return total + block.items.join(" ").split(/\s+/).filter(Boolean).length;
+    }
+    return total;
+  }, 0);
+  return `${Math.max(1, Math.round(words / 200))} min read`;
+}
 
 // ---------------------------------------------------------------------------
 // SHARED UI PIECES
@@ -859,6 +973,9 @@ function Nav({ view, setView, menuOpen, setMenuOpen }) {
           <button onClick={() => setView("home")} className={linkClass("home")}>
             Home
           </button>
+          <button onClick={() => setView("about")} className={linkClass("about")}>
+            About
+          </button>
           <button onClick={() => setView("blog")} className={linkClass("blog")}>
             Blogs
           </button>
@@ -873,6 +990,9 @@ function Nav({ view, setView, menuOpen, setMenuOpen }) {
         <div className="sm:hidden border-t border-[#1C1F26]/8 px-6 py-4 flex flex-col gap-4 bg-[#F8F7F3]">
           <button onClick={() => { setView("home"); setMenuOpen(false); }} className={`text-left ${linkClass("home")}`}>
             Home
+          </button>
+          <button onClick={() => { setView("about"); setMenuOpen(false); }} className={`text-left ${linkClass("about")}`}>
+            About
           </button>
           <button onClick={() => { setView("blog"); setMenuOpen(false); }} className={`text-left ${linkClass("blog")}`}>
             Blogs
@@ -913,22 +1033,46 @@ function Footer() {
             </h3>
             <p className="text-sm text-[#5B5F6B]">One email, whenever something new is published. No spam.</p>
           </div>
-          <form onSubmit={handleSubscribe} className="flex w-full sm:w-auto gap-2">
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="flex-1 sm:w-64 bg-white border border-[#1C1F26]/15 px-4 py-2.5 text-sm text-[#1C1F26] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
-            />
-            <button
-              type="submit"
-              className="whitespace-nowrap bg-[#1C1F26] text-[#F8F7F3] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] transition-colors duration-300 rounded-sm"
+          {BUTTONDOWN_USERNAME ? (
+            <form
+              action={`https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN_USERNAME}`}
+              method="post"
+              target="_blank"
+              className="flex w-full sm:w-auto gap-2"
             >
-              {status === "done" ? "Subscribed ✓" : "Subscribe"}
-            </button>
-          </form>
+              <input type="hidden" name="embed" value="1" />
+              <input
+                type="email"
+                required
+                name="email"
+                placeholder="you@example.com"
+                className="flex-1 sm:w-64 bg-white border border-[#1C1F26]/15 px-4 py-2.5 text-sm text-[#1C1F26] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+              />
+              <button
+                type="submit"
+                className="whitespace-nowrap bg-[#1C1F26] text-[#F8F7F3] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] transition-colors duration-300 rounded-sm"
+              >
+                Subscribe
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubscribe} className="flex w-full sm:w-auto gap-2">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="flex-1 sm:w-64 bg-white border border-[#1C1F26]/15 px-4 py-2.5 text-sm text-[#1C1F26] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+              />
+              <button
+                type="submit"
+                className="whitespace-nowrap bg-[#1C1F26] text-[#F8F7F3] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] transition-colors duration-300 rounded-sm"
+              >
+                {status === "done" ? "Subscribed ✓" : "Subscribe"}
+              </button>
+            </form>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
@@ -942,6 +1086,13 @@ function Footer() {
             © 2026 The Gospel Lens. Every good gift is from above.
           </p>
         </div>
+
+        <p className="text-[11px] text-[#8A8D96] leading-relaxed mt-6 pt-6 border-t border-[#1C1F26]/8 max-w-2xl">
+          Some articles on this site are curated, adapted, or quoted from other Christian teachers, authors, and ministries, and are shared here for devotional and educational purposes. All rights remain with their original creators. Scripture quotations are taken from the translations noted with each verse.
+        </p>
+        <p className="text-[11px] text-[#8A8D96] leading-relaxed mt-3 max-w-2xl">
+          Unless otherwise noted, Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.
+        </p>
       </div>
     </footer>
   );
@@ -965,7 +1116,7 @@ function PostCard({ post, onOpen, featured = false }) {
     >
       <div className="flex items-center justify-between mb-4">
         <CategoryTag category={post.category} />
-        <span className="text-[11px] uppercase tracking-[0.1em] text-[#8A8D96]">{post.readTime}</span>
+        <span className="text-[11px] uppercase tracking-[0.1em] text-[#8A8D96]">{estimateReadTime(post)}</span>
       </div>
       <h3
         className={`text-[#1C1F26] mb-2 leading-snug ${featured ? "text-2xl" : "text-xl"}`}
@@ -1167,6 +1318,64 @@ function PostBody({ blocks }) {
 // VIEWS
 // ---------------------------------------------------------------------------
 
+function VerseOfDay() {
+  const verse = useMemo(() => getVerseOfDay(), []);
+  return (
+    <div className="max-w-2xl mx-auto px-6 sm:px-8 -mt-6 mb-6">
+      <div className="bg-[#1C1F26] rounded-sm px-7 py-7 sm:px-9 sm:py-8 text-center">
+        <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-4">
+          <Sunrise size={13} strokeWidth={2} />
+          Verse of the Day
+        </div>
+        <p
+          className="text-[#F8F7F3] text-lg sm:text-xl leading-relaxed italic"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          "{verse.text}"
+        </p>
+        <p className="text-[#B0B4BD] text-sm mt-4 tracking-wide">— {verse.reference}, ESV</p>
+      </div>
+    </div>
+  );
+}
+
+function AboutView() {
+  return (
+    <section className="max-w-2xl mx-auto px-6 sm:px-8 pt-20 pb-28">
+      <Eyebrow center>
+        <span className="mx-auto">The Person Behind The Lens</span>
+      </Eyebrow>
+      <h1
+        className="text-[#1C1F26] text-4xl sm:text-5xl leading-[1.15] text-center mb-12"
+        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+      >
+        The Person Behind the Lens
+      </h1>
+
+      <div className="space-y-6 text-[#2E323B] text-[18px] leading-[1.9]">
+        <p>
+          <span
+            className="float-left text-7xl leading-[0.75] pr-3 pt-2 text-[#4A5D4E]"
+            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+          >
+            G
+          </span>
+          reetings in the name of the Lord — I'm Brian, the person behind The Gospel Lens.
+        </p>
+        <p>
+          I was born and raised in India and now live in the United States — two very different worlds that, in their own way, taught me the same thing: the gospel isn't a cultural export or a Western idea. It's good news for everyone, everywhere.
+        </p>
+        <p>
+          I started this site because I kept running into the same problem — people (myself included, at different points) who had heard about Jesus their whole lives without ever really hearing the gospel clearly. Not a list of rules. Not a vague sense of "be a good person." The actual news: that God, in Christ, did for us what we could never do for ourselves.
+        </p>
+        <p>
+          This isn't a pulpit, and I'm not a pastor or a theologian. I'm just someone who wants that news explained plainly, and who's gathered voices — some mine, some from teachers I trust — to help do that. My hope is simple: that whoever lands on this page, wherever they're starting from, walks away seeing the gospel a little more clearly than before.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function HomeView({ setView, openPost }) {
   return (
     <>
@@ -1192,6 +1401,8 @@ function HomeView({ setView, openPost }) {
         </button>
       </section>
 
+      <VerseOfDay />
+
       <section className="bg-white border-y border-[#1C1F26]/8">
         <div className="max-w-3xl mx-auto px-6 sm:px-8 py-20">
           <Eyebrow>Our Mission</Eyebrow>
@@ -1215,6 +1426,22 @@ function HomeView({ setView, openPost }) {
               The Gospel Lens exists to hold ordinary life up to that light — our work, our relationships, our doubts, our grief — and to write about what becomes visible when we do.
             </p>
           </div>
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
+        <Eyebrow>Start Here</Eyebrow>
+        <h2 className="text-3xl text-[#1C1F26] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          New here? Start with these.
+        </h2>
+        <p className="text-[#5B5F6B] text-[15px] mb-10 max-w-lg">
+          If you want to understand what the gospel actually is before anything else, these three posts are the clearest place to begin.
+        </p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FOUNDATIONAL_POST_IDS.map((id) => {
+            const post = POSTS.find((pp) => pp.id === id);
+            return post ? <PostCard key={post.id} post={post} onOpen={openPost} featured /> : null;
+          })}
         </div>
       </section>
 
@@ -1367,6 +1594,79 @@ function ReadingProgress() {
   );
 }
 
+function ShareBar({ post }) {
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = () => {
+    const base = window.location.href.split("#")[0];
+    return `${base}#${slugify(post.title)}`;
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // clipboard unavailable — fail quietly
+    }
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: post.title, url: shareUrl() });
+      } catch (err) {
+        // user cancelled — no action needed
+      }
+    } else {
+      handleCopy();
+    }
+  };
+
+  const shareX = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl())}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const shareFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 mt-14 pt-8 border-t border-[#1C1F26]/8">
+      <span className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] font-semibold mr-1">Share</span>
+      <button
+        onClick={handleNativeShare}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200 sm:hidden"
+      >
+        <Share2 size={14} strokeWidth={2} />
+        Share
+      </button>
+      <button
+        onClick={shareX}
+        className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+      >
+        Share on X
+      </button>
+      <button
+        onClick={shareFacebook}
+        className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+      >
+        Share on Facebook
+      </button>
+      <button
+        onClick={handleCopy}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+      >
+        {copied ? <Check size={14} strokeWidth={2} /> : <Link2 size={14} strokeWidth={2} />}
+        {copied ? "Link Copied" : "Copy Link"}
+      </button>
+    </div>
+  );
+}
+
 function SinglePostView({ post, setView, openPost }) {
   if (!post) return null;
 
@@ -1387,7 +1687,7 @@ function SinglePostView({ post, setView, openPost }) {
         <CategoryTag category={post.category} />
         <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] mt-3">
           {post.author ? `By ${post.author} · ` : ""}
-          {post.date} · {post.readTime}
+          {post.date} · {estimateReadTime(post)}
         </p>
         <h1
           className="text-[#1C1F26] text-3xl sm:text-[2.75rem] leading-[1.15] mt-4 mb-10"
@@ -1398,7 +1698,9 @@ function SinglePostView({ post, setView, openPost }) {
 
         <PostBody blocks={post.blocks} />
 
-        <div className="mt-14 pt-8 border-t border-[#1C1F26]/8">
+        <ShareBar post={post} />
+
+        <div className="mt-8">
           <button
             onClick={() => setView("blog")}
             className="inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] hover:text-[#4A5D4E] transition-colors duration-300"
@@ -1430,20 +1732,97 @@ function SinglePostView({ post, setView, openPost }) {
 // ROOT APP
 // ---------------------------------------------------------------------------
 
+function BackToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 700);
+    window.addEventListener("scroll", onScroll);
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Back to top"
+      className="fixed bottom-6 right-6 z-30 w-11 h-11 rounded-full bg-[#1C1F26] text-[#F8F7F3] flex items-center justify-center shadow-lg hover:bg-[#4A5D4E] transition-colors duration-300"
+    >
+      <ArrowRight size={16} strokeWidth={2.5} style={{ transform: "rotate(-90deg)" }} />
+    </button>
+  );
+}
+
 export default function GospelLensApp() {
   const [view, setView] = useState("home");
   const [activePost, setActivePost] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Read the URL hash on load (and whenever it changes) so a shared link
+  // like #we-will-worship-and-we-will-reign opens that exact post instead
+  // of always landing on Home. Old-style #post-4 links still work too.
+  useEffect(() => {
+    const applyHash = () => {
+      const hash = window.location.hash.replace("#", "");
+
+      if (hash === "blog") {
+        setView("blog");
+        return;
+      }
+      if (hash === "about") {
+        setView("about");
+        return;
+      }
+      if (hash.startsWith("post-")) {
+        const id = parseInt(hash.replace("post-", ""), 10);
+        const found = POSTS.find((pp) => pp.id === id);
+        if (found) {
+          setActivePost(found);
+          setView("post");
+          return;
+        }
+      }
+      if (hash) {
+        const found = getPostBySlug(hash);
+        if (found) {
+          setActivePost(found);
+          setView("post");
+          return;
+        }
+      }
+      setView("home");
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
+
+  // Keep the browser tab title in sync with what's on screen
+  useEffect(() => {
+    if (view === "post" && activePost) {
+      document.title = `${activePost.title} — The Gospel Lens`;
+    } else if (view === "blog") {
+      document.title = "Blogs — The Gospel Lens";
+    } else if (view === "about") {
+      document.title = "The Person Behind the Lens — The Gospel Lens";
+    } else {
+      document.title = "The Gospel Lens";
+    }
+  }, [view, activePost]);
+
   const openPost = (post) => {
     setActivePost(post);
     setView("post");
+    window.location.hash = slugify(post.title);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const changeView = (v) => {
     setView(v);
     setMenuOpen(false);
+    window.location.hash = v === "home" ? "" : v;
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -1459,10 +1838,12 @@ export default function GospelLensApp() {
       <main className="flex-1">
         {view === "home" && <HomeView setView={changeView} openPost={openPost} />}
         {view === "blog" && <BlogListView openPost={openPost} />}
+        {view === "about" && <AboutView />}
         {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} />}
       </main>
 
       <Footer />
+      <BackToTop />
     </div>
   );
 }
