@@ -12,6 +12,8 @@ import {
   Link2,
   Check,
   Sunrise,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -41,6 +43,15 @@ import {
 // — no other code changes needed.
 // ---------------------------------------------------------------------------
 const BUTTONDOWN_USERNAME = "";
+
+// ---------------------------------------------------------------------------
+// CONTACT CONFIG
+// Fill in your email address below and two things go live: a "Contact"
+// link in the footer for readers, and a separate "Submit a Blog Post" link
+// for other writers who want to pitch content (pre-filled subject line so
+// their emails are easy to spot). Leave blank to hide both links.
+// ---------------------------------------------------------------------------
+const CONTACT_EMAIL = "brian13gaini@gmail.com";
 
 const p = (text) => ({ type: "p", text });
 
@@ -869,6 +880,30 @@ const POSTS = [
 // "We Will Worship and We Will Reign" -> "we-will-worship-and-we-will-reign"
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// TOPICS — cross-category tags, separate from Foundations/Teaching/
+// Devotional. Lets someone browse "everything about grief" regardless of
+// which category it's filed under. Add a post's id to a tag's array to
+// tag it — a post can carry more than one tag.
+// ---------------------------------------------------------------------------
+
+const POST_TAGS = {
+  "The Gospel Explained": [1, 9, 12, 19],
+  "Grace & Assurance": [3, 14, 7],
+  "Sin & Repentance": [8, 17],
+  "Grief & Comfort": [6, 21, 22],
+  "Purpose & Calling": [5, 13, 23, 26],
+  "Prayer": [2, 18],
+  "Worship": [4],
+  "Friendship": [20],
+  "Discipline & Growth": [10, 11, 24, 25],
+  "Identity in Christ": [16],
+};
+
+function tagsForPost(postId) {
+  return Object.keys(POST_TAGS).filter((tag) => POST_TAGS[tag].includes(postId));
+}
+
 function slugify(title) {
   return title
     .toLowerCase()
@@ -958,12 +993,44 @@ function estimateReadTime(post) {
     if (block.type === "scripture") {
       return total + block.verses.join(" ").split(/\s+/).filter(Boolean).length;
     }
-    if (block.type === "reflection" || block.type === "share") {
+    if (block.type === "reflection" || block.type === "share" || block.type === "list") {
       return total + block.items.join(" ").split(/\s+/).filter(Boolean).length;
     }
     return total;
   }, 0);
   return `${Math.max(1, Math.round(words / 200))} min read`;
+}
+
+// Builds one lowercase blob of everything searchable in a post — title,
+// excerpt, author, category, topic tags, and every word in the body — so
+// a search for any keyword anywhere in a post actually finds it.
+const searchIndexCache = new Map();
+
+function getSearchIndex(post) {
+  if (searchIndexCache.has(post.id)) return searchIndexCache.get(post.id);
+
+  const bodyText = post.blocks
+    .map((block) => {
+      if (block.text) return block.text;
+      if (block.verses) return block.verses.join(" ");
+      if (block.items) return block.items.join(" ");
+      return "";
+    })
+    .join(" ");
+
+  const index = [
+    post.title,
+    post.excerpt,
+    post.author || "",
+    post.category,
+    tagsForPost(post.id).join(" "),
+    bodyText,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  searchIndexCache.set(post.id, index);
+  return index;
 }
 
 // ---------------------------------------------------------------------------
@@ -983,48 +1050,93 @@ function Eyebrow({ children, center = false }) {
   );
 }
 
-function Nav({ view, setView, menuOpen, setMenuOpen }) {
+function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark }) {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
   const linkClass = (v) =>
     `text-sm tracking-wide transition-colors duration-200 pb-1 border-b ${
       view === v || (v === "blog" && view === "post")
-        ? "text-[#1C1F26] border-[#B08D57]"
-        : "text-[#5B5F6B] border-transparent hover:text-[#1C1F26] hover:border-[#B08D57]/50"
+        ? "text-[#1C1F26] dark:text-[#F2F1EC] border-[#B08D57]"
+        : "text-[#5B5F6B] dark:text-[#A9ADB6] border-transparent hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] hover:border-[#B08D57]/50"
     }`;
 
+  const submitSearch = (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    onSearch(query.trim());
+    setSearchOpen(false);
+    setQuery("");
+  };
+
   return (
-    <header className="sticky top-0 z-30 bg-[#F8F7F3]/90 backdrop-blur-sm border-b border-[#1C1F26]/8">
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
-        <button onClick={() => setView("home")} className="flex items-center gap-2.5 group">
+    <header className="sticky top-0 z-30 bg-[#F8F7F3]/90 dark:bg-[#14161B]/90 backdrop-blur-sm border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between gap-3">
+        <button onClick={() => setView("home")} className="flex items-center gap-2.5 group shrink-0">
           <span className="relative flex items-center justify-center w-8 h-8 rounded-full border border-[#B08D57] text-[#B08D57] group-hover:bg-[#B08D57] group-hover:text-[#F8F7F3] transition-colors duration-300">
             <BookOpen size={15} strokeWidth={1.75} />
           </span>
           <span
-            className="text-[22px] text-[#1C1F26] tracking-tight"
+            className="text-[22px] text-[#1C1F26] dark:text-[#F2F1EC] tracking-tight hidden xs:inline"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
           >
             The Gospel Lens
           </span>
         </button>
 
-        <nav className="hidden sm:flex items-center gap-8">
-          <button onClick={() => setView("home")} className={linkClass("home")}>
-            Home
-          </button>
-          <button onClick={() => setView("about")} className={linkClass("about")}>
-            About
-          </button>
-          <button onClick={() => setView("blog")} className={linkClass("blog")}>
-            Blogs
-          </button>
-        </nav>
+        {searchOpen ? (
+          <form onSubmit={submitSearch} className="flex-1 flex items-center gap-2 max-w-sm">
+            <input
+              autoFocus
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search the blog…"
+              className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-3 py-2 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] rounded-sm focus:outline-none focus:border-[#4A5D4E]"
+            />
+            <button type="button" onClick={() => setSearchOpen(false)} className="text-[#8A8D96] dark:text-[#7C808A] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]" aria-label="Close search">
+              <X size={18} />
+            </button>
+          </form>
+        ) : (
+          <>
+            <nav className="hidden sm:flex items-center gap-8">
+              <button onClick={() => setView("home")} className={linkClass("home")}>
+                Home
+              </button>
+              <button onClick={() => setView("about")} className={linkClass("about")}>
+                About
+              </button>
+              <button onClick={() => setView("blog")} className={linkClass("blog")}>
+                Blogs
+              </button>
+            </nav>
 
-        <button className="sm:hidden text-[#1C1F26]" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSearchOpen(true)}
+                aria-label="Search"
+                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
+              >
+                <Search size={18} strokeWidth={2} />
+              </button>
+              <button
+                onClick={toggleDark}
+                aria-label="Toggle dark mode"
+                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
+              >
+                {dark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
+              </button>
+              <button className="sm:hidden text-[#1C1F26] dark:text-[#F2F1EC]" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+                {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {menuOpen && (
-        <div className="sm:hidden border-t border-[#1C1F26]/8 px-6 py-4 flex flex-col gap-4 bg-[#F8F7F3]">
+        <div className="sm:hidden border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 px-6 py-4 flex flex-col gap-4 bg-[#F8F7F3] dark:bg-[#14161B]">
           <button onClick={() => { setView("home"); setMenuOpen(false); }} className={`text-left ${linkClass("home")}`}>
             Home
           </button>
@@ -1058,17 +1170,17 @@ function Footer() {
   };
 
   return (
-    <footer className="border-t border-[#1C1F26]/8 mt-24">
+    <footer className="border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 mt-24">
       <div className="max-w-5xl mx-auto px-6 sm:px-8 py-14">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10 border-b border-[#1C1F26]/8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10 border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
           <div>
             <h3
-              className="text-lg text-[#1C1F26] mb-1"
+              className="text-lg text-[#1C1F26] dark:text-[#F2F1EC] mb-1"
               style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
             >
               Get new posts by email
             </h3>
-            <p className="text-sm text-[#5B5F6B]">One email, whenever something new is published. No spam.</p>
+            <p className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6]">One email, whenever something new is published. No spam.</p>
           </div>
           {BUTTONDOWN_USERNAME ? (
             <form
@@ -1083,7 +1195,7 @@ function Footer() {
                 required
                 name="email"
                 placeholder="you@example.com"
-                className="flex-1 sm:w-64 bg-white border border-[#1C1F26]/15 px-4 py-2.5 text-sm text-[#1C1F26] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+                className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
               />
               <button
                 type="submit"
@@ -1100,7 +1212,7 @@ function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="flex-1 sm:w-64 bg-white border border-[#1C1F26]/15 px-4 py-2.5 text-sm text-[#1C1F26] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+                className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
               />
               <button
                 type="submit"
@@ -1113,784 +1225,40 @@ function Footer() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
-          <div className="flex items-center gap-2 text-[#5B5F6B]">
+          <div className="flex items-center gap-2 text-[#5B5F6B] dark:text-[#A9ADB6]">
             <BookOpen size={14} strokeWidth={1.75} className="text-[#B08D57]" />
             <span className="text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
               The Gospel Lens
             </span>
           </div>
-          <p className="text-xs text-[#8A8D96] tracking-wide">
+
+          {CONTACT_EMAIL && (
+            <div className="flex items-center gap-5 text-xs">
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+              >
+                Contact
+              </a>
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Blog Submission — The Gospel Lens")}`}
+                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+              >
+                Submit a Blog Post
+              </a>
+            </div>
+          )}
+
+          <p className="text-xs text-[#8A8D96] dark:text-[#7C808A] tracking-wide">
             © 2026 The Gospel Lens. Every good gift is from above.
           </p>
         </div>
 
-        <p className="text-[11px] text-[#8A8D96] leading-relaxed mt-6 pt-6 border-t border-[#1C1F26]/8 max-w-2xl">
+        <p className="text-[11px] text-[#8A8D96] dark:text-[#7C808A] leading-relaxed mt-6 pt-6 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 max-w-2xl">
           Some articles on this site are curated, adapted, or quoted from other Christian teachers, authors, and ministries, and are shared here for devotional and educational purposes. All rights remain with their original creators. Scripture quotations are taken from the translations noted with each verse.
         </p>
-        <p className="text-[11px] text-[#8A8D96] leading-relaxed mt-3 max-w-2xl">
+        <p className="text-[11px] text-[#8A8D96] dark:text-[#7C808A] leading-relaxed mt-3 max-w-2xl">
           Unless otherwise noted, Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.
         </p>
       </div>
-    </footer>
-  );
-}
-
-function CategoryTag({ category }) {
-  return (
-    <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-[#4A5D4E] bg-[#4A5D4E]/8 px-2.5 py-1 rounded-full">
-      {category}
-    </span>
-  );
-}
-
-function PostCard({ post, onOpen, featured = false }) {
-  return (
-    <button
-      onClick={() => onOpen(post)}
-      className={`group text-left flex flex-col bg-white border border-[#1C1F26]/8 hover:border-[#B08D57]/40 rounded-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_-15px_rgba(28,31,38,0.25)] ${
-        featured ? "p-8" : "p-7"
-      }`}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <CategoryTag category={post.category} />
-        <span className="text-[11px] uppercase tracking-[0.1em] text-[#8A8D96]">{estimateReadTime(post)}</span>
-      </div>
-      <h3
-        className={`text-[#1C1F26] mb-2 leading-snug ${featured ? "text-2xl" : "text-xl"}`}
-        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-      >
-        {post.title}
-      </h3>
-      <span className="text-[11px] text-[#8A8D96] mb-3">
-        {post.author ? `By ${post.author} · ` : ""}
-        {post.date}
-      </span>
-      <p className="text-[#5B5F6B] text-[15px] leading-relaxed mb-6 flex-1">{post.excerpt}</p>
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4A5D4E] group-hover:gap-2.5 transition-all duration-300">
-        Read More
-        <ArrowRight size={14} strokeWidth={2} />
-      </span>
-    </button>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// POST BODY RENDERER — turns the `blocks` array into styled sections
-// ---------------------------------------------------------------------------
-
-function PostBody({ blocks }) {
-  let paragraphIndex = -1;
-
-  return (
-    <div className="space-y-6 text-[#2E323B] text-[18px] leading-[1.9]">
-      {blocks.map((block, i) => {
-        if (block.type === "p") {
-          paragraphIndex += 1;
-          const isFirst = paragraphIndex === 0;
-          return (
-            <p key={i}>
-              {isFirst ? (
-                <>
-                  <span
-                    className="float-left text-7xl leading-[0.75] pr-3 pt-2 text-[#4A5D4E]"
-                    style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-                  >
-                    {block.text.charAt(0)}
-                  </span>
-                  {block.text.slice(1)}
-                </>
-              ) : (
-                block.text
-              )}
-            </p>
-          );
-        }
-
-        if (block.type === "heading") {
-          return (
-            <h2
-              key={i}
-              className="text-2xl text-[#1C1F26] pt-4"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-            >
-              {block.text}
-            </h2>
-          );
-        }
-
-        if (block.type === "list") {
-          return (
-            <ul key={i} className="not-prose space-y-2 pl-1">
-              {block.items.map((item, ii) => (
-                <li key={ii} className="flex gap-3 text-[18px] leading-relaxed text-[#2E323B]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#B08D57] mt-3 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          );
-        }
-
-        if (block.type === "quote") {
-          return (
-            <div key={i} className="not-prose bg-[#1C1F26] text-[#F8F7F3] rounded-sm px-7 py-6 my-8">
-              <div className="flex items-start gap-3">
-                <Sparkles size={16} className="text-[#B08D57] mt-1 shrink-0" strokeWidth={2} />
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-2">
-                    Wisdom of the Day
-                  </p>
-                  <p className="text-[17px] leading-relaxed italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    "{block.text}"
-                  </p>
-                  {block.attribution && (
-                    <p className="text-sm text-[#B0B4BD] mt-3">— {block.attribution}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        }
-
-        if (block.type === "scripture") {
-          return (
-            <div key={i} className="not-prose border-l-4 border-[#B08D57] bg-[#4A5D4E]/6 rounded-r-sm px-6 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-3">
-                Scripture Focus · {block.reference}
-              </p>
-              <div className="space-y-3">
-                {block.verses.map((v, vi) => (
-                  <p key={vi} className="text-[17px] leading-relaxed italic text-[#2E323B]" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    "{v}"
-                  </p>
-                ))}
-              </div>
-            </div>
-          );
-        }
-
-        if (block.type === "reflection") {
-          return (
-            <div key={i} className="not-prose bg-white border border-[#1C1F26]/10 rounded-sm px-7 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4">
-                Reflection Questions
-              </p>
-              <ul className="space-y-3">
-                {block.items.map((q, qi) => (
-                  <li key={qi} className="flex gap-3 text-[16px] leading-relaxed text-[#2E323B]">
-                    <span className="text-[#B08D57] font-semibold shrink-0" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      {qi + 1}.
-                    </span>
-                    {q}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        }
-
-        if (block.type === "heart") {
-          return (
-            <div key={i} className="not-prose flex gap-3 items-start bg-[#B08D57]/10 border border-[#B08D57]/30 rounded-sm px-6 py-5 my-8">
-              <Quote size={18} className="text-[#B08D57] mt-1 shrink-0" strokeWidth={2} />
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#8a6f42] font-semibold mb-2">
-                  Write This On Your Heart
-                </p>
-                <p className="text-[16px] leading-relaxed text-[#2E323B]">{block.text}</p>
-              </div>
-            </div>
-          );
-        }
-
-        if (block.type === "encourage") {
-          return (
-            <div key={i} className="not-prose text-center border-y border-[#B08D57]/30 py-8 my-10">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">
-                Be Encouraged
-              </p>
-              <p
-                className="text-[22px] sm:text-2xl leading-snug text-[#1C1F26] max-w-lg mx-auto"
-                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-              >
-                {block.text}
-              </p>
-            </div>
-          );
-        }
-
-        if (block.type === "share") {
-          return (
-            <div key={i} className="not-prose bg-[#4A5D4E]/6 rounded-sm px-7 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4">
-                Share Your Faith
-              </p>
-              <ul className="space-y-3">
-                {block.items.map((item, ii) => (
-                  <li key={ii} className="flex gap-3 text-[16px] leading-relaxed text-[#2E323B]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#B08D57] mt-2.5 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        }
-
-        if (block.type === "prayer") {
-          return (
-            <div key={i} className="not-prose bg-[#1C1F26]/4 border-l-4 border-[#1C1F26]/20 rounded-r-sm px-7 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5B5F6B] font-semibold mb-3">
-                A Prayer
-              </p>
-              <p className="text-[17px] leading-relaxed text-[#2E323B] italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {block.text}
-              </p>
-            </div>
-          );
-        }
-
-        if (block.type === "closing") {
-          return (
-            <p key={i} className="text-sm italic text-[#8A8D96] pt-2">
-              {block.text}
-            </p>
-          );
-        }
-
-        return null;
-      })}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// VIEWS
-// ---------------------------------------------------------------------------
-
-function VerseOfDay() {
-  const verse = useMemo(() => getVerseOfDay(), []);
-  return (
-    <div className="max-w-2xl mx-auto px-6 sm:px-8 -mt-6 mb-6">
-      <div className="bg-[#1C1F26] rounded-sm px-7 py-7 sm:px-9 sm:py-8 text-center">
-        <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-4">
-          <Sunrise size={13} strokeWidth={2} />
-          Verse of the Day
-        </div>
-        <p
-          className="text-[#F8F7F3] text-lg sm:text-xl leading-relaxed italic"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          "{verse.text}"
-        </p>
-        <p className="text-[#B0B4BD] text-sm mt-4 tracking-wide">— {verse.reference}, ESV</p>
-      </div>
-    </div>
-  );
-}
-
-function AboutView() {
-  return (
-    <section className="max-w-2xl mx-auto px-6 sm:px-8 pt-20 pb-28">
-      <h1
-        className="text-[#1C1F26] text-4xl sm:text-5xl leading-[1.15] text-center mb-12"
-        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-      >
-        The Person Behind the Lens
-      </h1>
-
-      <div className="space-y-6 text-[#2E323B] text-[18px] leading-[1.9]">
-        <p>
-          <span
-            className="float-left text-7xl leading-[0.75] pr-3 pt-2 text-[#4A5D4E]"
-            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-          >
-            G
-          </span>
-          reetings in the name of the Lord — I'm Brian, the person behind The Gospel Lens.
-        </p>
-        <p>
-          I was born and raised in India and now live in the United States — two very different worlds that, in their own way, taught me the same thing: the gospel isn't a cultural export or a Western idea. It's good news for everyone, everywhere.
-        </p>
-        <p>
-          I started this site because I kept running into the same problem — people (myself included, at different points) who had heard about Jesus their whole lives without ever really hearing the gospel clearly. Not a list of rules. Not a vague sense of "be a good person." The actual news: that God, in Christ, did for us what we could never do for ourselves.
-        </p>
-        <p>
-          This isn't a pulpit, and I'm not a pastor or a theologian. I'm just someone who wants that news explained plainly, and who's gathered voices — some mine, some from teachers I trust — to help do that. My hope is simple: that whoever lands on this page, wherever they're starting from, walks away seeing the gospel a little more clearly than before.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function HomeView({ setView, openPost }) {
-  return (
-    <>
-      <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-20 pb-24 text-center">
-        <Eyebrow center>
-          <span className="mx-auto">A Christian Editorial Journal</span>
-        </Eyebrow>
-        <h1
-          className="text-[#1C1F26] text-4xl sm:text-6xl leading-[1.1] max-w-3xl mx-auto"
-          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-        >
-          Ordinary life, seen through an eternal lens.
-        </h1>
-        <p className="text-[#5B5F6B] text-lg mt-6 max-w-xl mx-auto leading-relaxed">
-          Reflections on the gospel of Jesus Christ — for the doubting, the weary, and the curious alike.
-        </p>
-        <button
-          onClick={() => setView("blog")}
-          className="mt-10 inline-flex items-center gap-2 bg-[#1C1F26] text-[#F8F7F3] px-7 py-3 text-sm tracking-wide hover:bg-[#4A5D4E] transition-colors duration-300"
-        >
-          Read the Blogs
-          <ArrowRight size={15} strokeWidth={2} />
-        </button>
-      </section>
-
-      <VerseOfDay />
-
-      <section className="bg-white border-y border-[#1C1F26]/8">
-        <div className="max-w-3xl mx-auto px-6 sm:px-8 py-20">
-          <Eyebrow>Our Mission</Eyebrow>
-          <h2 className="text-3xl text-[#1C1F26] mb-6" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-            What is the Gospel?
-          </h2>
-          <div className="space-y-5 text-[#3A3E47] text-[17px] leading-[1.85]">
-            <p>
-              <span
-                className="float-left text-6xl leading-[0.8] pr-3 pt-1 text-[#4A5D4E]"
-                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-              >
-                T
-              </span>
-              he gospel is simply this: God loved a broken world enough to enter it. In Jesus Christ, he lived the life we could not live, died the death we deserved, and rose again so that all who trust in him might be forgiven, made new, and brought home to God — not by our effort, but by his grace.
-            </p>
-            <p>
-              It is not a to-do list. It is not a religion of rule-keeping. It is news of something already accomplished, received simply by faith. That distinction changes everything about how we live, love, fail, and hope.
-            </p>
-            <p>
-              The Gospel Lens exists to hold ordinary life up to that light — our work, our relationships, our doubts, our grief — and to write about what becomes visible when we do.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
-        <Eyebrow>Start Here</Eyebrow>
-        <h2 className="text-3xl text-[#1C1F26] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-          New here? Start with these.
-        </h2>
-        <p className="text-[#5B5F6B] text-[15px] mb-10 max-w-lg">
-          If you want to understand what the gospel actually is before anything else, these three posts are the clearest place to begin.
-        </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FOUNDATIONAL_POST_IDS.map((id) => {
-            const post = POSTS.find((pp) => pp.id === id);
-            return post ? <PostCard key={post.id} post={post} onOpen={openPost} featured /> : null;
-          })}
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
-        <h2 className="text-3xl text-[#1C1F26] mb-10" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-          Recent Posts
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...POSTS]
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .slice(0, 3)
-            .map((post) => (
-              <PostCard key={post.id} post={post} onOpen={openPost} />
-            ))}
-        </div>
-        <div className="flex justify-center mt-12">
-          <button
-            onClick={() => setView("blog")}
-            className="inline-flex items-center gap-2 border border-[#1C1F26]/15 text-[#1C1F26] px-7 py-3 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
-          >
-            See More
-            <ArrowRight size={14} strokeWidth={2} />
-          </button>
-        </div>
-      </section>
-    </>
-  );
-}
-
-const PAGE_SIZE = 9;
-
-function BlogListView({ openPost }) {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-  const filtered = useMemo(() => {
-    return [...POSTS]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .filter((post) => (category === "All" ? true : post.category === category))
-      .filter((post) => {
-        const q = search.trim().toLowerCase();
-        if (!q) return true;
-        return post.title.toLowerCase().includes(q) || post.excerpt.toLowerCase().includes(q);
-      });
-  }, [search, category]);
-
-  // Reset pagination whenever the search or category changes
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [search, category]);
-
-  const visiblePosts = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
-
-  return (
-    <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-24">
-      <h1 className="text-4xl text-[#1C1F26] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-        Blogs
-      </h1>
-      <p className="text-[#5B5F6B] text-[15px] mb-8 max-w-lg">
-        Every post viewed through one lens: the finished work of Christ.
-      </p>
-
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-        <div className="relative flex-1 sm:max-w-xs">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8D96]" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search posts…"
-            className="w-full bg-white border border-[#1C1F26]/12 pl-9 pr-4 py-2.5 text-sm text-[#1C1F26] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
-          />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const active = category === c;
-            return (
-              <button
-                key={c}
-                onClick={() => setCategory(c)}
-                aria-pressed={active}
-                className={`inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.1em] px-3.5 py-2 rounded-full border-2 transition-all duration-200 ${
-                  active
-                    ? "bg-[#4A5D4E] text-white border-[#4A5D4E] shadow-[0_4px_12px_-4px_rgba(74,93,78,0.5)]"
-                    : "bg-white text-[#5B5F6B] border-[#1C1F26]/12 hover:border-[#4A5D4E]/50"
-                }`}
-              >
-                {active && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                {c}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <p className="text-xs text-[#8A8D96] mb-8">
-        Showing {filtered.length} {filtered.length === 1 ? "post" : "posts"}
-        {category !== "All" ? <> in <span className="font-semibold text-[#4A5D4E]">{category}</span></> : null}
-        {search.trim() ? <> matching "<span className="font-semibold text-[#1C1F26]">{search.trim()}</span>"</> : null}
-      </p>
-
-      {filtered.length === 0 ? (
-        <p className="text-[#8A8D96] text-sm py-16 text-center">
-          Nothing matches that search yet — try a different word or category.
-        </p>
-      ) : (
-        <>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visiblePosts.map((post) => (
-              <PostCard key={post.id} post={post} onOpen={openPost} />
-            ))}
-          </div>
-
-          {hasMore && (
-            <div className="flex justify-center mt-12">
-              <button
-                onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-                className="inline-flex items-center gap-2 border border-[#1C1F26]/15 text-[#1C1F26] px-7 py-3 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
-              >
-                Load More
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </section>
-  );
-}
-
-function ReadingProgress() {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0);
-    };
-    window.addEventListener("scroll", onScroll);
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <div className="fixed top-20 left-0 w-full h-[3px] bg-transparent z-20">
-      <div className="h-full bg-[#B08D57] transition-[width] duration-150" style={{ width: `${progress}%` }} />
-    </div>
-  );
-}
-
-function ShareBar({ post }) {
-  const [copied, setCopied] = useState(false);
-
-  const shareUrl = () => {
-    const base = window.location.href.split("#")[0];
-    return `${base}#${slugify(post.title)}`;
-  };
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl());
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      // clipboard unavailable — fail quietly
-    }
-  };
-
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: post.title, url: shareUrl() });
-      } catch (err) {
-        // user cancelled — no action needed
-      }
-    } else {
-      handleCopy();
-    }
-  };
-
-  const shareX = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl())}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  const shareFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  return (
-    <div className="flex flex-wrap items-center gap-3 mt-14 pt-8 border-t border-[#1C1F26]/8">
-      <span className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] font-semibold mr-1">Share</span>
-      <button
-        onClick={handleNativeShare}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200 sm:hidden"
-      >
-        <Share2 size={14} strokeWidth={2} />
-        Share
-      </button>
-      <button
-        onClick={shareX}
-        className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
-      >
-        Share on X
-      </button>
-      <button
-        onClick={shareFacebook}
-        className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
-      >
-        Share on Facebook
-      </button>
-      <button
-        onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] border border-[#1C1F26]/12 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
-      >
-        {copied ? <Check size={14} strokeWidth={2} /> : <Link2 size={14} strokeWidth={2} />}
-        {copied ? "Link Copied" : "Copy Link"}
-      </button>
-    </div>
-  );
-}
-
-function SinglePostView({ post, setView, openPost }) {
-  if (!post) return null;
-
-  const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 2);
-
-  return (
-    <article className="pt-16 pb-28">
-      <ReadingProgress />
-      <div className="max-w-2xl mx-auto px-6 sm:px-8">
-        <button
-          onClick={() => setView("blog")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
-        >
-          <ArrowLeft size={15} strokeWidth={2} />
-          Back to Blogs
-        </button>
-
-        <CategoryTag category={post.category} />
-        <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] mt-3">
-          {post.author ? `By ${post.author} · ` : ""}
-          {post.date} · {estimateReadTime(post)}
-        </p>
-        <h1
-          className="text-[#1C1F26] text-3xl sm:text-[2.75rem] leading-[1.15] mt-4 mb-10"
-          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-        >
-          {post.title}
-        </h1>
-
-        <PostBody blocks={post.blocks} />
-
-        <ShareBar post={post} />
-
-        <div className="mt-8">
-          <button
-            onClick={() => setView("blog")}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] hover:text-[#4A5D4E] transition-colors duration-300"
-          >
-            <ArrowLeft size={15} strokeWidth={2} />
-            Back to Blogs
-          </button>
-        </div>
-      </div>
-
-      {related.length > 0 && (
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 mt-20 pt-14 border-t border-[#1C1F26]/8">
-          <Eyebrow>Keep Reading</Eyebrow>
-          <h3 className="text-2xl text-[#1C1F26] mb-8" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-            More in {post.category}
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-6">
-            {related.map((p) => (
-              <PostCard key={p.id} post={p} onOpen={openPost} />
-            ))}
-          </div>
-        </div>
-      )}
-    </article>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// ROOT APP
-// ---------------------------------------------------------------------------
-
-function BackToTop() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 700);
-    window.addEventListener("scroll", onScroll);
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  if (!visible) return null;
-
-  return (
-    <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      aria-label="Back to top"
-      className="fixed bottom-6 right-6 z-30 w-11 h-11 rounded-full bg-[#1C1F26] text-[#F8F7F3] flex items-center justify-center shadow-lg hover:bg-[#4A5D4E] transition-colors duration-300"
-    >
-      <ArrowRight size={16} strokeWidth={2.5} style={{ transform: "rotate(-90deg)" }} />
-    </button>
-  );
-}
-
-export default function GospelLensApp() {
-  const [view, setView] = useState("home");
-  const [activePost, setActivePost] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  // Read the URL hash on load (and whenever it changes) so a shared link
-  // like #we-will-worship-and-we-will-reign opens that exact post instead
-  // of always landing on Home. Old-style #post-4 links still work too.
-  useEffect(() => {
-    const applyHash = () => {
-      const hash = window.location.hash.replace("#", "");
-
-      if (hash === "blog") {
-        setView("blog");
-        return;
-      }
-      if (hash === "about") {
-        setView("about");
-        return;
-      }
-      if (hash.startsWith("post-")) {
-        const id = parseInt(hash.replace("post-", ""), 10);
-        const found = POSTS.find((pp) => pp.id === id);
-        if (found) {
-          setActivePost(found);
-          setView("post");
-          return;
-        }
-      }
-      if (hash) {
-        const found = getPostBySlug(hash);
-        if (found) {
-          setActivePost(found);
-          setView("post");
-          return;
-        }
-      }
-      setView("home");
-    };
-    applyHash();
-    window.addEventListener("hashchange", applyHash);
-    return () => window.removeEventListener("hashchange", applyHash);
-  }, []);
-
-  // Keep the browser tab title in sync with what's on screen
-  useEffect(() => {
-    if (view === "post" && activePost) {
-      document.title = `${activePost.title} — The Gospel Lens`;
-    } else if (view === "blog") {
-      document.title = "Blogs — The Gospel Lens";
-    } else if (view === "about") {
-      document.title = "The Person Behind the Lens — The Gospel Lens";
-    } else {
-      document.title = "The Gospel Lens";
-    }
-  }, [view, activePost]);
-
-  const openPost = (post) => {
-    setActivePost(post);
-    setView("post");
-    window.location.hash = slugify(post.title);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const changeView = (v) => {
-    setView(v);
-    setMenuOpen(false);
-    window.location.hash = v === "home" ? "" : v;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  return (
-    <div className="min-h-screen bg-[#F8F7F3] flex flex-col">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-        * { font-family: 'Inter', sans-serif; }
-      `}</style>
-
-      <Nav view={view} setView={changeView} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-
-      <main className="flex-1">
-        {view === "home" && <HomeView setView={changeView} openPost={openPost} />}
-        {view === "blog" && <BlogListView openPost={openPost} />}
-        {view === "about" && <AboutView />}
-        {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} />}
-      </main>
-
-      <Footer />
-      <BackToTop />
-    </div>
-  );
-}
+    </fo
