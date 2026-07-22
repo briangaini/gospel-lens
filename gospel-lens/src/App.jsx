@@ -1077,7 +1077,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
             <BookOpen size={15} strokeWidth={1.75} />
           </span>
           <span
-            className="text-[22px] text-[#1C1F26] dark:text-[#F2F1EC] tracking-tight hidden xs:inline"
+            className="text-[22px] text-[#1C1F26] dark:text-[#F2F1EC] tracking-tight"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
           >
             The Gospel Lens
@@ -1264,7 +1264,7 @@ function Footer() {
     </footer>
   );
 }
- 
+
 function CategoryTag({ category }) {
   return (
     <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-[#4A5D4E] bg-[#4A5D4E]/8 px-2.5 py-1 rounded-full">
@@ -1272,7 +1272,7 @@ function CategoryTag({ category }) {
     </span>
   );
 }
- 
+
 function PostCard({ post, onOpen, featured = false }) {
   return (
     <button
@@ -1303,14 +1303,14 @@ function PostCard({ post, onOpen, featured = false }) {
     </button>
   );
 }
- 
+
 // ---------------------------------------------------------------------------
 // POST BODY RENDERER — turns the `blocks` array into styled sections
 // ---------------------------------------------------------------------------
- 
+
 function PostBody({ blocks }) {
   let paragraphIndex = -1;
- 
+
   return (
     <div className="space-y-6 text-[#2E323B] dark:text-[#D9D9D9] text-[18px] leading-[1.9]">
       {blocks.map((block, i) => {
@@ -1335,7 +1335,7 @@ function PostBody({ blocks }) {
             </p>
           );
         }
- 
+
         if (block.type === "heading") {
           return (
             <h2
@@ -1347,7 +1347,7 @@ function PostBody({ blocks }) {
             </h2>
           );
         }
- 
+
         if (block.type === "list") {
           return (
             <ul key={i} className="not-prose space-y-2 pl-1">
@@ -1360,7 +1360,7 @@ function PostBody({ blocks }) {
             </ul>
           );
         }
- 
+
         if (block.type === "quote") {
           return (
             <div key={i} className="not-prose bg-[#1C1F26] text-[#F8F7F3] rounded-sm px-7 py-6 my-8">
@@ -1381,7 +1381,7 @@ function PostBody({ blocks }) {
             </div>
           );
         }
- 
+
         if (block.type === "scripture") {
           return (
             <div key={i} className="not-prose border-l-4 border-[#B08D57] bg-[#4A5D4E]/6 rounded-r-sm px-6 py-6 my-8">
@@ -1398,7 +1398,7 @@ function PostBody({ blocks }) {
             </div>
           );
         }
- 
+
         if (block.type === "reflection") {
           return (
             <div key={i} className="not-prose bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-7 py-6 my-8">
@@ -1418,7 +1418,7 @@ function PostBody({ blocks }) {
             </div>
           );
         }
- 
+
         if (block.type === "heart") {
           return (
             <div key={i} className="not-prose flex gap-3 items-start bg-[#B08D57]/10 border border-[#B08D57]/30 rounded-sm px-6 py-5 my-8">
@@ -1432,7 +1432,7 @@ function PostBody({ blocks }) {
             </div>
           );
         }
- 
+
         if (block.type === "encourage") {
           return (
             <div key={i} className="not-prose text-center border-y border-[#B08D57]/30 py-8 my-10">
@@ -1448,7 +1448,7 @@ function PostBody({ blocks }) {
             </div>
           );
         }
- 
+
         if (block.type === "share") {
           return (
             <div key={i} className="not-prose bg-[#4A5D4E]/6 rounded-sm px-7 py-6 my-8">
@@ -1466,7 +1466,7 @@ function PostBody({ blocks }) {
             </div>
           );
         }
- 
+
         if (block.type === "prayer") {
           return (
             <div key={i} className="not-prose bg-[#1C1F26]/4 border-l-4 border-[#1C1F26]/20 dark:border-[#F2F1EC]/20 rounded-r-sm px-7 py-6 my-8">
@@ -1479,7 +1479,7 @@ function PostBody({ blocks }) {
             </div>
           );
         }
- 
+
         if (block.type === "closing") {
           return (
             <p key={i} className="text-sm italic text-[#8A8D96] dark:text-[#7C808A] pt-2">
@@ -1487,43 +1487,180 @@ function PostBody({ blocks }) {
             </p>
           );
         }
- 
+
         return null;
       })}
     </div>
   );
 }
- 
+
 // ---------------------------------------------------------------------------
 // VIEWS
 // ---------------------------------------------------------------------------
- 
+
+// ---------------------------------------------------------------------------
+// VERSE CARD IMAGE — draws a shareable graphic (dark card, wrapped verse
+// text, reference, and the site URL baked right into the image) so that
+// however it gets shared, the link travels with it. Used by the "Share
+// this verse" button below.
+// ---------------------------------------------------------------------------
+
+function wrapCanvasText(ctx, text, maxWidth) {
+  const words = text.split(" ");
+  const lines = [];
+  let line = "";
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+async function generateVerseCardBlob(verse) {
+  if (document.fonts && document.fonts.ready) {
+    try {
+      await document.fonts.load("700 48px 'Playfair Display'");
+      await document.fonts.ready;
+    } catch (err) {
+      // if fonts fail to report ready, draw anyway with fallback fonts
+    }
+  }
+
+  const size = 1080;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  // Background
+  ctx.fillStyle = "#1C1F26";
+  ctx.fillRect(0, 0, size, size);
+
+  // Thin gold accent line near top
+  ctx.strokeStyle = "#B08D57";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(size / 2 - 40, 150);
+  ctx.lineTo(size / 2 + 40, 150);
+  ctx.stroke();
+
+  // Eyebrow label
+  ctx.fillStyle = "#B08D57";
+  ctx.font = "600 22px Inter, sans-serif";
+  ctx.textAlign = "center";
+  ctx.letterSpacing = "3px";
+  ctx.fillText("VERSE OF THE DAY", size / 2, 200);
+  ctx.letterSpacing = "0px";
+
+  // Verse text, wrapped and centered
+  ctx.fillStyle = "#F8F7F3";
+  ctx.font = "italic 500 46px 'Playfair Display', Georgia, serif";
+  const maxTextWidth = size - 200;
+  const lines = wrapCanvasText(ctx, `"${verse.text}"`, maxTextWidth);
+  const lineHeight = 62;
+  const totalTextHeight = lines.length * lineHeight;
+  let y = size / 2 - totalTextHeight / 2 + 40;
+  for (const line of lines) {
+    ctx.fillText(line, size / 2, y);
+    y += lineHeight;
+  }
+
+  // Reference
+  ctx.fillStyle = "#B0B4BD";
+  ctx.font = "400 30px Inter, sans-serif";
+  ctx.fillText(`— ${verse.reference}, ESV`, size / 2, y + 30);
+
+  // Footer wordmark + URL baked into the image itself
+  ctx.fillStyle = "#B08D57";
+  ctx.font = "700 28px 'Playfair Display', Georgia, serif";
+  ctx.fillText("THE GOSPEL LENS", size / 2, size - 110);
+
+  ctx.fillStyle = "#8A8D96";
+  ctx.font = "400 24px Inter, sans-serif";
+  const siteUrl = window.location.href.split("#")[0].replace(/^https?:\/\//, "").replace(/\/$/, "");
+  ctx.fillText(siteUrl, size / 2, size - 70);
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/png");
+  });
+}
+
 function VerseOfDay() {
   const verse = useMemo(() => getVerseOfDay(), []);
-  const [copied, setCopied] = useState(false);
- 
+  const [status, setStatus] = useState("idle"); // idle | working | done | fallback
+
   const shareText = `"${verse.text}" — ${verse.reference} (ESV)`;
   const shareUrl = () => window.location.href.split("#")[0];
- 
+
+  const isMobile = () =>
+    typeof navigator !== "undefined" && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
   const handleShare = async () => {
+    setStatus("working");
     const url = shareUrl();
-    if (navigator.share) {
+    const blob = await generateVerseCardBlob(verse);
+    const file = blob ? new File([blob], "verse-of-the-day.png", { type: "image/png" }) : null;
+
+    // On phones: use the native share sheet with the image attached, so
+    // whoever receives it gets the card and the link together.
+    if (isMobile() && navigator.share) {
       try {
-        await navigator.share({ title: "Verse of the Day — The Gospel Lens", text: shareText, url });
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: "Verse of the Day — The Gospel Lens",
+            text: shareText,
+            url,
+            files: [file],
+          });
+        } else {
+          await navigator.share({ title: "Verse of the Day — The Gospel Lens", text: shareText, url });
+        }
+        setStatus("idle");
+        return;
       } catch (err) {
-        // user cancelled — no action needed
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(`${shareText}\n\nRead more at ${url}`);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        // clipboard unavailable — fail quietly
+        setStatus("idle");
+        return; // user cancelled the share sheet
       }
     }
+
+    // On desktop (including Mac, where the native share panel is limited):
+    // copy the actual verse card image to the clipboard so it can be
+    // pasted directly into Messages, email, or social apps. The site URL
+    // is already baked into the image itself.
+    if (file && navigator.clipboard && window.ClipboardItem) {
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": file })]);
+        setStatus("done");
+        setTimeout(() => setStatus("idle"), 2500);
+        return;
+      } catch (err) {
+        // fall through to text fallback below
+      }
+    }
+
+    // Last resort: copy verse text + link as plain text
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n\nRead more at ${url}`);
+      setStatus("fallback");
+      setTimeout(() => setStatus("idle"), 2500);
+    } catch (err) {
+      setStatus("idle");
+    }
   };
- 
+
+  const labels = {
+    idle: "Share this verse",
+    working: "Preparing image…",
+    done: "Verse card copied — paste anywhere",
+    fallback: "Text + link copied",
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-6 sm:px-8 -mt-6 mb-6">
       <div className="bg-[#1C1F26] rounded-sm px-7 py-7 sm:px-9 sm:py-8 text-center">
@@ -1540,16 +1677,17 @@ function VerseOfDay() {
         <p className="text-[#B0B4BD] text-sm mt-4 tracking-wide">— {verse.reference}, ESV</p>
         <button
           onClick={handleShare}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#B0B4BD] hover:text-[#B08D57] mt-5 transition-colors duration-200"
+          disabled={status === "working"}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#B0B4BD] hover:text-[#B08D57] mt-5 transition-colors duration-200 disabled:opacity-60"
         >
-          {copied ? <Check size={13} strokeWidth={2} /> : <Share2 size={13} strokeWidth={2} />}
-          {copied ? "Copied — paste anywhere" : "Share this verse"}
+          {status === "done" || status === "fallback" ? <Check size={13} strokeWidth={2} /> : <Share2 size={13} strokeWidth={2} />}
+          {labels[status]}
         </button>
       </div>
     </div>
   );
 }
- 
+
 function AboutView() {
   return (
     <section className="max-w-2xl mx-auto px-6 sm:px-8 pt-20 pb-28">
@@ -1559,7 +1697,7 @@ function AboutView() {
       >
         The Person Behind the Lens
       </h1>
- 
+
       <div className="space-y-6 text-[#2E323B] dark:text-[#D9D9D9] text-[18px] leading-[1.9]">
         <p>
           <span
@@ -1583,7 +1721,7 @@ function AboutView() {
     </section>
   );
 }
- 
+
 function HomeView({ setView, openPost }) {
   return (
     <>
@@ -1608,9 +1746,9 @@ function HomeView({ setView, openPost }) {
           <ArrowRight size={15} strokeWidth={2} />
         </button>
       </section>
- 
+
       <VerseOfDay />
- 
+
       <section className="bg-white dark:bg-[#1E2128] border-y border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
         <div className="max-w-3xl mx-auto px-6 sm:px-8 py-20">
           <Eyebrow>Our Mission</Eyebrow>
@@ -1636,7 +1774,7 @@ function HomeView({ setView, openPost }) {
           </div>
         </div>
       </section>
- 
+
       <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
         <Eyebrow>Start Here</Eyebrow>
         <h2 className="text-3xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
@@ -1652,7 +1790,7 @@ function HomeView({ setView, openPost }) {
           })}
         </div>
       </section>
- 
+
       <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
         <h2 className="text-3xl text-[#1C1F26] dark:text-[#F2F1EC] mb-10" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
           Recent Posts
@@ -1678,19 +1816,19 @@ function HomeView({ setView, openPost }) {
     </>
   );
 }
- 
+
 const PAGE_SIZE = 9;
- 
+
 function BlogListView({ openPost, initialSearch = "" }) {
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState("All");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
- 
+
   // Whenever a search arrives from the nav bar, apply it here too
   useEffect(() => {
     if (initialSearch) setSearch(initialSearch);
   }, [initialSearch]);
- 
+
   const filtered = useMemo(() => {
     const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return [...POSTS]
@@ -1705,16 +1843,16 @@ function BlogListView({ openPost, initialSearch = "" }) {
         return terms.every((term) => index.includes(term));
       });
   }, [search, category]);
- 
+
   // Reset pagination whenever the search or category changes
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [search, category]);
- 
+
   const visiblePosts = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
   const topics = Object.keys(POST_TAGS);
- 
+
   return (
     <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-24">
       <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
@@ -1723,7 +1861,7 @@ function BlogListView({ openPost, initialSearch = "" }) {
       <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
         Every post viewed through one lens: the finished work of Christ.
       </p>
- 
+
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
         <div className="relative flex-1 sm:max-w-xs">
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8D96] dark:text-[#7C808A]" />
@@ -1765,7 +1903,7 @@ function BlogListView({ openPost, initialSearch = "" }) {
           })}
         </div>
       </div>
- 
+
       <div className="flex flex-wrap items-center gap-2 mb-8">
         <span className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mr-1">Topics:</span>
         {topics.map((tag) => (
@@ -1778,13 +1916,13 @@ function BlogListView({ openPost, initialSearch = "" }) {
           </button>
         ))}
       </div>
- 
+
       <p className="text-xs text-[#8A8D96] dark:text-[#7C808A] mb-8">
         Showing {filtered.length} {filtered.length === 1 ? "post" : "posts"}
         {category !== "All" ? <> in <span className="font-semibold text-[#4A5D4E]">{category}</span></> : null}
         {search.trim() ? <> matching "<span className="font-semibold text-[#1C1F26] dark:text-[#F2F1EC]">{search.trim()}</span>"</> : null}
       </p>
- 
+
       {filtered.length === 0 ? (
         <p className="text-[#8A8D96] dark:text-[#7C808A] text-sm py-16 text-center">
           Nothing matches that search yet — try a different word or category.
@@ -1796,7 +1934,7 @@ function BlogListView({ openPost, initialSearch = "" }) {
               <PostCard key={post.id} post={post} onOpen={openPost} />
             ))}
           </div>
- 
+
           {hasMore && (
             <div className="flex justify-center mt-12">
               <button
@@ -1812,10 +1950,10 @@ function BlogListView({ openPost, initialSearch = "" }) {
     </section>
   );
 }
- 
+
 function ReadingProgress() {
   const [progress, setProgress] = useState(0);
- 
+
   useEffect(() => {
     const onScroll = () => {
       const scrollTop = window.scrollY;
@@ -1826,22 +1964,22 @@ function ReadingProgress() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
- 
+
   return (
     <div className="fixed top-20 left-0 w-full h-[3px] bg-transparent z-20">
       <div className="h-full bg-[#B08D57] transition-[width] duration-150" style={{ width: `${progress}%` }} />
     </div>
   );
 }
- 
+
 function ShareBar({ post }) {
   const [copied, setCopied] = useState(false);
- 
+
   const shareUrl = () => {
     const base = window.location.href.split("#")[0];
     return `${base}#${slugify(post.title)}`;
   };
- 
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl());
@@ -1851,7 +1989,7 @@ function ShareBar({ post }) {
       // clipboard unavailable — fail quietly
     }
   };
- 
+
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
@@ -1863,17 +2001,17 @@ function ShareBar({ post }) {
       handleCopy();
     }
   };
- 
+
   const shareX = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl())}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
- 
+
   const shareFacebook = () => {
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
- 
+
   return (
     <div className="no-print flex flex-wrap items-center gap-3 mt-14 pt-8 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
       <span className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mr-1">Share</span>
@@ -1906,17 +2044,17 @@ function ShareBar({ post }) {
     </div>
   );
 }
- 
+
 function SinglePostView({ post, setView, openPost }) {
   if (!post) return null;
- 
+
   const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 2);
- 
+
   const sortedByDate = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
   const currentIndex = sortedByDate.findIndex((p) => p.id === post.id);
   const newerPost = currentIndex > 0 ? sortedByDate[currentIndex - 1] : null;
   const olderPost = currentIndex < sortedByDate.length - 1 ? sortedByDate[currentIndex + 1] : null;
- 
+
   return (
     <article className="pt-16 pb-28">
       <ReadingProgress />
@@ -1928,7 +2066,7 @@ function SinglePostView({ post, setView, openPost }) {
           <ArrowLeft size={15} strokeWidth={2} />
           Back to Blogs
         </button>
- 
+
         <CategoryTag category={post.category} />
         <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mt-3">
           {post.author ? `By ${post.author} · ` : ""}
@@ -1940,11 +2078,11 @@ function SinglePostView({ post, setView, openPost }) {
         >
           {post.title}
         </h1>
- 
+
         <PostBody blocks={post.blocks} />
- 
+
         <ShareBar post={post} />
- 
+
         {(olderPost || newerPost) && (
           <div className="grid grid-cols-2 gap-4 mt-8">
             {olderPost ? (
@@ -1971,7 +2109,7 @@ function SinglePostView({ post, setView, openPost }) {
             ) : <div />}
           </div>
         )}
- 
+
         <div className="mt-8">
           <button
             onClick={() => setView("blog")}
@@ -1982,7 +2120,7 @@ function SinglePostView({ post, setView, openPost }) {
           </button>
         </div>
       </div>
- 
+
       {related.length > 0 && (
         <div className="max-w-5xl mx-auto px-6 sm:px-8 mt-20 pt-14 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
           <Eyebrow>Keep Reading</Eyebrow>
@@ -1999,23 +2137,23 @@ function SinglePostView({ post, setView, openPost }) {
     </article>
   );
 }
- 
+
 // ---------------------------------------------------------------------------
 // ROOT APP
 // ---------------------------------------------------------------------------
- 
+
 function BackToTop() {
   const [visible, setVisible] = useState(false);
- 
+
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 700);
     window.addEventListener("scroll", onScroll);
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
- 
+
   if (!visible) return null;
- 
+
   return (
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -2026,14 +2164,14 @@ function BackToTop() {
     </button>
   );
 }
- 
+
 export default function GospelLensApp() {
   const [view, setView] = useState("home");
   const [activePost, setActivePost] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const [navSearch, setNavSearch] = useState("");
- 
+
   const toggleDark = () => {
     setDark((d) => {
       const next = !d;
@@ -2041,21 +2179,21 @@ export default function GospelLensApp() {
       return next;
     });
   };
- 
+
   const handleNavSearch = (query) => {
     setNavSearch(query);
     setView("blog");
     window.location.hash = "blog";
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
- 
+
   // Read the URL hash on load (and whenever it changes) so a shared link
   // like #we-will-worship-and-we-will-reign opens that exact post instead
   // of always landing on Home. Old-style #post-4 links still work too.
   useEffect(() => {
     const applyHash = () => {
       const hash = window.location.hash.replace("#", "");
- 
+
       if (hash === "blog") {
         setView("blog");
         return;
@@ -2087,7 +2225,7 @@ export default function GospelLensApp() {
     window.addEventListener("hashchange", applyHash);
     return () => window.removeEventListener("hashchange", applyHash);
   }, []);
- 
+
   // Keep the browser tab title in sync with what's on screen
   useEffect(() => {
     if (view === "post" && activePost) {
@@ -2100,27 +2238,27 @@ export default function GospelLensApp() {
       document.title = "The Gospel Lens";
     }
   }, [view, activePost]);
- 
+
   const openPost = (post) => {
     setActivePost(post);
     setView("post");
     window.location.hash = slugify(post.title);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
- 
+
   const changeView = (v) => {
     setView(v);
     setMenuOpen(false);
     window.location.hash = v === "home" ? "" : v;
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
- 
+
   return (
     <div className="min-h-screen bg-[#F8F7F3] dark:bg-[#14161B] flex flex-col transition-colors duration-300">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
         * { font-family: 'Inter', sans-serif; }
- 
+
         @media print {
           header, footer, .no-print { display: none !important; }
           body, .min-h-screen { background: #fff !important; }
@@ -2128,19 +2266,18 @@ export default function GospelLensApp() {
           a[href]:after { content: none !important; }
         }
       `}</style>
- 
+
       <Nav view={view} setView={changeView} menuOpen={menuOpen} setMenuOpen={setMenuOpen} onSearch={handleNavSearch} dark={dark} toggleDark={toggleDark} />
- 
+
       <main className="flex-1">
         {view === "home" && <HomeView setView={changeView} openPost={openPost} />}
         {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} />}
         {view === "about" && <AboutView />}
         {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} />}
       </main>
- 
+
       <Footer />
       <BackToTop />
     </div>
   );
 }
- 
