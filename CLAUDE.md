@@ -69,6 +69,8 @@ There's a `p(text)` shorthand helper (`const p = (text) => ({ type: "p", text })
 
 To add a new post: pick the next `id`, write `blocks` using the types above to match the sermon/devotional structure of the content, and prepend or append to `POSTS` (existing posts are ordered by content, not strictly by array position — check surrounding dates).
 
+**Display order is driven entirely by the `date` field, not array position or `id`.** Every post list (homepage Recent Posts, Blogs page, older/newer post nav) sorts with `[...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date))`. So if Brian wants a new post to land at a specific point in the chronological order (e.g. "keep post X as the latest"), just pick a `date` that falls where he wants — where the object sits in the `POSTS` array itself doesn't matter for display order.
+
 ## Workflow preference
 
 After making a change (code or content), automatically `git add`, commit with a clear descriptive message, and `git push` to `origin main` — do this without asking each time, unless told otherwise for a specific change. Standing exception: pause and confirm first for anything unusually large or destructive (e.g. a big restructuring, deleting content, force-pushing).
@@ -80,3 +82,23 @@ Brian is new to Claude Code — proactively fill in gaps he wouldn't know to ask
 ## New feature ideas
 
 Before implementing any new feature or "next level" idea for this site (not just routine content/bug-fix edits), propose it and get explicit approval first — even if broader auto-approve permissions are active. Routine work (adding posts, small fixes, tweaks Brian directly asked for) doesn't need this — just do it and push.
+
+## Always end every response with a bugs & ideas roundup
+
+Brian explicitly asked (2026-08-03) for every response in this project to end with: (1) known bugs on the live site, and (2) "next level" feature ideas not yet greenlit. This is a standing requirement, not a one-time ask — do it even if the response is short or the bugs/ideas are unchanged since last time. Keep the list below current as the source of truth (update it here whenever something is fixed, newly found, or newly proposed) and echo it at the end of each response so Brian always has an accurate, up-to-date punch list to act on.
+
+**Known bugs (unfixed as of 2026-08-03):**
+- Newsletter signup in the footer is silently broken — it calls `window.storage?.set(...)`, which doesn't exist in the deployed app, so it always "succeeds" in the UI but never actually captures the email anywhere.
+- No favicon (blank/generic browser tab icon).
+- Social share previews are generic/site-wide, not per-post — sharing an individual post link shows the same title/description card for every post instead of that post's own.
+- No `sitemap.xml` or `robots.txt` for search engines.
+
+**Proposed "next level" ideas (not yet greenlit):**
+- Fix the newsletter capture (pairs with the bug above) — e.g. a free embeddable form service (Buttondown, Mailchimp) instead of the broken custom storage call.
+- Per-post social preview cards (real title/excerpt per post when shared).
+- Favicon + installable PWA (add-to-home-screen, works offline).
+- Dedicated author page for Jonny Ardavanis (bio + all his posts).
+- "Series" grouping for his related teachings.
+- "Listen to this post" via the browser's built-in text-to-speech (free, no backend).
+- Sitemap + robots.txt for search indexing.
+- Lightweight privacy-friendly analytics (e.g. Vercel Analytics).
