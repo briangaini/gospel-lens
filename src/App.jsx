@@ -1100,6 +1100,56 @@ const POSTS = [
       { type: "closing", text: "Down, yes. But never, ever out." },
     ],
   },
+  {
+    id: 31,
+    title: "Always Dependable",
+    author: null,
+    date: "August 2, 2026",
+    category: "Teaching",
+    readTime: "3 min read",
+    excerpt:
+      "David called himself righteous while surrounded by trouble — but Romans 3:10 says no one is righteous. Here's how both are true, and why it means God never runs out of reasons to show up for you.",
+    blocks: [
+      p("Do you ever feel like life has knocked the breath out of you? If so, you're not alone. In fact, it's no secret that this world is full of both beauty and trouble—of good things and hard things."),
+      p("King David, whose life was recorded in various parts of the Old Testament, was highly accustomed to trouble—constantly threatened by legitimate enemies and faced with the reality of impending death."),
+      p("Yet, inspired by the Holy Spirit, he wrote:"),
+      {
+        type: "scripture",
+        reference: "Psalm 34:19, ESV",
+        verses: [
+          "Many are the afflictions of the righteous, but the LORD delivers him out of them all.",
+        ],
+      },
+      p("If there's one thing you can depend on, it's that God is alive, active, and ever-present in your life … even the hardest parts of your life."),
+      p('But who is the "righteous person" David speaks of in this particular Psalm, when other parts of the Bible say things like, "no one is righteous—not even one"? (Romans 3:10, Psalm 14:3). There\'s a trick to understanding this at-first-glance contradiction:'),
+      { type: "encourage", text: "Righteousness can't be achieved, but it can be given." },
+      p("When we trust in God, as well as His Son, Jesus Christ (who sacrificed His life so that we could truly live), we're trusting that His righteousness will extend to us as well."),
+      p("To put it simply, a righteous person is one who relies on God's righteousness."),
+      p("Seems unfair and unmerited, doesn't it? But that's grace. It's by grace, through faith, that we—that you—can be counted as righteous. You can't work for it and you can't buy it."),
+      p("Because of that, when we're facing hard things, we can expect God to show up in a million unique ways. Not because we're righteous on our own, but because He is righteous on His own. And His righteousness has no limits."),
+      p("So how does God show up?"),
+      {
+        type: "list",
+        items: [
+          "He guides.",
+          "He comforts.",
+          "He corrects.",
+          "He reroutes.",
+          "He reminds us of true things.",
+          "He helps us persevere.",
+          "He brings wisdom and discernment to our minds.",
+          "He inspires others to help us.",
+          "He compels us to help others.",
+          "He gives us peace in the midst of trouble.",
+          "He encourages us as we stand boldly in faith.",
+          "He works and works and works in mysterious ways.",
+        ],
+      },
+      p("And just when you might wonder if your neediness is becoming a nuisance to God, remember: God's presence is inexhaustible and His resources are limitless."),
+      { type: "heart", text: "It's good to need God every moment of every day. To breathe. To survive. To flourish." },
+      { type: "closing", text: "So yes, trouble will come. But God will never leave your side." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1116,7 +1166,7 @@ const POSTS = [
 
 const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19],
-  "Grace & Assurance": [3, 14, 7],
+  "Grace & Assurance": [3, 14, 7, 31],
   "Sin & Repentance": [8, 17],
   "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26],
