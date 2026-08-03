@@ -1006,6 +1006,100 @@ const POSTS = [
       { type: "closing", text: "Stay dialed in." },
     ],
   },
+  {
+    id: 30,
+    title: "Down but Not Out",
+    author: null,
+    date: "August 3, 2026",
+    category: "Devotional",
+    readTime: "6 min read",
+    excerpt:
+      "There's a kind of tired that sleep doesn't fix. If hope feels more like a memory than a promise right now, this one's for you — because being down is never the same as being finished.",
+    blocks: [
+      p("There's a particular kind of tired that sleep doesn't fix."),
+      p("It's the tired that comes from being knocked down again — by the diagnosis, the rejection email, the relationship that didn't survive, the dream that seems to be dying a slow death. It's the exhaustion of getting back up one more time, only to feel like the ground is still moving beneath you. Maybe you're there right now. Maybe you're reading this on a day when hope feels less like a promise and more like a memory."),
+      p("If that's you, I want you to know something before we go any further: you are not weak for feeling this way, and you are not alone in it. Scripture never asks us to pretend we're fine. It asks us to bring our not-fine selves honestly before a God who is not surprised, not distant, and not finished with us."),
+      p("This is what it means to be down but not out."),
+      { type: "heading", text: "A Biblical Picture of Afflicted but Not Crushed" },
+      p("The Apostle Paul knew what it was to be knocked down. He'd been beaten, shipwrecked, imprisoned, betrayed, and exhausted for the sake of the gospel. He wasn't writing theory — he was writing from the floor. And from that floor, he wrote one of the most honest and hope-filled passages in all of Scripture:"),
+      {
+        type: "scripture",
+        reference: "2 Corinthians 4:8-9, ESV",
+        verses: [
+          "We are afflicted in every way, but not crushed; perplexed, but not driven to despair; persecuted, but not forsaken; struck down, but not destroyed;",
+        ],
+      },
+      p("Read that again slowly. Paul doesn't deny the affliction. He doesn't skip past the perplexity or pretend the persecution didn't hurt. He names every blow honestly — and then names the truth that outlasts every blow. Afflicted, but not crushed. Struck down, but not destroyed. The pain is real. But it is never the final word."),
+      p("The prophet Micah gives us the same defiant hope from a different angle, speaking to an enemy who assumed Israel's fall was permanent:"),
+      {
+        type: "scripture",
+        reference: "Micah 7:8, ESV",
+        verses: [
+          "Rejoice not over me, O my enemy; when I fall, I shall rise; when I sit in darkness, the LORD will be a light to me.",
+        ],
+      },
+      p("When I fall, I shall rise. Not because Micah found a burst of willpower, but because his confidence was never in his own strength to begin with. It was in the character of a God who does not abandon His people in the dark. That's the difference between worldly resilience and gospel-rooted hope — one says I'll pull myself up; the other says He will not let me stay down."),
+      p("This is the whole shape of the gospel story, really. Christ Himself was struck down — genuinely, brutally, all the way to a Roman cross and a sealed tomb. If the story had ended there, it would be a tragedy. But Sunday came. The stone rolled away. Death, which seemed to have won, was swallowed up in victory. Every believer's story is now folded into that story."),
+      { type: "encourage", text: "Our lowest moment is never the last chapter, because it wasn't His either." },
+      { type: "heading", text: "Shifting Our Eyes from the Trial to the Promise" },
+      p("Knowing this truth and feeling it in the middle of a hard season are two different things. So here are a few gospel-centered ways to move your focus from what's crushing you to what's carrying you."),
+      { type: "heading", text: "1. Name the trial honestly before God — don't perform strength for Him." },
+      p('Half the Psalms are laments. David didn\'t edit his pain before bringing it to God; he brought it raw. "Why are you cast down, O my soul, and why are you in turmoil within me? Hope in God" (Psalm 42:11, ESV) is both a question and an answer in the same breath. Honesty with God is not a lack of faith — it\'s the beginning of it.'),
+      { type: "heading", text: "2. Remember what remains true even when everything else feels uncertain." },
+      p("Your circumstances may be unstable, but His character is not."),
+      {
+        type: "scripture",
+        reference: "Lamentations 3:22-23, ESV",
+        verses: [
+          "The steadfast love of the LORD never ceases; his mercies never come to an end; they are new every morning; great is your faithfulness.",
+        ],
+      },
+      p("This verse was written in the middle of a book about the destruction of Jerusalem — genuine devastation. And yet, right in the wreckage, the writer chooses to remember mercy that renews daily. You don't need strength for the whole road today. You only need enough for this morning, and He supplies it fresh."),
+      { type: "heading", text: "3. Trade the temporary measuring stick for the eternal one." },
+      p("Paul, just a few verses after 2 Corinthians 4:8-9, gives us the secret to how he kept perspective:"),
+      {
+        type: "scripture",
+        reference: "2 Corinthians 4:17-18, ESV",
+        verses: [
+          "For this light momentary affliction is preparing for us an eternal weight of glory beyond all comparison, as we look not to the things that are seen but to the things that are unseen. For the things that are seen are transient, but the things that are unseen are eternal.",
+        ],
+      },
+      p('He\'s not minimizing suffering by calling it "light momentary affliction" — he\'s recalibrating what it\'s being weighed against. Against eternity, even our heaviest seasons are producing something that will outlast them.'),
+      { type: "heading", text: "4. Let your weakness be the place He shows up." },
+      p('When Paul begged God to remove a painful "thorn in the flesh," God\'s answer wasn\'t removal — it was presence:'),
+      {
+        type: "scripture",
+        reference: "2 Corinthians 12:9, ESV",
+        verses: [
+          "My grace is sufficient for you, for my power is made perfect in weakness.",
+        ],
+      },
+      p("Your exhaustion isn't disqualifying. It's often exactly where God's strength becomes most visible."),
+      { type: "heading", text: "5. Don't carry it alone." },
+      p('The church exists, in part, so that no believer has to be "down but not out" in isolation. Let someone pray for you this week. Say the hard sentence out loud to a trusted friend. Community is not a nice extra in the Christian life — it\'s one of the ordinary ways God holds His people up.'),
+      { type: "heading", text: "You Are Still in the Story" },
+      p("Here's the truth I want you to carry with you when you close this page: being down is not the same as being finished."),
+      p("The Christian life was never promised to be free of pressure, sorrow, or failure. What it was promised is a Savior who has already walked through death and come out the other side — and who has pledged that our story, joined to His, ends the same way. Not in ruin. In resurrection."),
+      {
+        type: "scripture",
+        reference: "Philippians 1:6, ESV",
+        verses: [
+          "He who began a good work in you will bring it to completion at the day of Jesus Christ.",
+        ],
+      },
+      p("So take a breath. You are not required to have it all figured out today. You are only asked to keep your eyes fixed on the One who has already secured how this ends. Afflicted, but not crushed. Struck down, but not destroyed. Fallen, but rising — because He is your light in the dark."),
+      {
+        type: "reflection",
+        items: [
+          'Where in your life right now do you feel "afflicted" but need to remember you are not "crushed"?',
+          "What would it look like this week to bring your honest pain to God instead of performing strength for Him?",
+          "Who is one person you could ask to walk through this season with you?",
+        ],
+      },
+      { type: "prayer", text: "Lord, You see what I'm carrying, and You haven't looked away. When I feel struck down, remind me that I am not destroyed. Renew my strength this morning, fix my eyes on what is above, and let Your power be made perfect in my weakness. I trust that You who began this good work in me will carry it through. In Jesus' name, Amen." },
+      { type: "closing", text: "Down, yes. But never, ever out." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1024,7 +1118,7 @@ const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19],
   "Grace & Assurance": [3, 14, 7],
   "Sin & Repentance": [8, 17],
-  "Grief & Comfort": [6, 21, 22],
+  "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26],
   "Prayer": [2, 18],
   "Worship": [4],
