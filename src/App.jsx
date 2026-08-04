@@ -14,6 +14,8 @@ import {
   Sunrise,
   Sun,
   Moon,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -42,7 +44,7 @@ import {
 // buttondown.com/ in your dashboard URL) and the form becomes fully working
 // — no other code changes needed.
 // ---------------------------------------------------------------------------
-const BUTTONDOWN_USERNAME = "";
+const BUTTONDOWN_USERNAME = "gaini";
 
 // ---------------------------------------------------------------------------
 // CONTACT CONFIG
@@ -1298,6 +1300,22 @@ function estimateReadTime(post) {
   return `${Math.max(1, Math.round(words / 200))} min read`;
 }
 
+// Flattens a post's blocks into one plain-text script for the browser's
+// built-in text-to-speech to read aloud (see ListenButton).
+function postToSpeechText(post) {
+  const parts = [post.title, "."];
+  post.blocks.forEach((block) => {
+    if (["p", "heading", "quote", "heart", "prayer", "encourage", "closing"].includes(block.type)) {
+      parts.push(block.text);
+    } else if (block.type === "scripture") {
+      parts.push(block.verses.join(". "));
+    } else if (block.type === "reflection" || block.type === "share" || block.type === "list") {
+      parts.push(block.items.join(". "));
+    }
+  });
+  return parts.join(" ");
+}
+
 // Builds one lowercase blob of everything searchable in a post — title,
 // excerpt, author, category, topic tags, and every word in the body — so
 // a search for any keyword anywhere in a post actually finds it.
@@ -2312,13 +2330,49 @@ function ReadingProgress() {
   );
 }
 
+function ListenButton({ post }) {
+  const [speaking, setSpeaking] = useState(false);
+  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
+
+  useEffect(() => {
+    return () => {
+      if (supported) window.speechSynthesis.cancel();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!supported) return null;
+
+  const toggle = () => {
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(postToSpeechText(post));
+    utterance.rate = 0.95;
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    setSpeaking(true);
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+    >
+      {speaking ? <VolumeX size={14} strokeWidth={2} /> : <Volume2 size={14} strokeWidth={2} />}
+      {speaking ? "Stop Listening" : "Listen to This Post"}
+    </button>
+  );
+}
+
 function ShareBar({ post }) {
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = () => {
-    const base = window.location.href.split("#")[0];
-    return `${base}#${slugify(post.title)}`;
-  };
+  const shareUrl = () => `${window.location.origin}/${slugify(post.title)}`;
 
   const handleCopy = async () => {
     try {
@@ -2431,6 +2485,10 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
 
         <PostBody blocks={post.blocks} />
 
+        <div className="flex flex-wrap gap-3 mb-6">
+          <ListenButton post={post} />
+        </div>
+
         <ShareBar post={post} />
 
         {(olderPost || newerPost) && (
@@ -2534,36 +2592,53 @@ export default function GospelLensApp() {
   const handleNavSearch = (query) => {
     setNavSearch(query);
     setView("blog");
-    window.location.hash = "blog";
+    window.history.pushState(null, "", "/blog");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Read the URL hash on load (and whenever it changes) so a shared link
-  // like #we-will-worship-and-we-will-reign opens that exact post instead
-  // of always landing on Home. Old-style #post-4 links still work too.
+  // Read the URL path on load (and on back/forward navigation) so a shared
+  // link like /we-will-worship-and-we-will-reign opens that exact post
+  // instead of always landing on Home. Old-style #slug and #post-4 links
+  // (from before real URLs existed) are silently upgraded in place —
+  // history.replaceState swaps the hash for the real path with no visible
+  // redirect, so links already shared out in the wild keep working.
   useEffect(() => {
-    const applyHash = () => {
+    const applyLocation = () => {
+      const path = window.location.pathname.replace(/\/+$/, "") || "/";
       const hash = window.location.hash.replace("#", "");
 
-      if (hash === "blog") {
+      if (path === "/" && hash) {
+        let target = null;
+        if (hash === "blog") target = "/blog";
+        else if (hash === "about") target = "/about";
+        else if (hash.startsWith("post-")) {
+          const id = parseInt(hash.replace("post-", ""), 10);
+          const found = POSTS.find((pp) => pp.id === id);
+          if (found) target = `/${slugify(found.title)}`;
+        } else if (hash.startsWith("collection-")) {
+          const authorSlug = hash.replace("collection-", "");
+          const authorName = Object.keys(AUTHORS).find((name) => slugify(name) === authorSlug);
+          if (authorName) target = `/collection/${slugify(authorName)}`;
+        } else {
+          const found = getPostBySlug(hash);
+          if (found) target = `/${slugify(found.title)}`;
+        }
+        if (target) {
+          window.history.replaceState(null, "", target);
+          return applyLocation();
+        }
+      }
+
+      if (path === "/blog") {
         setView("blog");
         return;
       }
-      if (hash === "about") {
+      if (path === "/about") {
         setView("about");
         return;
       }
-      if (hash.startsWith("post-")) {
-        const id = parseInt(hash.replace("post-", ""), 10);
-        const found = POSTS.find((pp) => pp.id === id);
-        if (found) {
-          setActivePost(found);
-          setView("post");
-          return;
-        }
-      }
-      if (hash.startsWith("collection-")) {
-        const authorSlug = hash.replace("collection-", "");
+      if (path.startsWith("/collection/")) {
+        const authorSlug = path.replace("/collection/", "");
         const authorName = Object.keys(AUTHORS).find((name) => slugify(name) === authorSlug);
         if (authorName) {
           setActiveAuthor(authorName);
@@ -2571,8 +2646,8 @@ export default function GospelLensApp() {
           return;
         }
       }
-      if (hash) {
-        const found = getPostBySlug(hash);
+      if (path !== "/") {
+        const found = getPostBySlug(path.replace(/^\//, ""));
         if (found) {
           setActivePost(found);
           setView("post");
@@ -2581,9 +2656,9 @@ export default function GospelLensApp() {
       }
       setView("home");
     };
-    applyHash();
-    window.addEventListener("hashchange", applyHash);
-    return () => window.removeEventListener("hashchange", applyHash);
+    applyLocation();
+    window.addEventListener("popstate", applyLocation);
+    return () => window.removeEventListener("popstate", applyLocation);
   }, []);
 
   // Keep the browser tab title in sync with what's on screen
@@ -2604,21 +2679,21 @@ export default function GospelLensApp() {
   const openPost = (post) => {
     setActivePost(post);
     setView("post");
-    window.location.hash = slugify(post.title);
+    window.history.pushState(null, "", `/${slugify(post.title)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const openCollection = (authorName) => {
     setActiveAuthor(authorName);
     setView("collection");
-    window.location.hash = `collection-${slugify(authorName)}`;
+    window.history.pushState(null, "", `/collection/${slugify(authorName)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const changeView = (v) => {
     setView(v);
     setMenuOpen(false);
-    window.location.hash = v === "home" ? "" : v;
+    window.history.pushState(null, "", v === "home" ? "/" : `/${v}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
