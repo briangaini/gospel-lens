@@ -1177,6 +1177,26 @@ const POST_TAGS = {
   "Identity in Christ": [16],
 };
 
+// ---------------------------------------------------------------------------
+// AUTHORS — bio info for contributors whose byline should link somewhere.
+// A post's author only becomes clickable if their name has an entry here.
+// ---------------------------------------------------------------------------
+
+const AUTHORS = {
+  "Jonny Ardavanis": {
+    role: "Lead Teaching Pastor & Elder, Stonebridge Bible Church",
+    bio: [
+      "Jonny has served as Lead Teaching Pastor and an Elder at Stonebridge Bible Church since June 2023. He also founded Dial In Ministries, which puts out weekly podcasts, devotionals, and sermons to help believers dig deeper into Scripture and actually live it out.",
+      "Before that, he was Dean of Campus Life at The Master's University — his own alma mater — focused on student discipleship, and before that, Camp Director at Hume Lake Christian Camps in Central California, running high school summer programs and mentoring youth leaders.",
+      "In October 2024 he published Consider the Lilies: Finding Perfect Peace in the Character of God. He and his wife, Caity, have three daughters — Lily Jean, Scottie Joan, and Sadie June.",
+    ],
+  },
+};
+
+function postsByAuthor(authorName) {
+  return [...POSTS].filter((p) => p.author === authorName).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
 function tagsForPost(postId) {
   return Object.keys(POST_TAGS).filter((tag) => POST_TAGS[tag].includes(postId));
 }
@@ -1333,7 +1353,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
 
   const linkClass = (v) =>
     `text-sm tracking-wide transition-colors duration-200 pb-1 border-b ${
-      view === v || (v === "blog" && view === "post")
+      view === v || (v === "blog" && (view === "post" || view === "collection"))
         ? "text-[#1C1F26] dark:text-[#F2F1EC] border-[#B08D57]"
         : "text-[#5B5F6B] dark:text-[#A9ADB6] border-transparent hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] hover:border-[#B08D57]/50"
     }`;
@@ -1999,6 +2019,49 @@ function AboutView() {
   );
 }
 
+function CollectionView({ authorName, openPost, setView }) {
+  const info = AUTHORS[authorName];
+  if (!info) return null;
+
+  const posts = postsByAuthor(authorName);
+
+  return (
+    <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
+      <button
+        onClick={() => setView("blog")}
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+      >
+        <ArrowLeft size={15} strokeWidth={2} />
+        Back to Blogs
+      </button>
+
+      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Teaching From</p>
+      <h1
+        className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-2"
+        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+      >
+        {authorName}
+      </h1>
+      <p className="text-[#4A5D4E] text-sm font-medium mb-10">{info.role}</p>
+
+      <div className="max-w-2xl space-y-5 text-[#2E323B] dark:text-[#D9D9D9] text-[17px] leading-[1.85] mb-16">
+        {info.bio.map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+
+      <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mb-6">
+        Collection · {posts.length} {posts.length === 1 ? "post" : "posts"} on The Gospel Lens
+      </p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} onOpen={openPost} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function HomeView({ setView, openPost }) {
   return (
     <>
@@ -2322,7 +2385,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, openPost }) {
+function SinglePostView({ post, setView, openPost, openCollection }) {
   if (!post) return null;
 
   const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 2);
@@ -2346,7 +2409,17 @@ function SinglePostView({ post, setView, openPost }) {
 
         <CategoryTag category={post.category} />
         <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mt-3">
-          {post.author ? `By ${post.author} · ` : ""}
+          {post.author && AUTHORS[post.author] ? (
+            <button
+              onClick={() => openCollection(post.author)}
+              className="hover:text-[#4A5D4E] hover:underline underline-offset-2 transition-colors duration-200"
+            >
+              By {post.author}
+            </button>
+          ) : post.author ? (
+            `By ${post.author}`
+          ) : null}
+          {post.author ? " · " : ""}
           {post.date} · {estimateReadTime(post)}
         </p>
         <h1
@@ -2445,6 +2518,7 @@ function BackToTop() {
 export default function GospelLensApp() {
   const [view, setView] = useState("home");
   const [activePost, setActivePost] = useState(null);
+  const [activeAuthor, setActiveAuthor] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const [navSearch, setNavSearch] = useState("");
@@ -2488,6 +2562,15 @@ export default function GospelLensApp() {
           return;
         }
       }
+      if (hash.startsWith("collection-")) {
+        const authorSlug = hash.replace("collection-", "");
+        const authorName = Object.keys(AUTHORS).find((name) => slugify(name) === authorSlug);
+        if (authorName) {
+          setActiveAuthor(authorName);
+          setView("collection");
+          return;
+        }
+      }
       if (hash) {
         const found = getPostBySlug(hash);
         if (found) {
@@ -2511,15 +2594,24 @@ export default function GospelLensApp() {
       document.title = "Blogs — The Gospel Lens";
     } else if (view === "about") {
       document.title = "The Person Behind the Lens — The Gospel Lens";
+    } else if (view === "collection" && activeAuthor) {
+      document.title = `${activeAuthor} — The Gospel Lens`;
     } else {
       document.title = "The Gospel Lens";
     }
-  }, [view, activePost]);
+  }, [view, activePost, activeAuthor]);
 
   const openPost = (post) => {
     setActivePost(post);
     setView("post");
     window.location.hash = slugify(post.title);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const openCollection = (authorName) => {
+    setActiveAuthor(authorName);
+    setView("collection");
+    window.location.hash = `collection-${slugify(authorName)}`;
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -2550,7 +2642,8 @@ export default function GospelLensApp() {
         {view === "home" && <HomeView setView={changeView} openPost={openPost} />}
         {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} />}
         {view === "about" && <AboutView />}
-        {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} />}
+        {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
+        {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} />}
       </main>
 
       <Footer />
