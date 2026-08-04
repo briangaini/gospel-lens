@@ -174,9 +174,17 @@ function main() {
     writeHtml(path.join("collection", author.slug), html);
   }
 
+  // /blog and /about need their own flat files too — verified live that
+  // vercel.json's rewrites catch-all does NOT reliably fall back to
+  // index.html here even with cleanUrls on, so these two known routes get
+  // real files (generic site-wide meta, same as the template) rather than
+  // depending on that fallback.
+  writeHtml("blog", template);
+  writeHtml("about", template);
+
   writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors));
 
-  console.log(`Prerendered ${posts.length} post pages and ${authors.length} collection page(s). Sitemap regenerated with real URLs.`);
+  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), and blog/about. Sitemap regenerated with real URLs.`);
 }
 
 main();
