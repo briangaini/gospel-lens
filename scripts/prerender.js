@@ -88,7 +88,7 @@ function truncateAtWord(str, max) {
   return `${cut.slice(0, lastSpace > 0 ? lastSpace : max)}…`;
 }
 
-function withMeta(template, { title, description, url }) {
+function withMeta(template, { title, description, url, ogType = "website" }) {
   const fullTitle = `${title} — The Gospel Lens`;
   const safeTitle = escapeHtml(fullTitle);
   const safeDescription = escapeHtml(description);
@@ -103,6 +103,7 @@ function withMeta(template, { title, description, url }) {
       /<meta property="og:description" content="[^"]*" \/>/,
       `<meta property="og:description" content="${safeDescription}" />`
     )
+    .replace(/<meta property="og:type" content="[^"]*" \/>/, `<meta property="og:type" content="${ogType}" />`)
     .replace(/<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`)
     .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${safeTitle}" />`)
     .replace(
@@ -161,6 +162,7 @@ function main() {
       title: post.title,
       description: post.excerpt,
       url: `${SITE_URL}/${post.slug}`,
+      ogType: "article",
     });
     writeHtml(post.slug, html);
   }

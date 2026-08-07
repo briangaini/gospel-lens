@@ -1300,20 +1300,98 @@ function estimateReadTime(post) {
   return `${Math.max(1, Math.round(words / 200))} min read`;
 }
 
-// Flattens a post's blocks into one plain-text script for the browser's
-// built-in text-to-speech to read aloud (see ListenButton).
-function postToSpeechText(post) {
-  const parts = [post.title, "."];
+// Splits a post into one text segment per block (title first) for the
+// browser's built-in text-to-speech (see useListenToPost). Read as separate
+// queued utterances rather than one giant string — each block gets a clean
+// breath/pause between it and the next, instead of running on flat.
+function postToSpeechSegments(post) {
+  const segments = [`${post.title}.`];
   post.blocks.forEach((block) => {
     if (["p", "heading", "quote", "heart", "prayer", "encourage", "closing"].includes(block.type)) {
-      parts.push(block.text);
+      segments.push(block.text);
     } else if (block.type === "scripture") {
-      parts.push(block.verses.join(". "));
+      segments.push(block.verses.join(". "));
     } else if (block.type === "reflection" || block.type === "share" || block.type === "list") {
-      parts.push(block.items.join(". "));
+      segments.push(block.items.join(". "));
     }
   });
-  return parts.join(" ");
+  return segments;
+}
+
+// Picks the best-sounding voice available in the visitor's own browser.
+// There's no free way to get a truly natural, emotive narrator voice — that
+// needs a paid cloud voice service — but most modern browsers do ship at
+// least one noticeably better-than-default voice (labeled "Natural",
+// "Enhanced", "Premium", "Neural", or a Google cloud voice) alongside the
+// flatter robotic-sounding default. This just finds the best of what's
+// already there for free.
+// A handful of default system voices that are widely considered clearer and
+// warmer than the rest of their platform's stock lineup, for when nothing
+// is explicitly labeled Natural/Enhanced/Neural — used as a tie-breaker,
+// not a hard requirement.
+const GOOD_DEFAULT_VOICE_NAMES = ["samantha", "ava", "google us english", "aria", "jenny", "zoe"];
+
+function pickBestVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+  const english = voices.filter((v) => v.lang.toLowerCase().startsWith("en"));
+  const pool = english.length ? english : voices;
+  const scored = pool.map((v) => {
+    const name = v.name.toLowerCase();
+    let score = 0;
+    if (name.includes("natural")) score += 5;
+    if (name.includes("neural")) score += 5;
+    if (name.includes("premium") || name.includes("enhanced")) score += 4;
+    if (name.includes("google")) score += 3;
+    if (!v.localService) score += 2; // cloud-served voices are usually higher quality
+    if (v.lang === "en-US" || v.lang === "en-GB") score += 1;
+    if (GOOD_DEFAULT_VOICE_NAMES.some((good) => name.includes(good))) score += 1.5;
+    return { v, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].v;
+}
+
+// Shared listen-to-post playback logic, used by both the top and bottom
+// buttons on a post so they stay in sync — clicking either one starts or
+// stops the same reading.
+function useListenToPost(post) {
+  const [speaking, setSpeaking] = useState(false);
+  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
+
+  useEffect(() => {
+    return () => {
+      if (supported) window.speechSynthesis.cancel();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggle = () => {
+    if (!supported) return;
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const voice = pickBestVoice();
+    const segments = postToSpeechSegments(post);
+    const utterances = segments.map((text, i) => {
+      const u = new SpeechSynthesisUtterance(text);
+      if (voice) u.voice = voice;
+      u.rate = 0.94; // a touch slower than default — reads as reflective, not rushed
+      u.pitch = 0.97;
+      if (i === segments.length - 1) {
+        u.onend = () => setSpeaking(false);
+        u.onerror = () => setSpeaking(false);
+      }
+      return u;
+    });
+    utterances.forEach((u) => window.speechSynthesis.speak(u));
+    setSpeaking(true);
+  };
+
+  return { speaking, toggle, supported };
 }
 
 // Builds one lowercase blob of everything searchable in a post — title,
@@ -2189,7 +2267,7 @@ function BlogListView({ openPost, initialSearch = "" }) {
 
   const filtered = useMemo(() => {
     const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    return [...POSTS]
+    const matched = [...POSTS]
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .filter((post) => (category === "All" ? true : post.category === category))
       .filter((post) => {
@@ -2200,6 +2278,18 @@ function BlogListView({ openPost, initialSearch = "" }) {
         // posts about both without needing that exact phrase.
         return terms.every((term) => index.includes(term));
       });
+
+    if (terms.length === 0) return matched;
+
+    // While actively searching, a post whose title matches should always
+    // outrank one that just happens to mention the word once in passing —
+    // sort is stable, so date order is preserved within each tier.
+    return [...matched].sort((a, b) => {
+      const aTitleMatch = terms.every((term) => a.title.toLowerCase().includes(term));
+      const bTitleMatch = terms.every((term) => b.title.toLowerCase().includes(term));
+      if (aTitleMatch === bTitleMatch) return 0;
+      return aTitleMatch ? -1 : 1;
+    });
   }, [search, category]);
 
   // Reset pagination whenever the search or category changes
@@ -2330,37 +2420,14 @@ function ReadingProgress() {
   );
 }
 
-function ListenButton({ post }) {
-  const [speaking, setSpeaking] = useState(false);
-  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
-
-  useEffect(() => {
-    return () => {
-      if (supported) window.speechSynthesis.cancel();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+// Presentational only — playback state/logic lives in useListenToPost so the
+// top and bottom buttons on a post can share one state and either can
+// start/stop the same reading.
+function ListenButton({ speaking, onToggle, supported }) {
   if (!supported) return null;
-
-  const toggle = () => {
-    if (speaking) {
-      window.speechSynthesis.cancel();
-      setSpeaking(false);
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(postToSpeechText(post));
-    utterance.rate = 0.95;
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-    setSpeaking(true);
-  };
-
   return (
     <button
-      onClick={toggle}
+      onClick={onToggle}
       className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
     >
       {speaking ? <VolumeX size={14} strokeWidth={2} /> : <Volume2 size={14} strokeWidth={2} />}
@@ -2440,6 +2507,7 @@ function ShareBar({ post }) {
 }
 
 function SinglePostView({ post, setView, openPost, openCollection }) {
+  const { speaking, toggle: toggleListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   if (!post) return null;
 
   const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 2);
@@ -2477,16 +2545,20 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
           {post.date} · {estimateReadTime(post)}
         </p>
         <h1
-          className="text-[#1C1F26] dark:text-[#F2F1EC] text-3xl sm:text-[2.75rem] leading-[1.15] mt-4 mb-10"
+          className="text-[#1C1F26] dark:text-[#F2F1EC] text-3xl sm:text-[2.75rem] leading-[1.15] mt-4 mb-5"
           style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
         >
           {post.title}
         </h1>
 
+        <div className="flex flex-wrap gap-3 mb-10">
+          <ListenButton speaking={speaking} onToggle={toggleListen} supported={listenSupported} />
+        </div>
+
         <PostBody blocks={post.blocks} />
 
         <div className="flex flex-wrap gap-3 mb-6">
-          <ListenButton post={post} />
+          <ListenButton speaking={speaking} onToggle={toggleListen} supported={listenSupported} />
         </div>
 
         <ShareBar post={post} />
