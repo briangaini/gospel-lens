@@ -121,11 +121,18 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~No author/collection page for Jonny Ardavanis~~ — fixed 2026-08-04, see "Contributor author pages" above.
 - ~~No analytics~~ — fixed 2026-08-04, Vercel Analytics (`@vercel/analytics`). **Note: still needs Brian to flip on "Web Analytics" in the Vercel project dashboard itself** — the client-side snippet is live but Vercel logs a harmless console message ("enable Web Analytics for your project") until that toggle is switched on there; that's a dashboard action Brian needs to do himself, not something fixable in code.
 - ~~No installable PWA~~ — fixed 2026-08-04, `vite-plugin-pwa` (manifest + service worker via Workbox), icons rasterized from the favicon mark.
-- ~~No "Listen to this post"~~ — fixed 2026-08-04, browser-native text-to-speech button on every post, hidden if unsupported.
+- ~~No "Listen to this post"~~ — fixed 2026-08-04, one button below the title and one at the end (synced), better voice selection (scores available system voices for quality), reads paragraph-by-paragraph instead of one flat block.
+- ~~`og:type` was `website` on post pages~~ — fixed 2026-08-04, now `article` for individual posts; home/blog/about/collection stay `website`.
+- ~~Search results weren't ranked~~ — fixed 2026-08-04, title matches now surface above body-only matches while a search is active.
 
 **Proposed "next level" ideas (not yet greenlit):**
-- `og:type` on post pages is still `website`, not `article` — minor semantic upgrade, low priority, cosmetic-only for how some platforms categorize the link.
 - Genuinely unknown/mistyped URLs 404 on Vercel rather than showing a friendly in-app "not found" page — accepted as normal for now (see the `vercel.json` gotcha above), but a custom 404 page is a small, low-risk idea if Brian wants a softer landing than Vercel's default.
+- **A truly natural/emotive Listen-to-Post voice** — the current version (2026-08-04) is the best achievable with the browser's own free voices; a real narrator-quality voice needs a paid cloud TTS API (e.g. ElevenLabs, Amazon Polly, Google Cloud TTS) plus a small serverless function, since a paid API key can't live in this client-only app the same way the Buttondown key couldn't. Real ongoing cost, bigger scope — Brian's call if worth pursuing.
+- **RSS feed** — a generated `dist/rss.xml` (same idea as `sitemap.xml`, extended with each post's full excerpt) so people can follow new posts in a feed reader independent of email. Cheap: reuses data the prerender script already extracts.
+- **Structured data (JSON-LD `Article` schema)** on each prerendered post page — a small `<script type="application/ld+json">` block with headline/date/author. Doesn't change how the page looks to a visitor, but gives Google more to work with for rich search-result snippets (sometimes shown with a date or author line). Pairs naturally with the prerender script since the data's already extracted there.
+- **Save-as-PDF / print button** — `index.css` already has a `@media print` stylesheet that hides the header/footer for clean printing; there's just no button that triggers it yet. A "Print / Save as PDF" link on each post calling `window.print()` would make that existing groundwork actually reachable — useful for someone who wants a physical copy for a small-group study.
+- **Weekly digest email to Buttondown subscribers** — now that the newsletter actually captures emails, the natural next step is giving subscribers a reason to have signed up: a simple weekly "here's what went up this week" email. Buttondown supports scheduled/automated sends; this would be a workflow/process change more than code.
+- **"Continue reading" / lightly remembered reading history** — using the visitor's own browser storage (no accounts, no server, fully private) to quietly note which posts they've opened, and show something like "You've read 6 posts" or resurface an unfinished one on return visits. A small, low-risk engagement touch.
 
 ## Newsletter integration (Buttondown)
 
