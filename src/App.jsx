@@ -1152,6 +1152,59 @@ const POSTS = [
       { type: "closing", text: "So yes, trouble will come. But God will never leave your side." },
     ],
   },
+  {
+    id: 32,
+    title: "Living in God's Love",
+    author: null,
+    date: "August 10, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "A good friend reminds you who you are. God is a friend like that — except love isn't just what He does, it's what He is. Here's what changes when you actually live inside that.",
+    blocks: [
+      p("Have you ever met someone who was exceptionally kind and caring? Good friends are like this—welcoming, eager to know how you're doing, giving their undivided attention. A good friend reminds us who we are. They listen to everything, the good and the bad, with compassion and love."),
+      p("God is a friend like this. He listens. He empathizes. He cares so much for us, and is kind in His responses. In fact, God does more than just show love—He is love. It is impossible for Him to be anything else because love is His very essence. His love is pure. It isn't selfish, disengaged, bitter, resentful, or passive. We can trust this kind of love. We can trust God."),
+      {
+        type: "scripture",
+        reference: "1 John 4:16",
+        verses: [
+          "And so we know and rely on the love God has for us. God is love. Whoever lives in love lives in God, and God in them.",
+        ],
+      },
+      p("How do you feel after you've spent time with a good friend? Maybe you feel more relaxed, you have a spring in your step, or you find that you have more courage to keep going. You might even find yourself loving others better because you feel so loved. The ripple effect of living in God's love is just like this and more. You can't help but love others when you know and experience how much God loved you."),
+      p("This is the life we are invited to. A life that knows and relies on the love God has for us, and then loves others because of it. Today, how will you discover the love God has for you? When you know and experience the love God has for you, everything changes."),
+    ],
+  },
+  {
+    id: 33,
+    title: "Keep Doing Good",
+    author: null,
+    date: "August 11, 2026",
+    category: "Devotional",
+    readTime: "4 min read",
+    excerpt:
+      "Even good people get tired of doing good. Paul knew that too — and told the Galatians exactly what to do about it.",
+    blocks: [
+      p("Do you remember the last time you were completely exhausted? Maybe you spent your entire day or week working on a hard project. Maybe you felt depleted after helping other people in your life. Or maybe hard situations and setbacks made you feel like giving up. All of us grow tired at some point."),
+      p("Paul, the writer of Galatians, knew that the people he was writing to would also become weary of the work they were doing. During Paul's time, there was a lot of persecution and hurting people, and Paul was writing to encourage them in the work they were doing."),
+      {
+        type: "scripture",
+        reference: "Galatians 6:9",
+        verses: [
+          "Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up.",
+        ],
+      },
+      p("Inside Paul's encouragement to the Galatians is this truth: Even good people will tire of doing good things."),
+      p("That's why Paul encourages everyone to continue to push forward in doing good. We should continue to help people. We should continue to share the hope of Jesus with people. We should continue to try and live as God would want us to."),
+      p("God knows that we'll eventually grow weary. And when we grow tired and frustrated, we'll probably begin to question why we're doing any of this to begin with. (Maybe you've already asked yourself this.)"),
+      p("But Galatians 6:9 encourages us to persevere in doing good things. Similar to how a farmer must work diligently to plant his crops and wait months before the actual harvest, Paul says there will be a harvest for those who do not give up."),
+      p("Just like the Christians in Galatia, we also need to persevere in living godly lives and helping those around us. If we do not give up, Scripture says there will be a reward for us. We may receive that reward during our time on earth, or in heaven—but regardless of when we receive it, we should persevere in doing good."),
+      p("That means that your work matters. There is value to how you live and love others."),
+      p("So spend some time today considering the good that you have done and can continue to do for others. Who can you help? Who can you share the hope of Jesus with? How can you continue to persevere in living a godly life?"),
+      p("If you've grown weary or defeated, make a commitment today to never give up. Choose to persevere through whatever season of life you're in, knowing that there will be a harvest for those who finish well."),
+      { type: "prayer", text: "God, help me to never get tired of doing good things in Your name. As I grow closer to You, give me the endurance to serve and love others well—no matter how I'm feeling. I want my life to bring those around me closer to You. Thank You for never giving up on me! Amen." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
