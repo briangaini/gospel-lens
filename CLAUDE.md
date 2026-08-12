@@ -124,6 +124,7 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~No "Listen to this post"~~ — fixed 2026-08-04, one button below the title and one at the end (synced), better voice selection (scores available system voices for quality), reads paragraph-by-paragraph instead of one flat block.
 - ~~`og:type` was `website` on post pages~~ — fixed 2026-08-04, now `article` for individual posts; home/blog/about/collection stay `website`.
 - ~~Search results weren't ranked~~ — fixed 2026-08-04, title matches now surface above body-only matches while a search is active.
+- ~~No dedicated share-link preview image~~ — fixed 2026-08-12, see "Share-link preview image" below.
 
 **Proposed "next level" ideas (not yet greenlit):**
 - Genuinely unknown/mistyped URLs 404 on Vercel rather than showing a friendly in-app "not found" page — accepted as normal for now (see the `vercel.json` gotcha above), but a custom 404 page is a small, low-risk idea if Brian wants a softer landing than Vercel's default.
@@ -133,6 +134,16 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - **Save-as-PDF / print button** — `index.css` already has a `@media print` stylesheet that hides the header/footer for clean printing; there's just no button that triggers it yet. A "Print / Save as PDF" link on each post calling `window.print()` would make that existing groundwork actually reachable — useful for someone who wants a physical copy for a small-group study.
 - **Weekly digest email to Buttondown subscribers** — now that the newsletter actually captures emails, the natural next step is giving subscribers a reason to have signed up: a simple weekly "here's what went up this week" email. Buttondown supports scheduled/automated sends; this would be a workflow/process change more than code.
 - **"Continue reading" / lightly remembered reading history** — using the visitor's own browser storage (no accounts, no server, fully private) to quietly note which posts they've opened, and show something like "You've read 6 posts" or resurface an unfinished one on return visits. A small, low-risk engagement touch.
+
+## Share-link preview image (og:image)
+
+`public/og-image.png` (630×630, transparent PNG) is wired in via `og:image`/`twitter:image` in `index.html`'s `<head>` — added 2026-08-12. This is the image link-preview bots (WhatsApp, iMessage, X, etc.) show in the small thumbnail when a link is shared; `prerender.js` doesn't touch these tags, so it carries through unchanged onto every prerendered post page too, giving every share the same image.
+
+**This is deliberately the *only* place this artwork is used.** Brian was explicit, more than once, that the site's actual header logo and favicon/app icons must NOT change — only the shared-link thumbnail. Don't reuse `og-image.png` for the header, `favicon.svg`, `apple-touch-icon.png`, or the PWA manifest icons without a separate, explicit request to change those specifically.
+
+The image itself: Brian designed it in Canva (a gold ring, a solid cross, an open book) and pasted the raw JPEG export into this repo's root as `logo from canva.jpeg` (untracked — never committed, it's a working reference file, safe to ignore or delete). His Canva account is free-tier, so the "transparent background" export was paywalled; `og-image.png` was produced by processing that JPEG programmatically — scoring each pixel's "whiteness" (the gold linework has a much lower blue channel than the white background, so this cleanly separates logo from background even with JPEG compression noise at the edges), converting background pixels to alpha 0, then cropping to content and padding to a perfect square before the final resize. If this ever needs regenerating (e.g. Brian tweaks the Canva design again), the same technique applies — don't ask him to find a Pro plan for the transparent export.
+
+Also worth remembering: the WhatsApp preview *card itself* being small on a phone screen is WhatsApp's own fixed UI, not something any `og:image`/meta tag can resize — don't imply that's fixable in code if it comes up again.
 
 ## Newsletter integration (Buttondown)
 
