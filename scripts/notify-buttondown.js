@@ -1,45 +1,33 @@
 // Runs in CI (see .github/workflows/newsletter-draft.yml) after every build,
-// on every push to main. Compares the current RSS feed (dist/rss.xml) against
-// .buttondown-notified.json — a small list of post URLs already drafted —
-// and creates a DRAFT email in Buttondown for anything new. Never sends:
-// creating an email via Buttondown's API always lands as a draft first
-// (confirmed in their docs), sending is a separate, deliberate step Brian
-// takes himself. That's deliberate — a safety net, not a limitation.
+// on every push to main. Compares the full post list (loaded via
+// load-posts-data.js) against .buttondown-notified.json — a small list of
+// post URLs already drafted — and creates a DRAFT email in Buttondown for
+// anything new, with the full post rendered as styled HTML (see
+// post-to-email-html.js) rather than just a title+excerpt+link. Never
+// sends: creating an email via Buttondown's API always lands as a draft
+// first (confirmed in their docs), sending is a separate, deliberate step
+// Brian takes himself. That's deliberate — a safety net, not a limitation.
 //
 // Silently does nothing (exit 0) if BUTTONDOWN_API_KEY isn't set yet, so the
 // workflow shows green instead of failing before Brian's added the secret.
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
+import { loadPostsData } from "./load-posts-data.js";
+import { postToEmailHtml } from "./post-to-email-html.js";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const STATE_FILE = path.join(ROOT, ".buttondown-notified.json");
-const RSS_FILE = path.join(ROOT, "dist", "rss.xml");
+const SITE_URL = "https://the-gospel-lens.vercel.app";
+const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const API_KEY = process.env.BUTTONDOWN_API_KEY;
 
-function decodeXml(str) {
-  return String(str)
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-}
-
-function parseRssItems(xml) {
-  const items = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let m;
-  while ((m = itemRegex.exec(xml))) {
-    const block = m[1];
-    const title = block.match(/<title>([\s\S]*?)<\/title>/)?.[1];
-    const link = block.match(/<link>([\s\S]*?)<\/link>/)?.[1];
-    const description = block.match(/<description>([\s\S]*?)<\/description>/)?.[1];
-    if (title && link) {
-      items.push({ title: decodeXml(title), link: decodeXml(link), description: decodeXml(description || "") });
-    }
-  }
-  return items;
+function slugify(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
 }
 
 function loadState() {
@@ -51,8 +39,8 @@ function saveState(state) {
   writeFileSync(STATE_FILE, `${JSON.stringify(state, null, 2)}\n`);
 }
 
-async function createDraft(post) {
-  const body = `${post.description}\n\n[Read the full post](${post.link})`;
+async function createDraft(post, url) {
+  const body = postToEmailHtml(post, { url, ogImageUrl: OG_IMAGE_URL, siteUrl: `${SITE_URL}/` });
   const res = await fetch("https://api.buttondown.com/v1/emails", {
     method: "POST",
     headers: {
@@ -72,13 +60,14 @@ async function main() {
     console.log("BUTTONDOWN_API_KEY is not set — skipping. This is expected until the secret is added in GitHub repo settings.");
     return;
   }
-  if (!existsSync(RSS_FILE)) throw new Error("dist/rss.xml not found — run `npm run build` before this script.");
 
-  const items = parseRssItems(readFileSync(RSS_FILE, "utf8"));
+  const { POSTS } = await loadPostsData();
   const state = loadState();
   const notified = new Set(state.notified);
 
-  const newItems = items.filter((item) => !notified.has(item.link));
+  const withUrls = POSTS.map((post) => ({ post, url: `${SITE_URL}/${slugify(post.title)}` }));
+  const newItems = withUrls.filter(({ url }) => !notified.has(url));
+
   if (newItems.length === 0) {
     console.log("No new posts since the last check — nothing to draft.");
     return;
@@ -86,11 +75,11 @@ async function main() {
 
   let created = 0;
   let hadErrors = false;
-  for (const item of newItems) {
-    console.log(`Creating Buttondown draft for: ${item.title}`);
+  for (const { post, url } of newItems) {
+    console.log(`Creating Buttondown draft for: ${post.title}`);
     try {
-      await createDraft(item);
-      notified.add(item.link);
+      await createDraft(post, url);
+      notified.add(url);
       created++;
     } catch (err) {
       // Don't let one bad post block the rest, and don't mark it notified

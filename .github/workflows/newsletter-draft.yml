@@ -1,9 +1,10 @@
 name: Draft newsletter email for new posts
 
-# Runs after every push to main. Builds the site (so dist/rss.xml is fresh),
-# then checks it for posts not yet drafted in Buttondown — see
-# scripts/notify-buttondown.js for the full explanation. Shows green even
-# before BUTTONDOWN_API_KEY is added as a repo secret; it just skips.
+# Runs after every push to main and checks the live post data (read
+# directly from src/App.jsx, no build needed) for posts not yet drafted in
+# Buttondown — see scripts/notify-buttondown.js for the full explanation.
+# Shows green even before BUTTONDOWN_API_KEY is added as a repo secret; it
+# just skips.
 on:
   push:
     branches: [main]
@@ -21,8 +22,6 @@ jobs:
           node-version: 20
 
       - run: npm ci
-
-      - run: npm run build
 
       - run: node scripts/notify-buttondown.js
         env:

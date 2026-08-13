@@ -2893,3 +2893,8 @@ export default function GospelLensApp() {
     </div>
   );
 }
+
+// Named exports alongside the default — used only by scripts/notify-buttondown.js
+// (via esbuild, see loadPostsData() there) to read the real POSTS/AUTHORS data,
+// blocks included, for building newsletter email HTML. Doesn't affect the app.
+export { POSTS, AUTHORS };
