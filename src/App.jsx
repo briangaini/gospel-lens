@@ -1490,35 +1490,85 @@ function useListenToPost(post) {
   const [status, setStatus] = useState("idle"); // idle | speaking | paused
   const supported = typeof window !== "undefined" && "speechSynthesis" in window;
 
+  // Speaking one segment at a time and only creating the next utterance once
+  // the previous one truly finishes (chained via onend), instead of queueing
+  // every paragraph upfront with repeated .speak() calls. Queueing many
+  // utterances at once and then pausing/resuming across the whole queue is
+  // the flaky part of this browser API — utterances with nothing holding a
+  // live reference to them can get garbage-collected mid-queue, which shows
+  // up as speech skipping around, stalling, or picking up from an
+  // unpredictable point. Refs (not local variables) keep the in-progress
+  // utterance and the remaining segments alive across renders.
+  const segmentsRef = useRef([]);
+  const indexRef = useRef(0);
+  const voiceRef = useRef(null);
+  const utteranceRef = useRef(null);
+
+  const stopAll = () => {
+    if (supported) window.speechSynthesis.cancel();
+    utteranceRef.current = null;
+  };
+
   // Stop any reading in progress whenever the underlying post changes —
   // including navigating to a different post entirely, not just leaving
   // the post view — so switching posts never leaves the old one still
   // reading over the new one. Also covers unmount (Home/Blogs/About).
   useEffect(() => {
     return () => {
-      if (supported) window.speechSynthesis.cancel();
+      stopAll();
       setStatus("idle");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post?.id]);
 
-  const start = () => {
-    window.speechSynthesis.cancel();
-    const voice = pickBestVoice();
-    const segments = postToSpeechSegments(post);
-    const utterances = segments.map((text, i) => {
-      const u = new SpeechSynthesisUtterance(text);
-      if (voice) u.voice = voice;
-      u.rate = 0.85; // slower, reflective reading pace rather than rushed
-      u.pitch = 0.97;
-      if (i === segments.length - 1) {
-        u.onend = () => setStatus("idle");
-        u.onerror = () => setStatus("idle");
+  // Browsers can restore a page from the back/forward cache (bfcache)
+  // without re-running this component's setup — if speech was paused when
+  // the visitor navigated away, the restored page can otherwise resume
+  // speaking on its own with no click involved. Force a clean stop whenever
+  // the page is (re)shown this way.
+  useEffect(() => {
+    if (!supported) return;
+    const onPageShow = (event) => {
+      if (event.persisted) {
+        stopAll();
+        setStatus("idle");
       }
-      return u;
-    });
-    utterances.forEach((u) => window.speechSynthesis.speak(u));
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supported]);
+
+  const speakFrom = (index) => {
+    const segments = segmentsRef.current;
+    if (index >= segments.length) {
+      utteranceRef.current = null;
+      setStatus("idle");
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(segments[index]);
+    if (voiceRef.current) u.voice = voiceRef.current;
+    u.rate = 0.85; // slower, reflective reading pace rather than rushed
+    u.pitch = 0.97;
+    u.onend = () => {
+      indexRef.current = index + 1;
+      speakFrom(index + 1);
+    };
+    u.onerror = () => {
+      utteranceRef.current = null;
+      setStatus("idle");
+    };
+    utteranceRef.current = u; // keep a live reference so it can't be GC'd mid-speech
+    window.speechSynthesis.speak(u);
+  };
+
+  const start = () => {
+    stopAll();
+    segmentsRef.current = postToSpeechSegments(post);
+    voiceRef.current = pickBestVoice();
+    indexRef.current = 0;
     setStatus("speaking");
+    speakFrom(0);
   };
 
   const toggle = () => {
@@ -1536,7 +1586,7 @@ function useListenToPost(post) {
 
   const restart = () => {
     if (!supported) return;
-    window.speechSynthesis.cancel();
+    stopAll();
     setStatus("idle");
   };
 
