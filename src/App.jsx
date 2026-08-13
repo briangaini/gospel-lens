@@ -14,8 +14,9 @@ import {
   Sunrise,
   Sun,
   Moon,
-  Volume2,
-  VolumeX,
+  Play,
+  Pause,
+  RotateCcw,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -1406,45 +1407,70 @@ function pickBestVoice() {
 }
 
 // Shared listen-to-post playback logic, used by both the top and bottom
-// buttons on a post so they stay in sync — clicking either one starts or
-// stops the same reading.
+// buttons on a post so they stay in sync — clicking either one affects the
+// same reading. Status is a small state machine rather than a boolean:
+//   idle     — nothing queued; tapping the main button starts from the top
+//   speaking — actively reading; tapping the main button pauses in place
+//   paused   — paused mid-read; tapping the main button resumes from there
+// The separate restart() action fully stops and clears the queue, so the
+// next tap on the main button starts over from the beginning — kept as a
+// distinct small control rather than folded into the main button, so the
+// everyday tap (pause/resume) stays a single obvious action.
 function useListenToPost(post) {
-  const [speaking, setSpeaking] = useState(false);
+  const [status, setStatus] = useState("idle"); // idle | speaking | paused
   const supported = typeof window !== "undefined" && "speechSynthesis" in window;
 
+  // Stop any reading in progress whenever the underlying post changes —
+  // including navigating to a different post entirely, not just leaving
+  // the post view — so switching posts never leaves the old one still
+  // reading over the new one. Also covers unmount (Home/Blogs/About).
   useEffect(() => {
     return () => {
       if (supported) window.speechSynthesis.cancel();
+      setStatus("idle");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [post?.id]);
 
-  const toggle = () => {
-    if (!supported) return;
-    if (speaking) {
-      window.speechSynthesis.cancel();
-      setSpeaking(false);
-      return;
-    }
+  const start = () => {
     window.speechSynthesis.cancel();
     const voice = pickBestVoice();
     const segments = postToSpeechSegments(post);
     const utterances = segments.map((text, i) => {
       const u = new SpeechSynthesisUtterance(text);
       if (voice) u.voice = voice;
-      u.rate = 0.94; // a touch slower than default — reads as reflective, not rushed
+      u.rate = 0.85; // slower, reflective reading pace rather than rushed
       u.pitch = 0.97;
       if (i === segments.length - 1) {
-        u.onend = () => setSpeaking(false);
-        u.onerror = () => setSpeaking(false);
+        u.onend = () => setStatus("idle");
+        u.onerror = () => setStatus("idle");
       }
       return u;
     });
     utterances.forEach((u) => window.speechSynthesis.speak(u));
-    setSpeaking(true);
+    setStatus("speaking");
   };
 
-  return { speaking, toggle, supported };
+  const toggle = () => {
+    if (!supported) return;
+    if (status === "idle") {
+      start();
+    } else if (status === "speaking") {
+      window.speechSynthesis.pause();
+      setStatus("paused");
+    } else if (status === "paused") {
+      window.speechSynthesis.resume();
+      setStatus("speaking");
+    }
+  };
+
+  const restart = () => {
+    if (!supported) return;
+    window.speechSynthesis.cancel();
+    setStatus("idle");
+  };
+
+  return { status, toggle, restart, supported };
 }
 
 // Builds one lowercase blob of everything searchable in a post — title,
@@ -2475,17 +2501,33 @@ function ReadingProgress() {
 
 // Presentational only — playback state/logic lives in useListenToPost so the
 // top and bottom buttons on a post can share one state and either can
-// start/stop the same reading.
-function ListenButton({ speaking, onToggle, supported }) {
+// control the same reading. Main button is a simple play/pause/resume
+// toggle; the small restart button (only shown once something's queued)
+// fully stops and clears it so the next tap starts from the beginning.
+function ListenButton({ status, onToggle, onRestart, supported }) {
   if (!supported) return null;
+  const label = status === "speaking" ? "Pause" : status === "paused" ? "Resume" : "Listen to This Post";
+  const Icon = status === "speaking" ? Pause : Play;
   return (
-    <button
-      onClick={onToggle}
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
-    >
-      {speaking ? <VolumeX size={14} strokeWidth={2} /> : <Volume2 size={14} strokeWidth={2} />}
-      {speaking ? "Stop Listening" : "Listen to This Post"}
-    </button>
+    <div className="inline-flex items-center gap-2">
+      <button
+        onClick={onToggle}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+      >
+        <Icon size={14} strokeWidth={2} />
+        {label}
+      </button>
+      {status !== "idle" && (
+        <button
+          onClick={onRestart}
+          aria-label="Restart from the beginning"
+          title="Restart from the beginning"
+          className="inline-flex items-center justify-center w-8 h-8 text-[#8A8D96] dark:text-[#7C808A] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+        >
+          <RotateCcw size={13} strokeWidth={2} />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -2560,7 +2602,7 @@ function ShareBar({ post }) {
 }
 
 function SinglePostView({ post, setView, openPost, openCollection }) {
-  const { speaking, toggle: toggleListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
+  const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   if (!post) return null;
 
   const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 2);
@@ -2605,13 +2647,13 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
         </h1>
 
         <div className="flex flex-wrap gap-3 mb-10">
-          <ListenButton speaking={speaking} onToggle={toggleListen} supported={listenSupported} />
+          <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
         </div>
 
         <PostBody blocks={post.blocks} />
 
         <div className="flex flex-wrap gap-3 mb-6">
-          <ListenButton speaking={speaking} onToggle={toggleListen} supported={listenSupported} />
+          <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
         </div>
 
         <ShareBar post={post} />
