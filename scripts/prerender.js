@@ -53,10 +53,13 @@ function loadPosts(src) {
     const idMatch = chunk.match(/id:\s*(\d+),/);
     const title = extractField("title", chunk);
     const excerpt = extractField("excerpt", chunk);
-    if (!idMatch || !title || !excerpt) {
+    const date = extractField("date", chunk);
+    const authorMatch = chunk.match(/author:\s*"((?:[^"\\]|\\.)*)"/);
+    const author = authorMatch ? authorMatch[1].replace(/\\(.)/g, "$1") : null;
+    if (!idMatch || !title || !excerpt || !date) {
       throw new Error(`Failed to extract post fields near: ${chunk.slice(0, 60)}...`);
     }
-    return { id: Number(idMatch[1]), title, excerpt, slug: slugify(title) };
+    return { id: Number(idMatch[1]), title, excerpt, date, author, slug: slugify(title) };
   });
 }
 
@@ -130,6 +133,7 @@ function buildSitemap(posts, authors) {
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/blog`, priority: "0.8" },
     { loc: `${SITE_URL}/about`, priority: "0.5" },
+    { loc: `${SITE_URL}/rss.xml`, priority: "0.3" },
     ...authors.map((a) => ({ loc: `${SITE_URL}/collection/${a.slug}`, priority: "0.5" })),
     ...posts.map((p) => ({ loc: `${SITE_URL}/${p.slug}`, priority: "0.6" })),
   ];
@@ -137,6 +141,43 @@ function buildSitemap(posts, authors) {
     .map((u) => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${u.priority}</priority>\n  </url>`)
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+}
+
+// RSS 2.0 feed, newest first. This is also the mechanism Buttondown's
+// "RSS to Email" automation watches to auto-send a new-post notification to
+// every subscriber — the feed just needs to be valid and each item's <guid>
+// stable, which slug-based guids already give us for free.
+function buildRss(posts) {
+  const byDate = [...posts].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const items = byDate
+    .map((p) => {
+      const url = `${SITE_URL}/${p.slug}`;
+      const pubDate = new Date(p.date).toUTCString();
+      const creator = p.author ? `\n      <dc:creator>${escapeHtml(p.author)}</dc:creator>` : "";
+      return `    <item>
+      <title>${escapeHtml(p.title)}</title>
+      <link>${url}</link>
+      <guid isPermaLink="true">${url}</guid>
+      <pubDate>${pubDate}</pubDate>${creator}
+      <description>${escapeHtml(p.excerpt)}</description>
+    </item>`;
+    })
+    .join("\n");
+
+  const lastBuildDate = byDate.length ? new Date(byDate[0].date).toUTCString() : new Date().toUTCString();
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>The Gospel Lens</title>
+    <link>${SITE_URL}/</link>
+    <description>Gospel-centered devotionals, sermon notes, and teaching — ordinary life, seen through an eternal lens.</description>
+    <language>en-us</language>
+    <lastBuildDate>${lastBuildDate}</lastBuildDate>
+${items}
+  </channel>
+</rss>
+`;
 }
 
 function main() {
@@ -185,8 +226,9 @@ function main() {
   writeHtml("about", template);
 
   writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors));
+  writeFileSync(path.join(distDir, "rss.xml"), buildRss(posts));
 
-  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), and blog/about. Sitemap regenerated with real URLs.`);
+  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), and blog/about. Sitemap and RSS feed regenerated.`);
 }
 
 main();
