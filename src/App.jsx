@@ -1206,6 +1206,76 @@ const POSTS = [
       { type: "prayer", text: "God, help me to never get tired of doing good things in Your name. As I grow closer to You, give me the endurance to serve and love others well—no matter how I'm feeling. I want my life to bring those around me closer to You. Thank You for never giving up on me! Amen." },
     ],
   },
+  {
+    id: 34,
+    title: "Called to Love",
+    author: null,
+    date: "August 13, 2026",
+    category: "Teaching",
+    readTime: "6 min read",
+    excerpt:
+      "You'll never fully agree with everyone in your life — and that was never the condition for loving them. Here's what Jesus actually commanded, and what it looks like to love well without losing yourself in the process.",
+    blocks: [
+      p("You will never fully agree with another person. Not completely — not even with the people you're closest to."),
+      p("That's not a flaw in your relationships. It's simply because there isn't another person on earth exactly like you. No one carries your exact story, your exact convictions, your exact way of seeing politics, money, relationships, or faith. You are unmistakably you. And the person sitting across from you—at your dinner table, in your church pew, on the other side of an argument—is unmistakably them."),
+      p("Given how different we all are, it's no surprise that disagreement is part of life. But here's what should surprise us: our differences were never meant to be a reason to withhold love. Jesus was clear about this. On the night before His death, He gave His followers a command that had nothing to do with agreement and everything to do with love:"),
+      {
+        type: "scripture",
+        reference: "John 13:34, NIV",
+        verses: [
+          "A new command I give you: Love one another. As I have loved you, so you must love one another.",
+        ],
+      },
+      p('Notice what Jesus didn\'t say. He didn\'t say, "Love one another once you see eye to eye." He didn\'t say, "Love the people who think like you." He said simply: love one another. And in case anyone thought this only applied to people who were easy to love, He went further:'),
+      {
+        type: "scripture",
+        reference: "Matthew 5:44",
+        verses: [
+          "Love your enemies and pray for those who persecute you.",
+        ],
+      },
+      p("If love is commanded even toward our enemies, then it's certainly meant for the neighbor down the street, the coworker who frustrates us, and the family member we don't quite understand."),
+      { type: "heading", text: "Love Your Neighbor as Yourself" },
+      p("When someone once asked Jesus which commandment mattered most, He didn't point to one law—He pointed to two, and said they were inseparable:"),
+      {
+        type: "scripture",
+        reference: "Mark 12:30-31",
+        verses: [
+          "Love the Lord your God with all your heart... Love your neighbor as yourself. There is no commandment greater than these.",
+        ],
+      },
+      p("Then, to make sure no one could narrow the definition of \"neighbor\" down to just the people they liked, Jesus told the story of the Good Samaritan (Luke 10:25-37)—a man from a group despised by the religious crowd of the day, who stopped to help a stranger everyone else had walked past. The people who had every social and religious reason to help didn't. The one person with every reason to keep walking didn't either—he stopped, bandaged the wounds, and paid for the stranger's care out of his own pocket."),
+      p("Jesus' point was simple and uncomfortable: your neighbor isn't defined by who's like you. It's defined by who's in front of you."),
+      { type: "heading", text: "What Love Actually Looks Like" },
+      p("Love, as Jesus modeled and taught it, isn't a feeling that shows up when circumstances are easy. It's a posture we choose. Scripture paints a fairly practical picture of what that posture looks like day to day:"),
+      {
+        type: "list",
+        items: [
+          "Love considers others first.",
+          "Love looks for the best in people.",
+          "Love shows respect, even in disagreement.",
+          "Love seeks unity rather than division.",
+          "Love isn't self-serving.",
+          "Love displays patience.",
+        ],
+      },
+      p("This is basically a plain-language version of what Paul wrote in 1 Corinthians 13—love is patient, love is kind, love does not insist on its own way. It's a high standard. And it's one none of us live up to perfectly."),
+      { type: "heading", text: "Giving of Yourself, Without Giving Up Your Wellbeing" },
+      p("To love people well often means giving of yourself—being present, being generous, letting people see who you really are instead of hiding behind a polished version of yourself. That kind of openness carries risk. People may not receive your honesty the way you hoped. Relationships built on real vulnerability can, at times, lead to disappointment or hurt."),
+      p("But loving people this way doesn't mean deliberately walking into harm, or staying in situations where someone is repeatedly disrespecting or mistreating you. Loving someone and protecting your own wellbeing aren't opposites. Jesus loved people fully, and He also withdrew to rest, set boundaries with those trying to trap or manipulate Him, and didn't entrust Himself to people whose intentions weren't genuine (John 2:24). Wisdom and love were never at odds in His example."),
+      p('So love generously—but that doesn\'t mean ignoring red flags or accepting mistreatment in the name of "being loving." You can love someone from a distance. You can love someone and still say no. You can care about a person\'s wellbeing without handing them the ability to repeatedly hurt you. Love gives of itself; it doesn\'t require you to erase yourself.'),
+      p("We won't always agree. We won't always understand each other. But Jesus' command to love was never contingent on agreement—it starts with a willingness to love the person in front of us the way we've been loved. Not because it's easy. Because it's who we're called to be."),
+      {
+        type: "reflection",
+        items: [
+          "Who in your life is hardest to love right now — and what would it look like to love them well, even without full agreement?",
+          "Where might you need to set a healthy boundary while still holding onto love for someone, rather than choosing between the two?",
+          "Is there a \"neighbor\" in your life you've overlooked simply because they're different from you?",
+        ],
+      },
+      { type: "prayer", text: "Lord, thank You for loving me first, long before I had anything figured out. Teach me to love others the way You've loved me—patiently, honestly, and without requiring agreement first. Give me wisdom to love people well while also protecting the heart You've given me. Help me see the neighbor in front of me the way You do. In Jesus' name, Amen." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
