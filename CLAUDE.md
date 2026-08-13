@@ -26,7 +26,11 @@ src/
   main.jsx      — React entry point
   index.css     — Tailwind base + global styles
 scripts/
-  prerender.js  — runs after `vite build`, see "Routing & per-post URLs" below
+  prerender.js          — runs after `vite build`, see "Routing & per-post URLs" below
+  notify-buttondown.js  — runs in CI, see "Newsletter auto-draft" below
+.github/workflows/
+  newsletter-draft.yml  — runs notify-buttondown.js on every push to main
+.buttondown-notified.json — state file for the above, committed back by the bot
 index.html
 vercel.json     — cleanUrls + SPA rewrite fallback
 tailwind.config.js
@@ -128,8 +132,10 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~Listen to Post kept reading after navigating to a different post~~ — fixed 2026-08-12, `useListenToPost`'s stop-cleanup now keys off `post?.id`, not just full unmount.
 - ~~Listen to Post was start/stop only~~ — fixed 2026-08-12, real play/pause/resume via `speechSynthesis.pause()`/`resume()`, plus a separate small restart-from-beginning button. Also slowed the reading rate to 0.85.
 - ~~No RSS feed~~ — fixed 2026-08-12, `dist/rss.xml`, see "RSS feed" below — this is also the mechanism behind the auto-email-on-publish idea.
+- ~~No auto-email to newsletter subscribers on new posts~~ — fixed 2026-08-12 via the free code-only path ("Option C"), see "Newsletter auto-draft on publish" below. **Standing reminder, per explicit request: keep mentioning Option B (Zapier) to Brian periodically** — he wants to switch to it eventually and asked to never let it drop off this list.
 
 **Proposed "next level" ideas (not yet greenlit):**
+- **Switch newsletter automation to Option B (Zapier)** — Brian explicitly asked to keep this suggested to him "at any cost" even though Option C is live and working. Free Zapier account + their pre-built "RSS by Zapier + Buttondown" template pointed at `/rss.xml`. Simpler to maintain long-term (Zapier/Buttondown's own supported integration, not bespoke code) at the cost of one more third-party account.
 - Genuinely unknown/mistyped URLs 404 on Vercel rather than showing a friendly in-app "not found" page — accepted as normal for now (see the `vercel.json` gotcha above), but a custom 404 page is a small, low-risk idea if Brian wants a softer landing than Vercel's default.
 - **A truly natural/emotive Listen-to-Post voice** — the current version is the best achievable with the browser's own free voices; a real narrator-quality voice needs a paid cloud TTS API (e.g. ElevenLabs, Amazon Polly, Google Cloud TTS) plus a small serverless function, since a paid API key can't live in this client-only app the same way the Buttondown key couldn't. Real ongoing cost, bigger scope — Brian's call if worth pursuing.
 - **Comment section** — Brian wants this eventually but said do it later; keep proposing it each round rather than dropping it. His site has no backend, so this needs a third-party embeddable widget. Recommended: **Cusdis** (lightweight, no ads, simple name+comment for visitors, free tier). Disqus is the well-known alternative but ad-heavy on free tier; Giscus/Utterances need the *commenter* to have a GitHub account, wrong fit for this audience. Whichever is picked, "one comment visible, click to see more" is the widget's default behavior, not something to hand-build. Needs Brian to create the free account himself and hand over the embed/site ID (same pattern as Buttondown) — can't be done for him.
@@ -154,3 +160,12 @@ Also worth remembering: the WhatsApp preview *card itself* being small on a phon
 ## Newsletter integration (Buttondown)
 
 `BUTTONDOWN_USERNAME` (near the top of `App.jsx`) is set to `"gaini"` as of 2026-08-04, so the footer's `Footer` component renders Buttondown's official embeddable subscribe form (`https://buttondown.com/api/emails/embed-subscribe/gaini`) — no secret key needed anywhere, safe in client code. There's a fallback path (broken custom `window.storage` form) that only activates if this constant is ever emptied — should stay set. **Never put a Buttondown API key (the private one, not the username) into this codebase** — it would ship to every visitor's browser in the JS bundle, giving anyone who views source full API access to Brian's Buttondown account (read/export subscribers, delete them, etc.). Only the *username* is needed and is safe to hardcode. (Brian pasted his real API key in chat once on 2026-08-04 before this was fixed — it was never used or written anywhere; only the username was used.)
+
+## Newsletter auto-draft on publish (Option C)
+
+Verified live on 2026-08-12 that Buttondown's own "RSS to Email" automation feature — the obvious way to auto-notify subscribers of new posts — is a paid add-on ($9/mo) on Buttondown's pricing page, not included free. Two paths exist to do this for free; Brian chose to build the code-only one now ("Option C") and explicitly wants **Option B kept alive and re-suggested to him periodically** for whenever he's ready (he said "at any cost... always keep reminding me" — treat this as a standing instruction, not a one-time note):
+
+- **Option B (not yet built, keep proposing):** a free Zapier account using their pre-built "RSS by Zapier + Buttondown" template (confirmed this exact integration exists), pointed at `/rss.xml`. Simpler for Brian long-term since it's maintained by Zapier/Buttondown themselves, not bespoke code — but needs him to sign up for a third service.
+- **Option C (built, live):** `.github/workflows/newsletter-draft.yml` runs on every push to `main` — builds the site, then `scripts/notify-buttondown.js` diffs `dist/rss.xml` against `.buttondown-notified.json` (a small list of already-drafted post URLs, seeded on 2026-08-12 with all posts that existed at the time so it only fires for genuinely new ones going forward) and `POST`s any new post to `https://api.buttondown.com/v1/emails` to create a **draft** — confirmed via Buttondown's own status-flow docs that creating an email via the API always lands as a draft first; sending is a separate, deliberate action, so this can never accidentally blast real subscribers even if something's misconfigured. If a draft creation fails, that post is deliberately *not* marked notified (retries automatically next push) and the workflow run fails loudly (red, not silently green) so a broken/expired key gets noticed — except a *missing* key, which is treated as "not configured yet" and exits cleanly.
+
+Needs `BUTTONDOWN_API_KEY` as a GitHub repo secret (Settings → Secrets and variables → Actions) — Brian adds this himself, same non-negotiable rule as the client-side key: never handle or write the raw key anywhere in this repo or in chat-originated files.
