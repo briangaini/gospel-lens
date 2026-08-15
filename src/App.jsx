@@ -1942,7 +1942,7 @@ function Footer() {
           </div>
 
           {CONTACT_EMAIL && (
-            <div className="flex items-center gap-5 text-xs">
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
                 className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
@@ -1954,6 +1954,18 @@ function Footer() {
                 className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
               >
                 Submit a Blog Post
+              </a>
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Share Your Story — The Gospel Lens")}&body=${encodeURIComponent("I wanted to share how a post on The Gospel Lens impacted me:\n\n")}`}
+                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+              >
+                Share Your Story
+              </a>
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Site Suggestion — The Gospel Lens")}`}
+                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+              >
+                Suggest an Idea
               </a>
             </div>
           )}
