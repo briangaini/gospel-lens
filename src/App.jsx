@@ -1505,8 +1505,13 @@ function useListenToPost(post) {
   const utteranceRef = useRef(null);
 
   const stopAll = () => {
-    if (supported) window.speechSynthesis.cancel();
+    // Null the ref BEFORE cancelling — cancel() fires the in-flight
+    // utterance's own onend/onerror asynchronously, and both handlers below
+    // check "is this utterance still the current one" by identity against
+    // this ref. Clearing it first means that stale event is always ignored,
+    // no matter when the browser actually gets around to firing it.
     utteranceRef.current = null;
+    if (supported) window.speechSynthesis.cancel();
   };
 
   // Stop any reading in progress whenever the underlying post changes —
@@ -1551,10 +1556,17 @@ function useListenToPost(post) {
     u.rate = 0.85; // slower, reflective reading pace rather than rushed
     u.pitch = 0.97;
     u.onend = () => {
+      // Ignore a stale event from an utterance we've since replaced (pause,
+      // restart, or a new post) — see the identity-check note in stopAll().
+      if (utteranceRef.current !== u) return;
       indexRef.current = index + 1;
       speakFrom(index + 1);
     };
     u.onerror = () => {
+      // Cancelling an in-progress utterance (to pause, restart, stop, or
+      // switch posts) fires onerror, not onend — that's expected, not a
+      // real failure, so only react if this utterance is still current.
+      if (utteranceRef.current !== u) return;
       utteranceRef.current = null;
       setStatus("idle");
     };
@@ -1576,11 +1588,25 @@ function useListenToPost(post) {
     if (status === "idle") {
       start();
     } else if (status === "speaking") {
-      window.speechSynthesis.pause();
+      // Deliberately NOT using the browser's native
+      // speechSynthesis.pause()/resume() here — verified this is genuinely
+      // unreliable in real-world use (this is a long-documented Web Speech
+      // API gotcha, not just an implementation bug here): some browsers
+      // effectively ignore pause() and keep talking, others cancel playback
+      // outright instead of truly pausing, and resume() afterwards is a
+      // no-op either way. Instead, "pause" is implemented by cancelling the
+      // in-flight utterance ourselves and simply remembering which segment
+      // (paragraph) we were on — indexRef.current isn't advanced until a
+      // segment finishes naturally (see speakFrom's onend), so it still
+      // points at the interrupted one. "Resume" just re-speaks that segment
+      // from its start. This trades exact mid-sentence resume for something
+      // that actually works consistently everywhere.
+      utteranceRef.current = null;
+      window.speechSynthesis.cancel();
       setStatus("paused");
     } else if (status === "paused") {
-      window.speechSynthesis.resume();
       setStatus("speaking");
+      speakFrom(indexRef.current);
     }
   };
 
