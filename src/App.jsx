@@ -2767,7 +2767,7 @@ function ReadingProgress() {
   }, []);
 
   return (
-    <div className="fixed top-20 left-0 w-full h-[3px] bg-transparent z-20">
+    <div className="no-print fixed top-20 left-0 w-full h-[3px] bg-transparent z-20">
       <div className="h-full bg-[#B08D57] transition-[width] duration-150" style={{ width: `${progress}%` }} />
     </div>
   );
@@ -2898,14 +2898,14 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
       <div className="max-w-2xl mx-auto px-6 sm:px-8">
         <button
           onClick={() => setView("blog")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+          className="no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
         >
           <ArrowLeft size={15} strokeWidth={2} />
           Back to Blogs
         </button>
 
         <CategoryTag category={post.category} />
-        <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mt-3">
+        <p className="post-byline text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mt-3">
           {post.author && AUTHORS[post.author] ? (
             <button
               onClick={() => openCollection(post.author)}
@@ -2926,17 +2926,17 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
           {post.title}
         </h1>
 
-        <div className="flex flex-wrap gap-3 mb-10">
+        <div className="no-print flex flex-wrap gap-3 mb-10">
           <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
         </div>
 
         <PostBody blocks={post.blocks} />
 
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="no-print flex flex-wrap gap-3 mb-6">
           <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
           <button
             onClick={() => window.print()}
-            className="no-print inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
           >
             <Printer size={14} strokeWidth={2} />
             Print / Save as PDF
@@ -2946,7 +2946,7 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
         <ShareBar post={post} />
 
         {(olderPost || newerPost) && (
-          <div className="grid grid-cols-2 gap-4 mt-8">
+          <div className="no-print grid grid-cols-2 gap-4 mt-8">
             {olderPost ? (
               <button
                 onClick={() => openPost(olderPost)}
@@ -2972,7 +2972,7 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
           </div>
         )}
 
-        <div className="mt-8">
+        <div className="no-print mt-8">
           <button
             onClick={() => setView("blog")}
             className="inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] hover:text-[#4A5D4E] transition-colors duration-300"
@@ -2984,7 +2984,7 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
       </div>
 
       {related.length > 0 && (
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 mt-20 pt-14 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
+        <div className="no-print max-w-5xl mx-auto px-6 sm:px-8 mt-20 pt-14 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
           <Eyebrow>Keep Reading</Eyebrow>
           <h3 className="text-2xl text-[#1C1F26] dark:text-[#F2F1EC] mb-8" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
             More in {post.category}
@@ -3169,6 +3169,27 @@ export default function GospelLensApp() {
           body, .min-h-screen { background: #fff !important; }
           article { padding: 0 !important; }
           a[href]:after { content: none !important; }
+
+          /* The byline (author · date · read time) uses a light gray meant
+             for screens — printers/PDF export often wash light gray out to
+             near-invisible, and its clickable-author <button> can pick up
+             stray print-only chrome. Force solid, plain text here so it
+             actually reads on paper, without touching colors anywhere else
+             in the article (the scripture/quote callout boxes rely on
+             theirs, e.g. light text on a dark background). */
+          .post-byline {
+            color: #1C1F26 !important;
+            font-size: 11px !important;
+          }
+          .post-byline button {
+            background: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            font: inherit !important;
+            color: inherit !important;
+            text-decoration: none !important;
+          }
         }
       `}</style>
 
