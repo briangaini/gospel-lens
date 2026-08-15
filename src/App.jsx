@@ -1328,6 +1328,31 @@ function tagsForPost(postId) {
   return Object.keys(POST_TAGS).filter((tag) => POST_TAGS[tag].includes(postId));
 }
 
+// "Keep Reading" picks — a shared topic tag (Grace & Assurance, Grief &
+// Comfort, etc.) is a much stronger signal of genuine relevance than just
+// sharing a category (Teaching/Devotional/Foundations is a pretty coarse
+// bucket), so posts sharing a tag are ranked first, tied by how many tags
+// they share; same-category posts fill in after that; newest breaks ties.
+// A post with no tag or category overlap at all is left out rather than
+// forced in just to hit the count.
+function getRelatedPosts(post, max = 2) {
+  const myTags = new Set(tagsForPost(post.id));
+  return POSTS.filter((p) => p.id !== post.id)
+    .map((p) => ({
+      post: p,
+      sharedTags: tagsForPost(p.id).filter((t) => myTags.has(t)).length,
+      sameCategory: p.category === post.category,
+    }))
+    .filter((s) => s.sharedTags > 0 || s.sameCategory)
+    .sort((a, b) => {
+      if (b.sharedTags !== a.sharedTags) return b.sharedTags - a.sharedTags;
+      if (a.sameCategory !== b.sameCategory) return a.sameCategory ? -1 : 1;
+      return new Date(b.post.date) - new Date(a.post.date);
+    })
+    .slice(0, max)
+    .map((s) => s.post);
+}
+
 function slugify(title) {
   return title
     .toLowerCase()
@@ -1811,6 +1836,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
 function Footer() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | saving | done
+  const buttondownFormRef = useRef(null);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -1823,6 +1849,23 @@ function Footer() {
     }
     setStatus("done");
     setEmail("");
+  };
+
+  // The live Buttondown form (below) is a real cross-origin POST that opens
+  // Buttondown's own confirmation page in a new tab (target="_blank") — we
+  // never get a response back to react to, since it's a native form
+  // submission, not a fetch call. So this is a same-tab, optimistic
+  // acknowledgment shown the moment someone submits, rather than something
+  // waiting on a result we structurally can't observe. Buttondown double
+  // opt-ins everyone, so "check your email to confirm" is accurate
+  // regardless of what happens in the new tab.
+  const handleButtondownSubmit = () => {
+    setStatus("done");
+    // Let the native submission read the field first, then clear it —
+    // resetting synchronously inside the submit handler risks clearing the
+    // value before the browser has captured it for the actual POST.
+    setTimeout(() => buttondownFormRef.current?.reset(), 50);
+    setTimeout(() => setStatus("idle"), 6000);
   };
 
   return (
@@ -1839,27 +1882,37 @@ function Footer() {
             <p className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6]">One email, whenever something new is published. No spam.</p>
           </div>
           {BUTTONDOWN_USERNAME ? (
-            <form
-              action={`https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN_USERNAME}`}
-              method="post"
-              target="_blank"
-              className="flex w-full sm:w-auto gap-2"
-            >
-              <input type="hidden" name="embed" value="1" />
-              <input
-                type="email"
-                required
-                name="email"
-                placeholder="you@example.com"
-                className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
-              />
-              <button
-                type="submit"
-                className="whitespace-nowrap bg-[#1C1F26] text-[#F8F7F3] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] transition-colors duration-300 rounded-sm"
+            <div className="w-full sm:w-auto">
+              <form
+                ref={buttondownFormRef}
+                action={`https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN_USERNAME}`}
+                method="post"
+                target="_blank"
+                onSubmit={handleButtondownSubmit}
+                className="flex w-full sm:w-auto gap-2"
               >
-                Subscribe
-              </button>
-            </form>
+                <input type="hidden" name="embed" value="1" />
+                <input
+                  type="email"
+                  required
+                  name="email"
+                  placeholder="you@example.com"
+                  className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+                />
+                <button
+                  type="submit"
+                  className="whitespace-nowrap bg-[#1C1F26] text-[#F8F7F3] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] transition-colors duration-300 rounded-sm"
+                >
+                  Subscribe
+                </button>
+              </form>
+              {status === "done" && (
+                <p className="flex items-center gap-1.5 text-xs text-[#4A5D4E] mt-2">
+                  <Check size={13} strokeWidth={2.5} />
+                  Check your email to confirm your subscription.
+                </p>
+              )}
+            </div>
           ) : (
             <form onSubmit={handleSubscribe} className="flex w-full sm:w-auto gap-2">
               <input
@@ -2885,7 +2938,7 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
 
   if (!post) return null;
 
-  const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 2);
+  const related = getRelatedPosts(post, 2);
 
   const sortedByDate = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
   const currentIndex = sortedByDate.findIndex((p) => p.id === post.id);
@@ -2987,7 +3040,7 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
         <div className="no-print max-w-5xl mx-auto px-6 sm:px-8 mt-20 pt-14 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
           <Eyebrow>Keep Reading</Eyebrow>
           <h3 className="text-2xl text-[#1C1F26] dark:text-[#F2F1EC] mb-8" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-            More in {post.category}
+            More Posts Like This
           </h3>
           <div className="grid sm:grid-cols-2 gap-6">
             {related.map((p) => (
@@ -3032,13 +3085,23 @@ export default function GospelLensApp() {
   const [activePost, setActivePost] = useState(null);
   const [activeAuthor, setActiveAuthor] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [dark, setDark] = useState(false);
+  // The inline script in index.html already applied the right class to
+  // <html> before this ever mounts (saved localStorage choice, else the
+  // system's prefers-color-scheme) — read that back rather than always
+  // starting from false, so state and DOM agree from the first render
+  // instead of a toggle being needed to "notice" dark mode is already on.
+  const [dark, setDark] = useState(() => typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
   const [navSearch, setNavSearch] = useState("");
 
   const toggleDark = () => {
     setDark((d) => {
       const next = !d;
       document.documentElement.classList.toggle("dark", next);
+      try {
+        window.localStorage.setItem("gospel-lens-theme", next ? "dark" : "light");
+      } catch (e) {
+        // localStorage unavailable — theme just won't persist, non-fatal
+      }
       return next;
     });
   };

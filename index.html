@@ -10,6 +10,22 @@
     <link rel="alternate" type="application/rss+xml" title="The Gospel Lens" href="/rss.xml" />
     <meta name="theme-color" content="#4A5D4E" />
 
+    <!-- Applies the visitor's dark-mode preference before anything paints,
+         so there's no flash of the wrong theme while React boots. Mirrors
+         the same "saved choice, else system preference" logic the app
+         itself uses once mounted (see GospelLensApp's dark state). -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("gospel-lens-theme");
+          var wantsDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (wantsDark) document.documentElement.classList.add("dark");
+        } catch (e) {
+          // localStorage/matchMedia unavailable — just stays light, harmless
+        }
+      })();
+    </script>
+
     <!-- Open Graph (Facebook, iMessage, WhatsApp, LinkedIn, etc.) -->
     <meta property="og:title" content="The Gospel Lens" />
     <meta property="og:description" content="Gospel-centered devotionals, sermon notes, and teaching — ordinary life, seen through an eternal lens." />
