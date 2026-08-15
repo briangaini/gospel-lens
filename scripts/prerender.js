@@ -91,11 +91,11 @@ function truncateAtWord(str, max) {
   return `${cut.slice(0, lastSpace > 0 ? lastSpace : max)}…`;
 }
 
-function withMeta(template, { title, description, url, ogType = "website" }) {
+function withMeta(template, { title, description, url, ogType = "website", jsonLd = null }) {
   const fullTitle = `${title} — The Gospel Lens`;
   const safeTitle = escapeHtml(fullTitle);
   const safeDescription = escapeHtml(description);
-  return template
+  let html = template
     .replace(/<title>[^<]*<\/title>/, `<title>${safeTitle}</title>`)
     .replace(
       /<meta name="description" content="[^"]*" \/>/,
@@ -113,6 +113,39 @@ function withMeta(template, { title, description, url, ogType = "website" }) {
       /<meta name="twitter:description" content="[^"]*" \/>/,
       `<meta name="twitter:description" content="${safeDescription}" />`
     );
+
+  if (jsonLd) {
+    html = html.replace("</head>", `  <script type="application/ld+json">${jsonLd}</script>\n  </head>`);
+  }
+
+  return html;
+}
+
+// Article structured data (schema.org) for a post page — an invisible tag
+// that doesn't change how the page looks, but gives Google enough to
+// potentially show richer search results (e.g. a byline/date under the
+// headline). JSON.stringify handles quote-escaping; the "</" replace is a
+// standard defensive measure so a title/excerpt containing that sequence
+// can't accidentally close the <script> tag early.
+function buildArticleJsonLd(post, ogImageUrl) {
+  const isoDate = new Date(post.date).toISOString();
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    image: [ogImageUrl],
+    datePublished: isoDate,
+    dateModified: isoDate,
+    author: post.author ? { "@type": "Person", name: post.author } : { "@type": "Organization", name: "The Gospel Lens" },
+    publisher: {
+      "@type": "Organization",
+      name: "The Gospel Lens",
+      logo: { "@type": "ImageObject", url: ogImageUrl },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/${post.slug}` },
+  };
+  return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
 // Written as flat <slug>.html files (not <slug>/index.html) to pair with
@@ -180,6 +213,97 @@ ${items}
 `;
 }
 
+// A static, JS-free 404 page in the site's own colors/type — for requests
+// Vercel serves before any React ever loads (see the vercel.json note above
+// about the rewrites catch-all not reliably firing). Vercel's static file
+// serving auto-detects a 404.html at the output root and serves it, with a
+// real 404 status, for any request that doesn't match a file/rewrite — the
+// same convention GitHub Pages/Netlify use. This is the fallback of last
+// resort; NotFoundView in App.jsx (src/App.jsx) is what visitors actually
+// see for any dead link the SPA's own router catches once JS has loaded.
+function build404Page() {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Not Found — The Gospel Lens</title>
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #F8F7F3;
+        color: #2E323B;
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+        padding: 24px;
+      }
+      .wrap { max-width: 480px; }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #4A5D4E;
+        font-weight: 600;
+        margin-bottom: 20px;
+      }
+      .eyebrow::before, .eyebrow::after { content: ""; width: 24px; height: 1px; background: #B08D57; }
+      h1 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 2.5rem;
+        line-height: 1.15;
+        color: #1C1F26;
+        margin: 0 0 18px;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #5B5F6B;
+        margin: 0 0 34px;
+      }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        letter-spacing: 0.02em;
+        padding: 12px 24px;
+        transition: opacity 0.2s;
+      }
+      a.btn:hover { opacity: 0.85; }
+      .btn-primary { background: #1C1F26; color: #F8F7F3; }
+      .btn-secondary { border: 1px solid rgba(28,31,38,0.15); color: #1C1F26; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="eyebrow">404</div>
+      <h1>This Page Isn't Here</h1>
+      <p>The link may be broken, or the page may have moved. Whatever it was, it isn't lost to us — you can always find your way back.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Go Home</a>
+        <a class="btn btn-secondary" href="/blog">Browse the Blogs</a>
+      </div>
+    </div>
+  </body>
+</html>
+`;
+}
+
 function main() {
   const distDir = path.join(ROOT, "dist");
   if (!existsSync(distDir)) throw new Error("dist/ not found — run `vite build` before this script.");
@@ -190,7 +314,7 @@ function main() {
   const posts = loadPosts(src);
   const authors = loadAuthors(src);
 
-  const RESERVED_SLUGS = new Set(["blog", "about", "collection"]);
+  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404"]);
   const seenSlugs = new Set();
   for (const p of posts) {
     if (seenSlugs.has(p.slug)) throw new Error(`Duplicate post slug detected: "${p.slug}" (id ${p.id}) — two titles slugify to the same URL.`);
@@ -198,12 +322,14 @@ function main() {
     seenSlugs.add(p.slug);
   }
 
+  const ogImageUrl = `${SITE_URL}/og-image.png`;
   for (const post of posts) {
     const html = withMeta(template, {
       title: post.title,
       description: post.excerpt,
       url: `${SITE_URL}/${post.slug}`,
       ogType: "article",
+      jsonLd: buildArticleJsonLd(post, ogImageUrl),
     });
     writeHtml(post.slug, html);
   }
@@ -224,11 +350,12 @@ function main() {
   // depending on that fallback.
   writeHtml("blog", template);
   writeHtml("about", template);
+  writeFileSync(path.join(distDir, "404.html"), build404Page());
 
   writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors));
   writeFileSync(path.join(distDir, "rss.xml"), buildRss(posts));
 
-  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), and blog/about. Sitemap and RSS feed regenerated.`);
+  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), blog/about, and 404. Sitemap and RSS feed regenerated.`);
 }
 
 main();

@@ -17,6 +17,7 @@ import {
   Play,
   Pause,
   RotateCcw,
+  Printer,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -1404,6 +1405,43 @@ function getVerseOfDay() {
 const FOUNDATIONAL_POST_IDS = [1, 12, 19];
 
 // ---------------------------------------------------------------------------
+// READ HISTORY — a light, entirely local memory of which posts a visitor has
+// opened, kept in their own browser's localStorage. Nothing is sent
+// anywhere, no account involved; it just powers a quiet "Continue Reading"
+// nudge on Home and a small read-count on the Blogs page. Safe to fail
+// silently (private browsing, storage disabled, quota full, etc.) since
+// none of this is essential to using the site.
+// ---------------------------------------------------------------------------
+
+const READ_HISTORY_KEY = "gospel-lens-read-history";
+const READ_HISTORY_MAX = 100;
+
+function getReadHistory() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(READ_HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+// Records a post as read, moving it to the end (most-recent) if it was
+// already in the list rather than duplicating it, and caps the list length
+// so localStorage usage can't grow unbounded for a long-time reader.
+function recordPostRead(postId) {
+  if (typeof window === "undefined") return;
+  try {
+    const history = getReadHistory().filter((id) => id !== postId);
+    history.push(postId);
+    window.localStorage.setItem(READ_HISTORY_KEY, JSON.stringify(history.slice(-READ_HISTORY_MAX)));
+  } catch {
+    // localStorage unavailable — quietly skip, nothing else depends on this
+  }
+}
+
+// ---------------------------------------------------------------------------
 // READING TIME — calculated from actual word count (~200 wpm) instead of
 // a hand-typed estimate, so it stays accurate as posts get edited.
 // ---------------------------------------------------------------------------
@@ -2340,6 +2378,55 @@ function AboutView() {
   );
 }
 
+// Shown for any path that isn't Home, Blogs, About, a real post, or a real
+// author collection — a typo'd or dead link, rather than silently landing
+// on Home with no explanation. See scripts/prerender.js for the matching
+// static dist/404.html, which covers requests Vercel serves before any of
+// this JS ever runs.
+function NotFoundView({ setView, openPost }) {
+  const recentPosts = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+
+  return (
+    <section className="max-w-2xl mx-auto px-6 sm:px-8 pt-24 pb-16 text-center">
+      <Eyebrow center>
+        <span className="mx-auto">404</span>
+      </Eyebrow>
+      <h1
+        className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-5"
+        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+      >
+        This Page Isn't Here
+      </h1>
+      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[16px] leading-relaxed max-w-md mx-auto mb-10">
+        The link may be broken, or the page may have moved. Whatever it was, it isn't lost to us — you can always find your way back.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-3 mb-20">
+        <button
+          onClick={() => setView("home")}
+          className="inline-flex items-center gap-2 bg-[#1C1F26] text-[#F8F7F3] px-6 py-3 text-sm tracking-wide hover:bg-[#4A5D4E] transition-colors duration-300"
+        >
+          Go Home
+        </button>
+        <button
+          onClick={() => setView("blog")}
+          className="inline-flex items-center gap-2 border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 text-[#1C1F26] dark:text-[#F2F1EC] px-6 py-3 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
+        >
+          Browse the Blogs
+        </button>
+      </div>
+
+      <div className="text-left">
+        <Eyebrow>In the Meantime</Eyebrow>
+        <div className="grid sm:grid-cols-3 gap-6">
+          {recentPosts.map((post) => (
+            <PostCard key={post.id} post={post} onOpen={openPost} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CollectionView({ authorName, openPost, setView }) {
   const info = AUTHORS[authorName];
   if (!info) return null;
@@ -2383,6 +2470,39 @@ function CollectionView({ authorName, openPost, setView }) {
   );
 }
 
+// Quiet "pick up where you left off" nudge — only appears once a visitor
+// has actually opened a post before (see READ HISTORY above), pointing at
+// the most recent one. Reads localStorage once per mount, which is enough
+// since HomeView remounts fresh whenever the view switches back to Home.
+function ContinueReadingCard({ openPost }) {
+  const [lastPost] = useState(() => {
+    const history = getReadHistory();
+    if (!history.length) return null;
+    return POSTS.find((p) => p.id === history[history.length - 1]) || null;
+  });
+
+  if (!lastPost) return null;
+
+  return (
+    <div className="max-w-3xl mx-auto px-6 sm:px-8 -mt-8 mb-4">
+      <button
+        onClick={() => openPost(lastPost)}
+        className="w-full text-left flex items-center justify-between gap-4 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-5 py-4 hover:border-[#4A5D4E]/50 transition-colors duration-200"
+      >
+        <div className="min-w-0">
+          <span className="text-[10px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold">
+            Continue Reading
+          </span>
+          <div className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium mt-0.5 truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {lastPost.title}
+          </div>
+        </div>
+        <ArrowRight size={16} strokeWidth={2} className="shrink-0 text-[#4A5D4E]" />
+      </button>
+    </div>
+  );
+}
+
 function HomeView({ setView, openPost }) {
   return (
     <>
@@ -2407,6 +2527,8 @@ function HomeView({ setView, openPost }) {
           <ArrowRight size={15} strokeWidth={2} />
         </button>
       </section>
+
+      <ContinueReadingCard openPost={openPost} />
 
       <VerseOfDay />
 
@@ -2484,6 +2606,7 @@ function BlogListView({ openPost, initialSearch = "" }) {
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState("All");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [readCount] = useState(() => getReadHistory().length);
 
   // Whenever a search arrives from the nav bar, apply it here too
   useEffect(() => {
@@ -2533,6 +2656,11 @@ function BlogListView({ openPost, initialSearch = "" }) {
       </h1>
       <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
         Every post viewed through one lens: the finished work of Christ.
+        {readCount > 0 && (
+          <span className="block text-[#8A8D96] dark:text-[#7C808A] text-[13px] mt-1">
+            You've read {readCount} {readCount === 1 ? "post" : "posts"} so far.
+          </span>
+        )}
       </p>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
@@ -2749,6 +2877,12 @@ function ShareBar({ post }) {
 
 function SinglePostView({ post, setView, openPost, openCollection }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
+
+  // Quietly note this post as read — see the READ HISTORY section above.
+  useEffect(() => {
+    if (post) recordPostRead(post.id);
+  }, [post?.id]);
+
   if (!post) return null;
 
   const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 2);
@@ -2800,6 +2934,13 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
 
         <div className="flex flex-wrap gap-3 mb-6">
           <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
+          <button
+            onClick={() => window.print()}
+            className="no-print inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+          >
+            <Printer size={14} strokeWidth={2} />
+            Print / Save as PDF
+          </button>
         </div>
 
         <ShareBar post={post} />
@@ -2966,6 +3107,11 @@ export default function GospelLensApp() {
           setView("post");
           return;
         }
+        // A non-root path that didn't match blog/about/a collection/a post
+        // above is a genuine dead or mistyped link — show a real "not
+        // found" page instead of silently falling back to Home.
+        setView("notfound");
+        return;
       }
       setView("home");
     };
@@ -2984,6 +3130,8 @@ export default function GospelLensApp() {
       document.title = "The Person Behind the Lens — The Gospel Lens";
     } else if (view === "collection" && activeAuthor) {
       document.title = `${activeAuthor} — The Gospel Lens`;
+    } else if (view === "notfound") {
+      document.title = "Page Not Found — The Gospel Lens";
     } else {
       document.title = "The Gospel Lens";
     }
@@ -3032,6 +3180,7 @@ export default function GospelLensApp() {
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
         {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} />}
+        {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
 
       <Footer />
