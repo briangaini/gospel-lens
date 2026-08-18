@@ -7,6 +7,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      // The default auto-injected registerSW.js only calls
+      // navigator.serviceWorker.register() -- it never reloads a tab that's
+      // already open when a new version ships, so registerType:
+      // "autoUpdate" alone (which just makes the new service worker
+      // skip-waiting and take over in the background) wasn't actually
+      // enough: the old JS bundle kept running silently in memory until
+      // something else caused a reload. Disabling the auto-injected script
+      // and registering manually in src/main.jsx via virtual:pwa-register
+      // lets it force a reload the moment a new version is ready, instead
+      // of waiting on a visitor's next unrelated navigation.
+      injectRegister: false,
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         name: "The Gospel Lens",
