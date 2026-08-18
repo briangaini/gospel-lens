@@ -21,9 +21,23 @@ import "./index.css";
 //      newly finished installing), tell it to activate right away.
 //   2. The moment a worker actually takes over the page (controllerchange
 //      -- confirmed firing correctly and promptly in testing), reload.
+//   3. Force an update *check* immediately on load, and again whenever the
+//      tab regains focus after being backgrounded -- rather than only
+//      relying on the browser's own default background-check schedule,
+//      which turned out to be noticeably slow/conservative in real use
+//      (confirmed live: an already-open tab needed several manual
+//      refreshes before it picked up a deploy, when relying on that
+//      default timing alone). Forcing the check ourselves on load/focus
+//      means step 1-2 above get a chance to run almost immediately instead
+//      of waiting on however long the browser would've taken on its own.
 // Together these get a genuinely automatic update with no prompt and no
-// manual refresh, verified end-to-end locally: a rebuild while a tab
-// stayed open resulted in that tab reloading itself to the new version.
+// manual refresh needed going forward, for anyone whose browser is already
+// running this code. The one thing this can't fix: a visitor whose browser
+// is still running an OLDER bundle from *before* this file existed has no
+// way to run this logic at all until their own browser's native update
+// check (independent of anything here) eventually swaps them onto a
+// version that does -- a one-time migration cost with no code-side fix,
+// since the old code genuinely has none of this.
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     window.location.reload();
@@ -41,6 +55,11 @@ if ("serviceWorker" in navigator) {
         newWorker.addEventListener("statechange", () => {
           if (newWorker.state === "installed") activateWhenReady(newWorker);
         });
+      });
+
+      reg.update();
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") reg.update();
       });
     });
   });
