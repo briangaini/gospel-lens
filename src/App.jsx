@@ -1277,6 +1277,79 @@ const POSTS = [
       { type: "prayer", text: "Lord, thank You for loving me first, long before I had anything figured out. Teach me to love others the way You've loved me—patiently, honestly, and without requiring agreement first. Give me wisdom to love people well while also protecting the heart You've given me. Help me see the neighbor in front of me the way You do. In Jesus' name, Amen." },
     ],
   },
+  {
+    id: 35,
+    title: "The Sweetness of Patience",
+    author: null,
+    date: "August 16, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Fruit picked too soon lacks the sweetness time was meant to give it. James says the same is true of a faith that skips patience — here's what the waiting is actually for.",
+    blocks: [
+      p("Have you ever plucked fruit prematurely?"),
+      p("Perhaps you were drawn in by its vibrant color or sweet scent moving through the air. But when you took the first bite, you realized it lacked the ripeness you anticipated. Everything seemed right at first glance, but there was one missing ingredient…"),
+      p("Time."),
+      p("Even the simple act of picking fruit can teach us about time and patience:"),
+      {
+        type: "scripture",
+        reference: "James 5:7-8",
+        verses: [
+          "Be patient, then, brothers and sisters, until the Lord's coming. See how the farmer waits for the land to yield its valuable crop, patiently waiting for the autumn and spring rains. You, too, be patient and stand firm because the Lord's coming is near.",
+        ],
+      },
+      p("The author, James, penned these words under the inspiration of the Holy Spirit to a community of new Jewish converts to Christianity, dispersed throughout various regions. These early Christians faced many trials, including persecution and opposition, because of their newfound faith. James' call to wait patiently and endure was more than mere words on a page; they were a lifeline of hope and encouragement in the midst of adversity."),
+      p("And just as those early believers confronted trials, we, too, will encounter challenges and suffering in our Christian journey. And, just like those early believers, you can choose patience—allowing the fruit of the Spirit to ripen within you, no matter the season of life. And when you do, your character will mature, your faith will deepen, and your relationship with God will become sweeter than you could imagine."),
+      { type: "encourage", text: "Patience always bears the fruit of perseverance and strength, even today and even for you!" },
+    ],
+  },
+  {
+    id: 36,
+    title: "The Peace That Guards",
+    author: "Jonny Ardavanis",
+    date: "August 17, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "Paul wrote \"be anxious for nothing\" from a jail cell, facing execution. What actually produces that kind of peace — and why it functions like an elite guard around a trusting heart.",
+    blocks: [
+      p('"And the peace of God, which surpasses all comprehension, will guard your hearts and your minds in Christ Jesus." Paul wrote those words from a jail cell. He was about to be beheaded. And he says, "Be anxious for nothing."'),
+      { type: "quote", text: "Peace is the derivative of trust. And trust is the product of beholding God as revealed in His Word.", attribution: "Jonny Ardavanis" },
+      {
+        type: "scripture",
+        reference: "Philippians 4:6-7; Isaiah 26:3; Colossians 3:15",
+        verses: [
+          "Be anxious for nothing, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God, which surpasses all comprehension, will guard your hearts and your minds in Christ Jesus.",
+          "You will keep him in perfect peace, whose mind is stayed on You, because he trusts in You.",
+          "Let the peace of Christ rule in your hearts.",
+        ],
+      },
+      p("Peace has been given to you if you're in Christ. But gifts have to be received. God's peace doesn't simply fall into your lap as you wait for it. It is something we must pursue."),
+      p("So how do we experience it?"),
+      { type: "heading", text: "Start Here: Faith" },
+      p("People say, \"I placed my faith in Christ once upon a time.\" And we treat faith as if it's a past tense event. But the Scripture says the righteous shall live by faith—present tense. Faith is not a thing. Faith is an exercise. It is a constant fixation of your gaze and your mind upon who God is."),
+      p("Isaiah 26:3: \"You will keep him in perfect peace, whose mind is stayed on You, because he trusts in You.\""),
+      p("A mind stayed on God. Not glancing at God. Stayed on God. Fixed. Anchored."),
+      p('Now Philippians 4:6—and don\'t miss the four words just before it. "The Lord is near." That\'s the background. If you don\'t understand God\'s nearness, you have much to be anxious about. But if the Lord is near, then Paul can say—from a jail cell, facing execution—"Be anxious for nothing."'),
+      p('Not, "be anxious for less." Paul says, "nothing."'),
+      p('Paul continues, "But in everything by prayer and supplication..." with what? Thanksgiving. Because one of the ways you solidify your convictions about the character of God is by thanking Him that He is who He reveals Himself to be. Thank You, God, that You are sovereign and loving and wise. You begin your prayer not with a grocery list of needs but with adoration. And as you pray this way, God\'s Spirit takes that truth and impresses it upon your heart so that it\'s not just something you check off—it\'s something you taste and believe.'),
+      p('"And then the peace of God—which surpasses all comprehension..." Meaning what? This peace doesn\'t make sense to the watching world—"will guard your hearts and minds in Christ Jesus."'),
+      p("That word \"guard\" is phrouros—an elite military unit standing outside a double-walled city. Impenetrable. Nothing is getting in."),
+      p("And Colossians 3:15: \"Let the peace of Christ rule in your hearts.\" That word rule is brabeuō—it means umpire or arbitrator. The peace of God functions as the umpire in your heart. Anything that comes across the plate—any trial, any evil, any uncertainty—the peace of God calls it. And it guards you."),
+      p('Horatio Spafford lost everything in the Chicago fire of 1871. He sent his wife and four daughters on a voyage to England. The ship was struck and sunk. All four daughters drowned. His wife survived and telegrammed him: "Saved alone, what shall I do?" He crossed the Atlantic to meet her. And the captain, knowing his tragedy, pointed to the place where his daughters had died.'),
+      p('There, over those waters, Horatio Spafford wrote: "When sorrows like sea billows roll—whatever my lot, Thou hast taught me to say, it is well, it is well with my soul."'),
+      p("That is supernatural peace. That is the garrison of God around a broken heart. That is what Jesus promised and what He delivers."),
+      {
+        type: "reflection",
+        items: [
+          "Are you exercising faith daily—fixing your mind on God—or treating faith as a past-tense event that happened when you got saved?",
+          "Is your prayer life characterized by thanksgiving and adoration, or just a grocery list of requests?",
+          "Can you say with Horatio Spafford, \"Whatever my lot—it is well with my soul\"? If not, what is preventing you?",
+        ],
+      },
+      { type: "heart", text: "The peace of God will guard my heart like an elite garrison. Nothing gets through. But I must fix my mind on Him. Stay there. Trust Him." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
