@@ -1350,6 +1350,51 @@ const POSTS = [
       { type: "heart", text: "The peace of God will guard my heart like an elite garrison. Nothing gets through. But I must fix my mind on Him. Stay there. Trust Him." },
     ],
   },
+  {
+    id: 37,
+    title: "The True Vine",
+    author: "Jonny Ardavanis",
+    date: "August 19, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Jesus doesn't just say \"I am a vine.\" He says \"I am the true vine.\" What Israel's whole history says about the false one — and what actually connects anyone to God.",
+    blocks: [
+      p('Jesus doesn\'t say "I am a vine." He says "I am the true vine." Circle that word. True. Because if Jesus is the true vine, there has to be a false one.'),
+      { type: "quote", text: "Nobody is connected to God the Father unless they are connected by faith to His one and only Son, Jesus Christ.", attribution: "Jonny Ardavanis" },
+      {
+        type: "scripture",
+        reference: "John 15:1; Isaiah 5:1-7; Jeremiah 2:21",
+        verses: [
+          "I am the true vine, and My Father is the vinedresser.",
+          "I planted you like a choice vine, a completely faithful seed. How then have you turned yourself before Me into degenerate shoots of a foreign vine?",
+        ],
+      },
+      p('Throughout the Old Testament, God refers to His people Israel as His chosen vineyard. Isaiah 5—He dug around it. He planted it with the choicest vine. He built a tower. He put a hedge. He said, "This is My vineyard." And He expected it to produce good grapes.'),
+      p("But it produced only worthless ones."),
+      p('Isaiah 5:7: "The vineyard of the LORD of hosts is the house of Israel." He looked for justice—but behold, bloodshed. He looked for righteousness—but behold, a cry of distress.'),
+      p('Jeremiah 2:21: "I planted you like a choice vine. How then have you turned yourself before Me into degenerate shoots of a foreign vine?"'),
+      p("Ezekiel 15 says Israel is likened to a vine that ought to be burned. Hosea calls them empty vines, strange vines with no leaves."),
+      p("At every stage throughout their history, God's people should have borne fruit. They should have looked like God. Instead they defected, rebelled, served idols, looked exactly like the nations around them. Thought they were connected to God. But bore no fruit of it."),
+      p('And Jesus stands up and says, "I am the true vine."'),
+      p("Which means what? As a branch, you could have no right connection to God unless you are connected to Me."),
+      p('The Jews said, "We are descendants of Abraham. We have God as our father." And Jesus says, "No. You are not connected to God at all." Nobody is connected to God the Father unless they are connected by faith to His one and only Son Jesus Christ.'),
+      p('This is why Paul says not all Israel is Israel. You can have external circumcision, but the circumcision God is after is the circumcision of the heart. Jesus tells them, "If you were really of Abraham, you would believe in Me."'),
+      p("Can I ask you a question? Are you genuinely connected to the vine—or are you like the nation of Israel, going through the motions, externally religious, looking the part, bearing no fruit?"),
+      p('Jesus says there are professors of faith who are not possessors. Many are going to stand before Him on that day and say, "Lord, Lord, did we not prophesy in Your name?" And He\'s going to look at them and say, "I never knew you."'),
+      p('"Many."'),
+      p("The true vine is Jesus. And you either are connected to Him by faith—or you are not connected to God at all."),
+      {
+        type: "reflection",
+        items: [
+          "Is your connection to God genuine and fruitful, or is it religious and external—going through the motions?",
+          "Have you ever asked the question seriously: is my faith truly saving faith, or am I a professor who is not a possessor?",
+          "What fruit in your life demonstrates that you are truly connected to the true vine?",
+        ],
+      },
+      { type: "heart", text: "Israel was the false vine—religious, external, fruitless. Jesus is the true vine. I am connected to God only through Him—and only genuinely if I bear fruit." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
