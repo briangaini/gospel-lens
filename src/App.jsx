@@ -1395,6 +1395,55 @@ const POSTS = [
       { type: "heart", text: "Israel was the false vine—religious, external, fruitless. Jesus is the true vine. I am connected to God only through Him—and only genuinely if I bear fruit." },
     ],
   },
+  {
+    id: 38,
+    title: "From Dawn to Dusk",
+    author: null,
+    date: "August 20, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "From every nation, language, and skin color to every season your heart is in — worship was never meant to wait for perfect circumstances. It's for right now, from dawn to dusk.",
+    blocks: [
+      p("Close your eyes for a moment. And while you do that, picture this wonderfully diverse planet we call home. (Yes, really.)"),
+      p("Everything that you just imagined—God created all of it. And God created all of us to worship Him."),
+      p("From north to south and east to west. From bustling cities to slow-paced villages. From lifeless deserts to life-packed forests. From the highest mountains to the farthest oceans."),
+      {
+        type: "scripture",
+        reference: "Psalm 113:3, NIV",
+        verses: [
+          "From the rising of the sun to the place where it sets, the name of the Lord is to be praised!",
+        ],
+      },
+      p("The sun \"rises\" and \"sets\" on all of us. All people, all languages, all nations. All skin colors, eye colors, and hair colors. All shapes, sizes, and personalities. Rich and poor. Aching hearts and contagious smiles."),
+      p("An eclectic mix of people from various parts of the world have been praising God from generation to generation—and it continues to happen now. And we know it will never stop."),
+      p('In Revelation 7, John has a vision of a "great multitude that no one could count, from every nation, tribe, people, and language, standing before the throne and before the Lamb," who is Christ. They are serving and worshiping, all day and night.'),
+      p("God's people—past, present, and future—are a worshiping people."),
+      {
+        type: "list",
+        items: [
+          "We can worship with our songs.",
+          "We can worship with our money.",
+          "We can worship with our lives.",
+        ],
+      },
+      p("And one day, when we finally see things clearly, every knee will bow and every tongue will confess that Jesus Christ is Lord. But today, we don't have to wait to worship."),
+      {
+        type: "list",
+        items: [
+          "When sunlight streams through your windows, you can worship.",
+          "When the evening sky turns orange-ish pink, you can worship.",
+          "When you're in a season of waiting, you can worship.",
+          "When you're in a season of receiving, you can worship.",
+          "When your heart is breaking, you can worship.",
+          "When your heart is full, you can worship.",
+        ],
+      },
+      p("From dawn to dusk, let the name of the Lord be praised."),
+      p("Today, think about this verse and consider what compels you to worship God. Then, shift your heart toward Him and don't forget to worship."),
+      { type: "prayer", text: "God, You are good. No matter what goes on around me—You are good. You are worthy of praise because You are God. You provide for me, strengthen me, deliver me, and heal me. Even when I don't see You at work in my life, that doesn't change the fact that You are working. There is no one like You. So regardless of what I face today, I will praise You! In Jesus' name, Amen." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1416,7 +1465,7 @@ const POST_TAGS = {
   "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26],
   "Prayer": [2, 18],
-  "Worship": [4],
+  "Worship": [4, 38],
   "Friendship": [20],
   "Discipline & Growth": [10, 11, 24, 25],
   "Identity in Christ": [16],
