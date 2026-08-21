@@ -1444,6 +1444,51 @@ const POSTS = [
       { type: "prayer", text: "God, You are good. No matter what goes on around me—You are good. You are worthy of praise because You are God. You provide for me, strengthen me, deliver me, and heal me. Even when I don't see You at work in my life, that doesn't change the fact that You are working. There is no one like You. So regardless of what I face today, I will praise You! In Jesus' name, Amen." },
     ],
   },
+  {
+    id: 39,
+    title: "He Prunes Every Branch That Bears Fruit",
+    author: "Jonny Ardavanis",
+    date: "August 21, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "\"Every branch that bears fruit, He prunes it so that it may bear more fruit.\" What God's pruning actually looks like in the middle of trial, disappointment, and loss — and why it's love, not punishment.",
+    blocks: [
+      p('"Every branch that bears fruit, He prunes it so that it may bear more fruit." Want to know God\'s will for your life? More fruit. How does He do that? Well, let\'s not be creative. Let\'s just read.'),
+      { type: "quote", text: "God does love you as you are, but He has no intention of leaving you as you are.", attribution: "Jonny Ardavanis" },
+      {
+        type: "scripture",
+        reference: "John 15:2; Hebrews 12:5-7, 11; Psalm 119:71",
+        verses: [
+          "Every branch that bears fruit, He prunes it so that it may bear more fruit.",
+          "For those whom the Lord loves, He disciplines, and He scourges every son whom He receives... All discipline for the moment seems not to be joyful, but sorrowful; yet to those who have been trained by it, it yields the peaceful fruit of righteousness.",
+          "It was good for me that I was afflicted, that I may learn Your statutes.",
+        ],
+      },
+      p("When a farmer tends to his fields, he cleanses the branch of anything that would thwart further growth. He takes the knife to the branch and removes things. The Greek word is kathairo—to clean, to prune. The Father is making us more like Christ."),
+      p("This is why James says to consider it all joy when you encounter trials—because the testing of your faith transforms us. If the vinedresser loves his vineyard, he doesn't just let it be. He scrutinizes, examines, and removes anything toxic."),
+      p("How does God prune us? Through difficulty. Through disappointment. Through failure. Through loss. Through pain. Through unmet expectations and unrealized hopes."),
+      p('David says in Psalm 119:71, "It was good for me that I was afflicted, that I may learn Your statutes." This is God\'s love gift to His own. Pruning.'),
+      p('Hebrews 12:5-7 says: "My son, do not regard lightly the discipline of the Lord, nor faint when you are reproved by Him. For those whom the Lord loves, He disciplines, and He scourges every son whom He receives." And then verse 8—and this is sobering: "If you are without discipline of which all have become partakers, then you are illegitimate children and not sons."'),
+      p("If you've never felt the pruning work of God, you're not a legitimate child. That's just what it says."),
+      p("I would be concerned for the soul of someone who has never been in a trial."),
+      p('John Newton wrote: "I asked the Lord that I might grow in faith and love and every grace. Instead, He made me feel the hidden evils of my heart and let the angry powers of hell assault my soul. The Lord replied: I answered prayer for grace and faith. These inward trials I employ from self and pride to set thee free—that thou might seek thine all in Me."'),
+      p("Newton asked to become like Christ. And God sent him trials to wean him from the world and from dependence on his own strength."),
+      p("God does love you as you are. But He has no intention of leaving you as you are."),
+      p('CS Lewis pictures this in Eustace, the boy turned dragon in The Voyage of the Dawn Treader. He frantically scratches at his own scales—but no matter how deep he picks, there is only more dragon underneath. Then Aslan, the Christ figure, says: "You will have to let me undress you." And the very first tear Aslan makes goes so deep that Eustace thinks it has gone to his heart. But then the skin peels off.'),
+      p("You cannot prune yourself. God must do it."),
+      p("And Spurgeon said it well: affliction is the handle, but the Word of God is the knife."),
+      {
+        type: "reflection",
+        items: [
+          "Are you currently in a trial? Have you considered that the vinedresser may be pruning you—not punishing you?",
+          "If you've never experienced the discipline of God, does that concern you?",
+          "What would it look like to have joy in your current trial because you know God is producing more fruit?",
+        ],
+      },
+      { type: "heart", text: "The Father prunes every branch that bears fruit. He is not against me in my trial. He is for me—removing what prevents more fruit. This is His love." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1467,7 +1512,7 @@ const POST_TAGS = {
   "Prayer": [2, 18],
   "Worship": [4, 38],
   "Friendship": [20],
-  "Discipline & Growth": [10, 11, 24, 25],
+  "Discipline & Growth": [10, 11, 24, 25, 39],
   "Identity in Christ": [16],
 };
 
