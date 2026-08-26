@@ -11,6 +11,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import path from "node:path";
+import { buildAllShareCards } from "./build-share-cards.js";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const SITE_URL = "https://the-gospel-lens.vercel.app";
@@ -54,12 +55,13 @@ function loadPosts(src) {
     const title = extractField("title", chunk);
     const excerpt = extractField("excerpt", chunk);
     const date = extractField("date", chunk);
+    const category = extractField("category", chunk);
     const authorMatch = chunk.match(/author:\s*"((?:[^"\\]|\\.)*)"/);
     const author = authorMatch ? authorMatch[1].replace(/\\(.)/g, "$1") : null;
-    if (!idMatch || !title || !excerpt || !date) {
+    if (!idMatch || !title || !excerpt || !date || !category) {
       throw new Error(`Failed to extract post fields near: ${chunk.slice(0, 60)}...`);
     }
-    return { id: Number(idMatch[1]), title, excerpt, date, author, slug: slugify(title) };
+    return { id: Number(idMatch[1]), title, excerpt, date, category, author, slug: slugify(title) };
   });
 }
 
@@ -91,7 +93,7 @@ function truncateAtWord(str, max) {
   return `${cut.slice(0, lastSpace > 0 ? lastSpace : max)}…`;
 }
 
-function withMeta(template, { title, description, url, ogType = "website", jsonLd = null }) {
+function withMeta(template, { title, description, url, ogType = "website", jsonLd = null, imageUrl = null }) {
   const fullTitle = `${title} — The Gospel Lens`;
   const safeTitle = escapeHtml(fullTitle);
   const safeDescription = escapeHtml(description);
@@ -114,6 +116,15 @@ function withMeta(template, { title, description, url, ogType = "website", jsonL
       `<meta name="twitter:description" content="${safeDescription}" />`
     );
 
+  // Only posts get their own generated card (see build-share-cards.js);
+  // home/blog/about/collection keep the generic image already baked into
+  // the template untouched.
+  if (imageUrl) {
+    html = html
+      .replace(/<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${imageUrl}" />`)
+      .replace(/<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${imageUrl}" />`);
+  }
+
   if (jsonLd) {
     html = html.replace("</head>", `  <script type="application/ld+json">${jsonLd}</script>\n  </head>`);
   }
@@ -127,21 +138,24 @@ function withMeta(template, { title, description, url, ogType = "website", jsonL
 // headline). JSON.stringify handles quote-escaping; the "</" replace is a
 // standard defensive measure so a title/excerpt containing that sequence
 // can't accidentally close the <script> tag early.
-function buildArticleJsonLd(post, ogImageUrl) {
+function buildArticleJsonLd(post, articleImageUrl, publisherLogoUrl) {
   const isoDate = new Date(post.date).toISOString();
   const data = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
     description: post.excerpt,
-    image: [ogImageUrl],
+    image: [articleImageUrl],
     datePublished: isoDate,
     dateModified: isoDate,
     author: post.author ? { "@type": "Person", name: post.author } : { "@type": "Organization", name: "The Gospel Lens" },
     publisher: {
       "@type": "Organization",
       name: "The Gospel Lens",
-      logo: { "@type": "ImageObject", url: ogImageUrl },
+      // Deliberately always the site's one consistent logo mark, not the
+      // per-post share card above -- a publisher's logo is meant to be
+      // stable across every article, unlike the article's own image.
+      logo: { "@type": "ImageObject", url: publisherLogoUrl },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/${post.slug}` },
   };
@@ -304,7 +318,7 @@ function build404Page() {
 `;
 }
 
-function main() {
+async function main() {
   const distDir = path.join(ROOT, "dist");
   if (!existsSync(distDir)) throw new Error("dist/ not found — run `vite build` before this script.");
 
@@ -323,13 +337,21 @@ function main() {
   }
 
   const ogImageUrl = `${SITE_URL}/og-image.png`;
+
+  // One branded PNG per post (category + title, see build-share-cards.js),
+  // so a shared link shows something specific to that post instead of the
+  // one generic image every other page still uses.
+  await buildAllShareCards(posts, path.join(distDir, "og"));
+
   for (const post of posts) {
+    const shareImageUrl = `${SITE_URL}/og/${post.slug}.png`;
     const html = withMeta(template, {
       title: post.title,
       description: post.excerpt,
       url: `${SITE_URL}/${post.slug}`,
       ogType: "article",
-      jsonLd: buildArticleJsonLd(post, ogImageUrl),
+      imageUrl: shareImageUrl,
+      jsonLd: buildArticleJsonLd(post, shareImageUrl, ogImageUrl),
     });
     writeHtml(post.slug, html);
   }
@@ -355,7 +377,10 @@ function main() {
   writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors));
   writeFileSync(path.join(distDir, "rss.xml"), buildRss(posts));
 
-  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), blog/about, and 404. Sitemap and RSS feed regenerated.`);
+  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), blog/about, and 404. Sitemap, RSS feed, and per-post share cards regenerated.`);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
