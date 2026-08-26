@@ -27,6 +27,8 @@ src/
   index.css     — Tailwind base + global styles
 scripts/
   prerender.js          — runs after `vite build`, see "Routing & per-post URLs" below
+  build-share-cards.js  — generates per-post share images, see "Share-link preview image" below
+  fonts/                — real Playfair Display/Inter font files, used by build-share-cards.js
   notify-buttondown.js  — runs in CI, see "Newsletter auto-draft" below
 .github/workflows/
   newsletter-draft.yml  — runs notify-buttondown.js on every push to main
@@ -174,9 +176,11 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 
 ## Share-link preview image (og:image)
 
-`public/og-image.png` (630×630, transparent PNG) is wired in via `og:image`/`twitter:image` in `index.html`'s `<head>` — added 2026-08-12. This is the image link-preview bots (WhatsApp, iMessage, X, etc.) show in the small thumbnail when a link is shared; `prerender.js` doesn't touch these tags, so it carries through unchanged onto every prerendered post page too, giving every share the same image.
+`public/og-image.png` (630×630, transparent PNG) is wired into `index.html`'s `<head>` as the site-wide default — added 2026-08-12. Home, Blogs, About, and every author collection page still use this exact image unchanged.
 
-**This is deliberately the *only* place this artwork is used.** Brian was explicit, more than once, that the site's actual header logo and favicon/app icons must NOT change — only the shared-link thumbnail. Don't reuse `og-image.png` for the header, `favicon.svg`, `apple-touch-icon.png`, or the PWA manifest icons without a separate, explicit request to change those specifically.
+**Every individual post now gets its own distinct, generated share image instead (added 2026-08-26).** `scripts/build-share-cards.js` renders a branded 630×630 PNG per post — category, the post's actual title, the same brand mark as the generic image, and a domain footer — to `dist/og/<slug>.png`, and `scripts/prerender.js` points that post's `og:image`/`twitter:image`/JSON-LD `image` at it specifically (JSON-LD's `publisher.logo` stays on the generic `og-image.png`, since a publisher logo is supposed to be stable across every article, unlike the article's own image). Uses `@napi-rs/canvas` (prebuilt native binaries — installs cleanly on Vercel's Linux build servers, no compile step) with the real Playfair Display/Inter font files bundled in `scripts/fonts/`, so the rendered text matches the site's actual typography rather than a fallback font. Title text auto-wraps and shrinks to fit up to 4 lines — tested against the longest real title on the site (49 characters, colon and apostrophe included) down to short 3-word titles. **Approved via a mocked-up HTML preview first** (three real post titles at real size, plus a simulated iMessage bubble) before any of this was built, per Brian's ask to see anything visual/brand-related before it ships. Verified live: fetched a real generated card straight off production and confirmed it renders pixel-identical to the local build, including both fonts rendering correctly (not a fallback) — confirms the native canvas library actually works on Vercel's infrastructure, not just locally.
+
+**The header logo, favicon, and PWA/app icons are untouched by any of this** — Brian was explicit, more than once, that those must never change; only what a shared *link's* preview image shows. Don't reuse `og-image.png` (or the new per-post cards) for the header, `favicon.svg`, `apple-touch-icon.png`, or the PWA manifest icons without a separate, explicit request to change those specifically.
 
 The image itself: Brian designed it in Canva (a gold ring, a solid cross, an open book) and pasted the raw JPEG export into this repo's root as `logo from canva.jpeg` (untracked — never committed, it's a working reference file, safe to ignore or delete). His Canva account is free-tier, so the "transparent background" export was paywalled; `og-image.png` was produced by processing that JPEG programmatically — scoring each pixel's "whiteness" (the gold linework has a much lower blue channel than the white background, so this cleanly separates logo from background even with JPEG compression noise at the edges), converting background pixels to alpha 0, then cropping to content and padding to a perfect square before the final resize. If this ever needs regenerating (e.g. Brian tweaks the Canva design again), the same technique applies — don't ask him to find a Pro plan for the transparent export.
 
