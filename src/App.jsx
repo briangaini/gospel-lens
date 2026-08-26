@@ -1489,6 +1489,127 @@ const POSTS = [
       { type: "heart", text: "The Father prunes every branch that bears fruit. He is not against me in my trial. He is for me—removing what prevents more fruit. This is His love." },
     ],
   },
+  {
+    id: 40,
+    title: "Apart From Me You Can Do Nothing",
+    author: "Jonny Ardavanis",
+    date: "August 24, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "\"Apart from Me you can do nothing.\" Not a little — nothing. What it actually means to abide in the vine, and why so little spiritual growth might trace back to thinking you're the vine instead of the branch.",
+    blocks: [
+      p('"I am the vine, you are the branches; he who abides in Me and I in him, he bears much fruit, for apart from Me you can do nothing."'),
+      p("Nothing. Not a little. Nothing."),
+      { type: "quote", text: "Could it be that part of the reason you see such little growth in your life is because you think you're a vine and not a bruised branch?", attribution: "Jonny Ardavanis" },
+      {
+        type: "scripture",
+        reference: "John 15:4-5; Philippians 2:12-13; Galatians 5:22-23",
+        verses: [
+          "Abide in Me, and I in you. As the branch cannot bear fruit of itself unless it abides in the vine, so neither can you unless you abide in Me.",
+          "Work out your salvation with fear and trembling; for it is God who is at work in you, both to will and to work for His good pleasure.",
+          "The fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control.",
+        ],
+      },
+      p("Eleven times in eleven verses in John 15, Jesus uses the word remain. Abide. Stay with Me. That is not an accident."),
+      p("The believer's responsibility is to abide. What does that mean? It means we remain close to Jesus. It means we live in constant dependence on Him. All Christian growth is organic growth—something God brings about as we live near to Him."),
+      p('Jesus says, "You are the branches." By the way—you\'re not a trunk. You\'re not an oak tree. Jesus says we are smoldering wicks, bruised reeds (Matthew 12:20). And unless we are connected to the vine, He says, "Apart from Me you can do nothing."'),
+      p("What does that mean? It doesn't mean you can't play Christian. A lot of people have done that. A lot of people have written Christian books, preached sermons, lived the Christian life thinking they could do it on their own."),
+      p('When He says, "Apart from Me you can do nothing"—He means you can bear no actual fruit. You can play the game. But you cannot bear fruit unless you\'re abiding in the vine.'),
+      p('Philippians 2:12-13 says, "Work out your salvation with fear and trembling. For it is God who works in and through you to will and to work for His good pleasure." We work—but it is God working in and through us.'),
+      p("Can I just ask you a question? Could it be that part of the reason you see such little growth in your life is because you think you're a vine and not a bruised branch?"),
+      p('You think the power is in you. You think the life comes from you. And Jesus says, "No—apart from Me, you can do nothing." The branch does not generate life. It receives it from the vine. The only job of the branch is to stay connected.'),
+      p("Stay close. Abide. Remain. And the fruit will come—because fruit is what happens when a branch stays in the vine."),
+      {
+        type: "reflection",
+        items: [
+          "Are you trying to bear fruit through your own effort and discipline, or through dependence on Christ?",
+          "What does it look like practically for you to abide in Christ this week—in your prayer life, your time in the Word, your fellowship with His people?",
+          "Where in your life are you acting like the vine instead of the branch—relying on your own strength rather than His?",
+        ],
+      },
+      { type: "heart", text: "I am a branch, not a vine. My job is not to generate life. My job is to stay connected. Apart from Him, nothing. In Him, much fruit." },
+    ],
+  },
+  {
+    id: 41,
+    title: "Peace I Leave With You",
+    author: "Jonny Ardavanis",
+    date: "August 12, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Over a billion people live with a mental health disorder, and people pay $1,600 for a moment of quiet. Into all of that, Jesus offers something no retreat can — because He doesn't just give peace. He is peace.",
+    blocks: [
+      p("Over a billion people worldwide are living with a mental health disorder. 32% of US adults report anxiety or depression. Anti-depressants among 12 to 24 year olds are up 66% since 2016. People are paying $1,600 to go to digital detox camps just to get a moment's quiet."),
+      p("And into all of that, Jesus says something staggering."),
+      { type: "quote", text: "The world promises you peace and gives you sand. God promises peace and gives you a double-walled castle.", attribution: "Jonny Ardavanis" },
+      {
+        type: "scripture",
+        reference: "John 14:27; Judges 6:24; Ephesians 2:14",
+        verses: [
+          "Peace I leave with you; My peace I give to you; not as the world gives do I give to you. Do not let your heart be troubled, nor let it be fearful.",
+          "The LORD is peace.",
+          "For He Himself is our peace.",
+        ],
+      },
+      p("It's Thursday night of Passion Week. Jesus is hours from His arrest, trial, beating, and crucifixion. The disciple's hopes are scraping the ground. They're despairing. They're afraid. And in the middle of His own great trouble and turmoil, Jesus begins to lob their way precious promises—promises intended to lift up their countenance and give them not just comfort but courage as well."),
+      p("And He saves one final gift for last."),
+      p('"Peace I leave with you. My peace I give to you."'),
+      p('Circle that word: My. This is not the world\'s peace. He says so Himself. "Not as the world gives do I give to you." The world\'s peace is empty, hollow, fleeting, fickle, fading. It\'s transient. It\'s not real.'),
+      p("But Jesus doesn't just provide peace. He doesn't just distribute peace like a vending machine. Look at Judges 6:24—God's name there is Yahweh Shalom. The Lord is peace. God's names are not arbitrary labels. They are representative of His nature, His identity. And God wants you to know something about Himself. He reveals His name as Yahweh Shalom. He is peace. He can give it because He is it."),
+      p('And Ephesians 2:14 says of Jesus, "For He Himself is our peace."'),
+      p('After the resurrection, Jesus appears to His disciples twice and says the same thing both times: "Peace be with you." Then He appears to Thomas and says it again. This is why Paul refers to God as the God of peace. Twelve out of thirteen letters Paul writes, he says, "Peace be with you." This isn\'t a pleasantry. It\'s a profound theological reality.'),
+      p("This peace is free to you. But listen—it was very costly to Jesus."),
+      p('You will never have subjective peace until you are at objective peace with God. People are spending thousands on calm retreats, looking for a moment\'s serenity. And God says, "You need peace with God." Because by nature we are enemies of God. Romans 3 says there is none righteous, not even one. Ephesians 2 says we were by nature children of wrath. The terminus of sin is eternal punishment.'),
+      p('But Romans 5:1 says, "Therefore, having been justified by faith, we have peace with God through our Lord Jesus Christ."'),
+      p("He is our peace. He secured it. He gives it. He is it."),
+      {
+        type: "reflection",
+        items: [
+          "Have you been looking for peace in retreats, routines, or relationships that can never truly provide it?",
+          "Do you understand that subjective peace—the kind you feel—is only available when you are at objective peace with God through Christ?",
+          "When you are anxious or fearful, are you turning to the God who is peace—or to the world's counterfeit?",
+        ],
+      },
+      { type: "heart", text: "The world promises peace and gives me sand. Jesus is Yahweh Shalom—the Lord is peace. He doesn't just give it. He is it." },
+    ],
+  },
+  {
+    id: 42,
+    title: "Creating a Heart of Gratitude",
+    author: null,
+    date: "August 25, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Scripture doesn't just teach us how to lament — it teaches us how to give thanks in every season. Three simple starting points for building a genuine habit of gratitude toward God.",
+    blocks: [
+      p("One of the most powerful emotions is gratitude. If we can find ways to be thankful and grateful throughout our life, we will find the power and emotional strength to walk through some of life's hardest seasons."),
+      p("It's not always easy to find ways to be thankful and grateful. But, one of the things Scripture teaches us throughout the Psalms is that there is always something to be grateful for."),
+      p("The Psalms teach us various songs and poems for every season of our life. But more than that, they also teach us how to cultivate a heart of gratitude and worship towards God."),
+      p("We belong to a God who loves us and cares deeply for us. God's love and goodness will never end. Psalm 100:5 praises God for these things:"),
+      {
+        type: "scripture",
+        reference: "Psalm 100:5",
+        verses: [
+          "For the Lord is good and his love endures forever; his faithfulness continues through all generations.",
+        ],
+      },
+      p("Through Psalms like this, we can begin to build a habit of gratitude towards God and all that He has done. We can thank God for what He has done in our lives, what He is currently doing, and what He will do in the future as we follow after Him."),
+      p("Because God is always good, loving, and faithful, there is always something we can be grateful for—even in the midst of difficult seasons of life."),
+      p("Take a few moments today to strengthen the habit of gratitude in your life."),
+      {
+        type: "list",
+        items: [
+          "First, begin by thanking God for who He is: that He is good, faithful, and loving towards you.",
+          "Next, thank God for all that He has done. Thank Him for the good things in your life, and that He has walked with you through the hard times.",
+          "Lastly, thank God for all He will continue to do in the days and years to come. He is trustworthy!",
+        ],
+      },
+      { type: "prayer", text: "God, nothing is impossible for You. You love me even when I'm unloveable. You are good to me even when I don't deserve it. You are kind and compassionate toward me even when I mess up. You show me what faithful love looks like. Thank You for never leaving or forsaking me! Today, remind me of all the ways You have shown up in my life. You are worthy of my worship. In Jesus' name, Amen!" },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1514,6 +1635,7 @@ const POST_TAGS = {
   "Friendship": [20],
   "Discipline & Growth": [10, 11, 24, 25, 39],
   "Identity in Christ": [16],
+  "Peace": [36, 41],
 };
 
 // ---------------------------------------------------------------------------
