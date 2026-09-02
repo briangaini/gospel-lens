@@ -53,13 +53,22 @@ function registerFonts() {
 // wider than maxWidth on its own is left to overflow slightly rather than
 // shrinking indefinitely -- doesn't happen with any real post title here,
 // but this keeps it from ever infinite-looping on unexpected input.
-function fitTitle(ctx, text, { maxWidth, maxLines, maxFontSize, minFontSize, weight = "700" }) {
+//
+// maxHeight matters as much as maxLines: a title that wraps to exactly
+// maxLines at a given font size can still be tall enough to run into
+// whatever's drawn below it (the divider/domain footer here) once line
+// height is factored in -- caught for real on "From Worry to Worship:
+// Seeing Your Anxiety Through God's Eyes" (60 characters, the longest
+// title on the site as of when this was written), which hit 4 lines at
+// the previous minimum font size and visibly overlapped the footer.
+function fitTitle(ctx, text, { maxWidth, maxHeight, maxLines, maxFontSize, minFontSize, lineHeightRatio, weight = "700" }) {
   let fontSize = maxFontSize;
   let lines = [];
   while (fontSize >= minFontSize) {
     ctx.font = `${weight} ${fontSize}px "${FONT.playfair}"`;
     lines = wrapLines(ctx, text, maxWidth);
-    if (lines.length <= maxLines) break;
+    const blockHeight = lines.length * fontSize * lineHeightRatio;
+    if (lines.length <= maxLines && blockHeight <= maxHeight) break;
     fontSize -= 2;
   }
   return { lines, fontSize };
@@ -156,20 +165,26 @@ export async function buildShareCard(post) {
   });
   cursorY += pillHeight + SIZE * 0.06;
 
-  // Title -- fit within a comfortable width, up to 4 lines, shrinking from
-  // a large display size down to a still-readable minimum if needed.
+  // Title -- fit within a comfortable width AND the vertical space actually
+  // left before the footer (see fitTitle's comment), shrinking from a
+  // large display size down to a still-readable minimum if needed.
+  const LINE_HEIGHT_RATIO = 1.22;
+  const domainY = SIZE * 0.895;
+  const titleBottomLimit = domainY - SIZE * 0.045 - SIZE * 0.02; // stop short of the divider, with a margin
   const maxTitleWidth = SIZE * 0.8;
   const { lines, fontSize: titleFontSize } = fitTitle(ctx, post.title, {
     maxWidth: maxTitleWidth,
+    maxHeight: titleBottomLimit - cursorY,
+    lineHeightRatio: LINE_HEIGHT_RATIO,
     maxLines: 4,
     maxFontSize: SIZE * 0.073,
-    minFontSize: SIZE * 0.04,
+    minFontSize: SIZE * 0.032,
   });
   ctx.font = `700 ${titleFontSize}px "${FONT.playfair}"`;
   ctx.fillStyle = COLOR.cream;
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  const lineHeight = titleFontSize * 1.22;
+  const lineHeight = titleFontSize * LINE_HEIGHT_RATIO;
   for (const line of lines) {
     cursorY += lineHeight;
     ctx.fillText(line, centerX, cursorY);
@@ -178,7 +193,6 @@ export async function buildShareCard(post) {
   // Divider + domain footer, pinned near the bottom rather than following
   // the title block, so short and long titles both end up looking
   // deliberately composed instead of the footer drifting around.
-  const domainY = SIZE * 0.895;
   ctx.strokeStyle = COLOR.rule;
   ctx.lineWidth = 1;
   ctx.beginPath();

@@ -1610,6 +1610,67 @@ const POSTS = [
       { type: "prayer", text: "God, nothing is impossible for You. You love me even when I'm unloveable. You are good to me even when I don't deserve it. You are kind and compassionate toward me even when I mess up. You show me what faithful love looks like. Thank You for never leaving or forsaking me! Today, remind me of all the ways You have shown up in my life. You are worthy of my worship. In Jesus' name, Amen!" },
     ],
   },
+  {
+    id: 43,
+    title: "From Worry to Worship: Seeing Your Anxiety Through God's Eyes",
+    author: null,
+    date: "August 26, 2026",
+    category: "Teaching",
+    readTime: "5 min read",
+    excerpt:
+      "God doesn't want you living in constant dread — and yet some days, you still do. What Scripture actually says about anxiety, and why the way through worry isn't fighting it harder, but turning it into worship.",
+    blocks: [
+      p("Two things can be true at the same time: God doesn't want you living in constant dread. And yet, some days, you still do."),
+      p("Maybe you love Him with your whole heart, read your Bible, pray daily—and you still find yourself lying awake replaying worst-case scenarios. Maybe you want to be free of anxious thoughts, but you've learned the hard way that you can't just will them away. If that's you, take a breath. You're not failing at faith. You're human, living in a world that gives your nervous system plenty to respond to."),
+      p("So often, anxiety gets talked about as something shameful—a spiritual failure, a lack of trust, a problem to eliminate as fast as possible. But what if the response God's after isn't stricter self-control, but a redirected gaze? What if the way through worry isn't to fight it harder, but to turn it into worship?"),
+      { type: "heading", text: "What Scripture Actually Says" },
+      p("Jesus addressed anxious hearts directly:"),
+      {
+        type: "scripture",
+        reference: "Matthew 6:34",
+        verses: ["Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own."],
+      },
+      p("Notice what He's not saying. He's not saying anxiety makes you a lesser Christian, or that feeling it means you don't trust Him enough. He's speaking gently into something He understands intimately—the human tendency to carry tomorrow's weight today. And just a few verses earlier in that same passage, He points His listeners toward the birds of the air and the flowers of the field—creatures that don't strive or store up, yet are fully cared for by the Father (Matthew 6:26–29). It's not a scolding. It's an invitation to lift our eyes off the worry long enough to notice who's actually holding it all together."),
+      p("That shift—from staring at the problem to gazing at the Provider—is where worship begins."),
+      { type: "heading", text: "Hagar in the Wilderness" },
+      p("If anyone in Scripture understood overwhelming fear, it was Hagar. She was pregnant, alone, and fleeing mistreatment—running with nowhere to go and no one to turn to (Genesis 16). Whatever she was feeling in that wilderness, it's hard to imagine it wasn't some form of anxiety: the racing thoughts, the uncertainty, the sense that everything was unraveling and she had no control over any of it."),
+      p("And that is exactly where God found her."),
+      p("Not with a rebuke. Not with a command to calm down and trust harder. He came with presence. He asked about her situation—not because He didn't know, but because He wanted her to be heard. He spoke a blessing over her future. And what's remarkable is how Hagar responds to that encounter. She doesn't simply calm down and move on. She worships. She gives God a name, right there in the wilderness, in the middle of her fear:"),
+      {
+        type: "scripture",
+        reference: "Genesis 16:13",
+        verses: ["You are the God who sees me."],
+      },
+      p("That's worship born out of anxiety, not after it was resolved. Hagar's circumstances hadn't changed yet—she was still in the wilderness, still uncertain about what came next. But something in her had shifted from fixating on her fear to fixing her eyes on the God who saw her in it. That's the movement worship makes possible: not the absence of worry, but the presence of Someone bigger than it."),
+      { type: "heading", text: "Letting Worship Interrupt the Worry" },
+      p("Worship doesn't mean pretending anxiety isn't real, or singing a song until the feeling magically disappears. It means intentionally redirecting your attention—even mid-anxious-thought—toward who God is and what He's already done. Paul described something similar when he wrote:"),
+      {
+        type: "scripture",
+        reference: "Philippians 4:6",
+        verses: ["Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God."],
+      },
+      p('Prayer with thanksgiving. Not thanksgiving because everything is fine, but thanksgiving as an act of trust—naming what\'s true about God even while the anxious feeling is still present. That could look like speaking His character out loud when your mind is racing. It could look like a worship song playing while you fold laundry with a knotted stomach. It could look like simply whispering, "You are the God who sees me," the way Hagar did, before anything about your circumstances has actually changed.'),
+      {
+        type: "scripture",
+        reference: "Philippians 4:7",
+        verses: ["And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus."],
+      },
+      p("Yes! The Peace of God! God's peace doesn't always make sense to the world, but it guards our hearts when we need it the most."),
+      p("This isn't a formula that erases anxiety instantly. But it does something important: it keeps you from facing your fear alone, and it re-centers your heart on the God who's holding what you can't."),
+      { type: "heading", text: "Bringing It to Him" },
+      p("Anxiety may not disappear the moment we turn it into worship—but we're never asked to manage it alone. The Holy Spirit doesn't just visit us in our composed, put-together moments. He lives in the anxious ones too. You are not too much for Him. You are not disqualified because you're struggling. You are seen—the same way Hagar was seen, in the middle of the wilderness, before anything had changed yet."),
+      p("So today, when the worry rises, try letting it become an invitation to worship instead—a reminder to lift your eyes toward the One who already sees you and already holds what's ahead."),
+      {
+        type: "reflection",
+        items: [
+          "What would it look like to let a moment of anxiety become a moment of worship this week, rather than waiting for the worry to pass first?",
+          "Like Hagar, is there a fear you've been carrying alone that you could bring honestly to God today?",
+        ],
+      },
+      { type: "prayer", text: "God, I don't want to carry tomorrow's worries today, but sometimes it feels unavoidable. Help me turn my anxious thoughts into worship instead of letting them consume me. Remind me that You made me, and You see me, right where I am. Meet me in this moment the way You met Hagar—not with criticism, but with presence. I trust You with what I can't control. In Jesus' name, Amen." },
+      { type: "closing", text: "If anxiety feels overwhelming or constant, please don't walk through it alone — consider talking with a Christian counselor or licensed therapist who understands Scripture and can walk alongside your faith as you find healing." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
