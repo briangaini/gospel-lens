@@ -1671,6 +1671,39 @@ const POSTS = [
       { type: "closing", text: "If anxiety feels overwhelming or constant, please don't walk through it alone — consider talking with a Christian counselor or licensed therapist who understands Scripture and can walk alongside your faith as you find healing." },
     ],
   },
+  {
+    id: 44,
+    title: "Look Up",
+    author: null,
+    date: "August 27, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "It's easy to fixate on the here and now — but Paul tells the Colossians to set their sights on heaven instead. Four things to remember about the reality that's still ahead.",
+    blocks: [
+      p("It's normal, as well as understandable, to spend our time, energy, and attention focusing on the here and now. We're busy, after all. Sometimes we're preoccupied. And when we stop to really think about it, it's difficult to perceive something beyond our five senses."),
+      p("But in his letter to the Colossians, Paul encourages his fellow believers to look up:"),
+      {
+        type: "scripture",
+        reference: "Colossians 3:1, NLT",
+        verses: [
+          "Since you have been raised to new life with Christ, set your sights on the realities of heaven, where Christ sits in the place of honor at God's right hand.",
+        ],
+      },
+      p("As you think about Paul's words and the realities of heaven, here are four things to consider:"),
+      {
+        type: "list",
+        items: [
+          "First, heaven isn't some vague, dream-like state. It's a real place, with real people, where God is the true King.",
+          "Second, there will come a day when we will all meet God face to face. We will no longer need faith or hope, because that which we've hoped for will finally be revealed.",
+          "Third, our troubles and our heartbreaks (and even death itself) are temporary! Scripture tells us that, eventually, God will do away with pain and death and sickness and suffering—forever.",
+          "Lastly (and most importantly), God is still on His throne, with Jesus beside Him in the place of honor. No matter how crazy, senseless, or heartbreaking the world can seem, we can have confidence knowing that nothing is outside of God's sovereign plan.",
+        ],
+      },
+      p("So when you're tempted to look around at others or look inward at yourself, look up instead. Heaven is wherever God is, and that's the truest reality of all."),
+      { type: "prayer", text: "God, I now realize that eternal life began the moment I accepted your free gifts of grace and salvation. As I follow You, please help me to remember to look up to have an eternal mindset. Give me the wisdom to be mindful of heaven as I'm living here on earth. In Jesus' name, Amen." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
