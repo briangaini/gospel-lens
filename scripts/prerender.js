@@ -149,7 +149,12 @@ function withMeta(template, { title, description, url, ogType = "website", jsonL
   }
 
   if (jsonLd) {
-    html = html.replace("</head>", `  <script type="application/ld+json">${jsonLd}</script>\n  </head>`);
+    // Accept either one JSON-LD string or an array of them (e.g. Article +
+    // BreadcrumbList together) -- Google supports multiple <script> blocks
+    // per page, one graph each, rather than requiring them merged into one.
+    const blocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+    const scripts = blocks.map((block) => `  <script type="application/ld+json">${block}</script>`).join("\n");
+    html = html.replace("</head>", `${scripts}\n  </head>`);
   }
 
   return html;
@@ -181,6 +186,26 @@ function buildArticleJsonLd(post, articleImageUrl, publisherLogoUrl) {
       logo: { "@type": "ImageObject", url: publisherLogoUrl },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/${post.slug}` },
+  };
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+// Breadcrumb structured data (Home → Blogs → Post Title) -- a second,
+// separate JSON-LD block alongside the Article schema above. Purely
+// invisible/no UI change; it just gives Google the option to show a
+// breadcrumb trail in the search result instead of a raw URL. Genuinely
+// matches the site's real navigation path to every post (Home -> Blogs ->
+// the post itself), so this isn't a fabricated hierarchy.
+function buildBreadcrumbJsonLd(items) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
   };
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
@@ -375,13 +400,18 @@ async function main() {
 
   for (const post of posts) {
     const shareImageUrl = `${SITE_URL}/og/${post.slug}.png`;
+    const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+      { name: "Home", url: `${SITE_URL}/` },
+      { name: "Blogs", url: `${SITE_URL}/blog` },
+      { name: post.title, url: `${SITE_URL}/${post.slug}` },
+    ]);
     const html = withMeta(template, {
       title: post.title,
       description: post.excerpt,
       url: `${SITE_URL}/${post.slug}`,
       ogType: "article",
       imageUrl: shareImageUrl,
-      jsonLd: buildArticleJsonLd(post, shareImageUrl, ogImageUrl),
+      jsonLd: [buildArticleJsonLd(post, shareImageUrl, ogImageUrl), breadcrumbJsonLd],
     });
     writeHtml(post.slug, html);
   }

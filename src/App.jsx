@@ -1971,6 +1971,47 @@ function toggleSavedPost(postId) {
 }
 
 // ---------------------------------------------------------------------------
+// LIKED POSTS — deliberately a separate list from Saved, per Brian's
+// explicit choice: "Saved" is "I want to come back and finish/read this,"
+// "Liked" is a lighter reaction, "this one meant something to me," without
+// necessarily intending to revisit it. Same fully-local approach, own
+// localStorage key, own icon (Heart), own page. Mirrors the Saved Posts
+// helpers exactly on purpose, for the same reason and the same tradeoffs.
+// ---------------------------------------------------------------------------
+
+const LIKED_POSTS_KEY = "gospel-lens-liked-posts";
+
+function getLikedPostIds() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(LIKED_POSTS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function isPostLiked(postId) {
+  return getLikedPostIds().includes(postId);
+}
+
+function toggleLikedPost(postId) {
+  if (typeof window === "undefined") return false;
+  try {
+    const ids = getLikedPostIds();
+    const idx = ids.indexOf(postId);
+    const nowLiked = idx === -1;
+    if (nowLiked) ids.push(postId);
+    else ids.splice(idx, 1);
+    window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(ids));
+    return nowLiked;
+  } catch {
+    return isPostLiked(postId);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // READING TIME — calculated from actual word count (~200 wpm) instead of
 // a hand-typed estimate, so it stays accurate as posts get edited.
 // ---------------------------------------------------------------------------
@@ -2342,6 +2383,18 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
                 <Bookmark size={18} strokeWidth={2} fill={view === "saved" ? "currentColor" : "none"} />
               </button>
               <button
+                onClick={() => setView("liked")}
+                aria-label="Liked Posts"
+                title="Liked Posts"
+                className={`transition-colors duration-200 ${
+                  view === "liked"
+                    ? "text-[#C1584A]"
+                    : "text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+                }`}
+              >
+                <Heart size={18} strokeWidth={2} fill={view === "liked" ? "currentColor" : "none"} />
+              </button>
+              <button
                 onClick={toggleDark}
                 aria-label="Toggle dark mode"
                 className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
@@ -2366,6 +2419,12 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
           </button>
           <button onClick={() => { setView("blog"); setMenuOpen(false); }} className={`text-left ${linkClass("blog")}`}>
             Blogs
+          </button>
+          <button onClick={() => { setView("saved"); setMenuOpen(false); }} className={`text-left ${linkClass("saved")}`}>
+            Saved Posts
+          </button>
+          <button onClick={() => { setView("liked"); setMenuOpen(false); }} className={`text-left ${linkClass("liked")}`}>
+            Liked Posts
           </button>
         </div>
       )}
@@ -2540,14 +2599,22 @@ function CategoryTag({ category }) {
 // can't legally contain another <button>. The visible content in between
 // is pointer-events-none so clicks pass through to whichever of the two
 // buttons is actually underneath that point.
-function PostCard({ post, onOpen, featured = false, onToggleSave }) {
+function PostCard({ post, onOpen, featured = false, onToggleSave, onToggleLike }) {
   const [saved, setSaved] = useState(() => isPostSaved(post.id));
+  const [liked, setLiked] = useState(() => isPostLiked(post.id));
 
   const handleToggleSave = (e) => {
     e.stopPropagation();
     const nowSaved = toggleSavedPost(post.id);
     setSaved(nowSaved);
     onToggleSave?.(post.id, nowSaved);
+  };
+
+  const handleToggleLike = (e) => {
+    e.stopPropagation();
+    const nowLiked = toggleLikedPost(post.id);
+    setLiked(nowLiked);
+    onToggleLike?.(post.id, nowLiked);
   };
 
   return (
@@ -2557,16 +2624,26 @@ function PostCard({ post, onOpen, featured = false, onToggleSave }) {
       }`}
     >
       <button onClick={() => onOpen(post)} className="absolute inset-0 z-0 text-left" aria-label={`Read ${post.title}`} />
-      <button
-        onClick={handleToggleSave}
-        aria-label={saved ? "Remove from Saved Posts" : "Save for later"}
-        title={saved ? "Remove from Saved Posts" : "Save for later"}
-        className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-[#14161B]/85 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#B08D57] transition-colors duration-200"
-      >
-        <Bookmark size={15} strokeWidth={2} className={saved ? "text-[#B08D57]" : ""} fill={saved ? "currentColor" : "none"} />
-      </button>
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        <button
+          onClick={handleToggleLike}
+          aria-label={liked ? "Remove from Liked Posts" : "Like this post"}
+          title={liked ? "Remove from Liked Posts" : "Like this post"}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-[#14161B]/85 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#C1584A] transition-colors duration-200"
+        >
+          <Heart size={15} strokeWidth={2} className={liked ? "text-[#C1584A]" : ""} fill={liked ? "currentColor" : "none"} />
+        </button>
+        <button
+          onClick={handleToggleSave}
+          aria-label={saved ? "Remove from Saved Posts" : "Save for later"}
+          title={saved ? "Remove from Saved Posts" : "Save for later"}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-[#14161B]/85 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#B08D57] transition-colors duration-200"
+        >
+          <Bookmark size={15} strokeWidth={2} className={saved ? "text-[#B08D57]" : ""} fill={saved ? "currentColor" : "none"} />
+        </button>
+      </div>
       <div className="pointer-events-none flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-4 pr-8">
+        <div className="flex items-center justify-between mb-4 pr-20">
           <CategoryTag category={post.category} />
           <span className="text-[11px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A]">{estimateReadTime(post)}</span>
         </div>
@@ -3176,6 +3253,52 @@ function SavedPostsView({ openPost, setView }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {savedPosts.map((post) => (
             <PostCard key={post.id} post={post} onOpen={openPost} onToggleSave={handleToggleSave} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// A lighter, separate reaction from Saved Posts (Brian's explicit choice —
+// "Saved" is "I want to come back to this," "Liked" is "this one meant
+// something to me," not necessarily meant to be revisited). Mirrors
+// SavedPostsView exactly on purpose.
+function LikedPostsView({ openPost, setView }) {
+  const [likedIds, setLikedIds] = useState(() => [...getLikedPostIds()].reverse());
+
+  const handleToggleLike = (postId, nowLiked) => {
+    if (!nowLiked) setLikedIds((ids) => ids.filter((id) => id !== postId));
+  };
+
+  const likedPosts = likedIds.map((id) => POSTS.find((p) => p.id === id)).filter(Boolean);
+
+  return (
+    <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-24">
+      <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+        Liked Posts
+      </h1>
+      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
+        Posts that meant something to you — stored privately in this browser only, never sent anywhere.
+      </p>
+
+      {likedPosts.length === 0 ? (
+        <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
+          <Heart size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
+          <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-6">
+            Nothing liked yet — tap the heart icon on any post to add it here.
+          </p>
+          <button
+            onClick={() => setView("blog")}
+            className="inline-flex items-center gap-2 border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 text-[#1C1F26] dark:text-[#F2F1EC] px-6 py-2.5 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
+          >
+            Browse the Blogs
+          </button>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {likedPosts.map((post) => (
+            <PostCard key={post.id} post={post} onOpen={openPost} onToggleLike={handleToggleLike} />
           ))}
         </div>
       )}
@@ -3852,6 +3975,7 @@ function ShareBar({ post }) {
 function SinglePostView({ post, setView, openPost, openCollection }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
+  const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
 
   // Quietly note this post as read — see the READ HISTORY section above.
   useEffect(() => {
@@ -3859,15 +3983,19 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
   }, [post?.id]);
 
   // This component doesn't unmount between posts (only `post` changes), so
-  // the bookmark toggle's own local state needs an explicit refresh here
-  // rather than just a useState initializer.
+  // the bookmark/like toggles' own local state needs an explicit refresh
+  // here rather than just a useState initializer.
   useEffect(() => {
-    if (post) setSaved(isPostSaved(post.id));
+    if (post) {
+      setSaved(isPostSaved(post.id));
+      setLiked(isPostLiked(post.id));
+    }
   }, [post?.id]);
 
   if (!post) return null;
 
   const handleToggleSave = () => setSaved(toggleSavedPost(post.id));
+  const handleToggleLike = () => setLiked(toggleLikedPost(post.id));
 
   const related = getRelatedPosts(post, 2);
 
@@ -3918,6 +4046,13 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
           >
             <Bookmark size={14} strokeWidth={2} className={saved ? "text-[#B08D57]" : ""} fill={saved ? "currentColor" : "none"} />
             {saved ? "Saved" : "Save for Later"}
+          </button>
+          <button
+            onClick={handleToggleLike}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#C1584A]/50 hover:text-[#C1584A] transition-colors duration-200"
+          >
+            <Heart size={14} strokeWidth={2} className={liked ? "text-[#C1584A]" : ""} fill={liked ? "currentColor" : "none"} />
+            {liked ? "Liked" : "Like"}
           </button>
         </div>
 
@@ -4247,6 +4382,7 @@ export default function GospelLensApp() {
         {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} />}
         {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} />}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} />}
+        {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} />}
         {view === "readingplan" && <ReadingPlanView openPost={openPost} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
