@@ -1881,6 +1881,16 @@ function getFromArchivePost() {
   return eligible[weekNumber % eligible.length];
 }
 
+// A short guided reading path for first-time visitors, in a specific
+// suggested order. This order is a first-pass guess from the posts'
+// titles/themes, not a close read of the full content -- worth revisiting
+// once it's live. Reuses the existing "The Gospel Explained" POST_TAGS
+// group (4 posts) rather than a separate list, so there's only one place
+// that ever needs updating. Every post here already has its own real,
+// public URL -- nothing about this plan ever makes a post inaccessible;
+// "upcoming" in ReadingPlanView is a progress cue only, never a gate.
+const READING_PLAN_POST_IDS = [1, 9, 12, 19];
+
 // ---------------------------------------------------------------------------
 // READ HISTORY — a light, entirely local memory of which posts a visitor has
 // opened, kept in their own browser's localStorage. Nothing is sent
@@ -3173,6 +3183,78 @@ function SavedPostsView({ openPost, setView }) {
   );
 }
 
+// The 4-day guided path (see READING_PLAN_POST_IDS above). "Upcoming" days
+// are visually distinct from "next" and "done," but every single one is a
+// real, clickable link the whole time -- nothing here is ever actually
+// gated behind finishing an earlier day.
+function ReadingPlanView({ openPost }) {
+  const readIds = new Set(getReadHistory());
+  const planPosts = READING_PLAN_POST_IDS.map((id) => POSTS.find((p) => p.id === id)).filter(Boolean);
+  const readCount = planPosts.filter((p) => readIds.has(p.id)).length;
+  const nextIndex = planPosts.findIndex((p) => !readIds.has(p.id));
+
+  return (
+    <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-24">
+      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Guided Reading Plan</p>
+      <h1
+        className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-4"
+        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+      >
+        4 Days to Understand the Gospel
+      </h1>
+      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
+        A short path through the posts that explain the gospel most clearly, in order. Every post below is a real, open link — read them in any order you like; this is just a suggested path, not a requirement.
+      </p>
+
+      <div className="flex items-center gap-3 mb-8">
+        <span className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6] whitespace-nowrap">
+          {readCount} of {planPosts.length} days complete
+        </span>
+        <div className="flex-1 h-1.5 rounded-full bg-[#1C1F26]/10 dark:bg-[#F2F1EC]/12 overflow-hidden">
+          <div className="h-full bg-[#B08D57] rounded-full transition-[width] duration-300" style={{ width: `${(readCount / planPosts.length) * 100}%` }} />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {planPosts.map((post, i) => {
+          const isDone = readIds.has(post.id);
+          const isNext = i === nextIndex;
+          return (
+            <button
+              key={post.id}
+              onClick={() => openPost(post)}
+              className={`flex items-center gap-4 text-left bg-white dark:bg-[#1E2128] border rounded-sm px-5 py-4 transition-colors duration-200 hover:border-[#4A5D4E]/50 ${
+                isNext ? "border-[#B08D57]" : "border-[#1C1F26]/10 dark:border-[#F2F1EC]/12"
+              }`}
+            >
+              <span
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                  isDone
+                    ? "bg-[#4A5D4E] text-white"
+                    : isNext
+                      ? "bg-[#B08D57]/15 text-[#B08D57] border-2 border-[#B08D57]"
+                      : "bg-[#1C1F26]/8 dark:bg-[#F2F1EC]/10 text-[#8A8D96] dark:text-[#7C808A]"
+                }`}
+              >
+                {isDone ? "✓" : i + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A] font-semibold">
+                  Day {i + 1}
+                  {isNext ? " · Up Next" : ""}
+                </div>
+                <div className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium mt-0.5 truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  {post.title}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // Shown for any path that isn't Home, Blogs, About, a real post, or a real
 // author collection — a typo'd or dead link, rather than silently landing
 // on Home with no explanation. See scripts/prerender.js for the matching
@@ -3386,7 +3468,7 @@ function FromArchiveCard({ openPost }) {
   );
 }
 
-function HomeView({ setView, openPost }) {
+function HomeView({ setView, openPost, openReadingPlan }) {
   return (
     <>
       <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-20 pb-24 text-center">
@@ -3455,6 +3537,13 @@ function HomeView({ setView, openPost }) {
             return post ? <PostCard key={post.id} post={post} onOpen={openPost} featured /> : null;
           })}
         </div>
+        <button
+          onClick={openReadingPlan}
+          className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mt-8 hover:gap-3 transition-all duration-300"
+        >
+          Prefer a guided path? Follow the 4-Day Plan
+          <ArrowRight size={14} strokeWidth={2} />
+        </button>
       </section>
 
       <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
@@ -4100,6 +4189,12 @@ export default function GospelLensApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const openReadingPlan = () => {
+    setView("readingplan");
+    window.history.pushState(null, "", "/start-here");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const changeView = (v) => {
     setView(v);
     setMenuOpen(false);
@@ -4145,13 +4240,14 @@ export default function GospelLensApp() {
       <Nav view={view} setView={changeView} menuOpen={menuOpen} setMenuOpen={setMenuOpen} onSearch={handleNavSearch} dark={dark} toggleDark={toggleDark} />
 
       <main className="flex-1">
-        {view === "home" && <HomeView setView={changeView} openPost={openPost} />}
+        {view === "home" && <HomeView setView={changeView} openPost={openPost} openReadingPlan={openReadingPlan} />}
         {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} openTopic={openTopic} />}
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
         {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} />}
         {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} />}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} />}
+        {view === "readingplan" && <ReadingPlanView openPost={openPost} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
 
