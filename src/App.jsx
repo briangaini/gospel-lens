@@ -2935,26 +2935,27 @@ async function shareVerseCard({ text, attribution, eyebrow, title, url, filename
   const blob = await generateVerseCardBlob({ text, attribution, eyebrow });
   const file = blob ? new File([blob], filename, { type: "image/png" }) : null;
 
-  // Try the native share sheet on ANY device that can share files, not
-  // just phones -- modern desktop Safari/Chrome increasingly support this
-  // too, and it's the only way to hand the picture and the link to
-  // another app as one bundled action instead of a separate copy-paste
-  // for each. Where file-sharing isn't supported but text sharing still
-  // is, still use it rather than dropping straight to a clipboard copy --
-  // the link travels correctly either way.
-  //
-  // IMPORTANT: the separate `url` field is deliberately left OUT when a
-  // file is being shared. Confirmed live on desktop that including both
-  // makes some share destinations independently fetch a rich link
-  // preview for `url` (the site's own generic icon/logo) *in addition to*
-  // the actual attached card image -- showing up as a second, unrelated
-  // image (or the destination's "Copy" action copying both to the
-  // clipboard at once, pasting as two images instead of one). The link
-  // is already inside `shareText` above, so nothing is lost by omitting
-  // the separate field here -- only the unwanted duplicate preview is.
-  if (navigator.share) {
-    const canShareFile = file && navigator.canShare && navigator.canShare({ files: [file] });
+  // Native share WITH a file attached is mobile-only. Verified live (a
+  // real repro from a real desktop share) that Chrome's macOS
+  // implementation of file-sharing via the Web Share API is genuinely
+  // broken, not just inconsistent: it round-trips the file through a
+  // local temp path under ~/Library/Application Support/Google/Chrome/
+  // <profile>/WebShare/share-<uuid>/<filename>, and handing that off to
+  // WhatsApp Desktop, that literal local file path leaked into the
+  // visible message text AND the whole share was duplicated -- two
+  // images, two text messages, from one click. This lives in Chrome's own
+  // OS-integration layer, not anything this page controls, so the fix is
+  // to avoid that code path entirely on desktop rather than risk visitors
+  // hitting Brian's exact repro. (An earlier attempt fixed a *different*
+  // theory -- a rich link preview competing with the image -- which
+  // turned out not to be the actual cause; this is.)
+  // On mobile, always prefer native share -- with the file when the
+  // device supports it, text-only otherwise. Both are safe on mobile;
+  // the bug above is specific to desktop Chrome's file-sharing bridge.
+  const isMobile = typeof navigator !== "undefined" && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (isMobile && navigator.share) {
     try {
+      const canShareFile = file && navigator.canShare && navigator.canShare({ files: [file] });
       if (canShareFile) {
         await navigator.share({ title, text: shareText, files: [file] });
       } else {
@@ -2966,10 +2967,14 @@ async function shareVerseCard({ text, attribution, eyebrow, title, url, filename
     }
   }
 
-  // No native share available in this browser: copy the image to the
-  // clipboard for pasting, and -- in that same clipboard write -- include
-  // the caption text too, so a paste target that reads text (like a
-  // caption box) can pick up the link without a second, separate copy.
+  // Desktop's default path when there's an actual image to share: copy it
+  // to the clipboard, and -- in that same clipboard write -- include the
+  // caption text too, so a paste target that reads text (like a caption
+  // box) can pick up the link without a second, separate copy. This never
+  // touches the broken OS-share-extension bridge above, so it can't hit
+  // that bug at all. Deliberately checked BEFORE any desktop native-share
+  // fallback, so a valid image is never silently dropped in favor of a
+  // text-only share sheet.
   if (file && navigator.clipboard && window.ClipboardItem) {
     try {
       await navigator.clipboard.write([
@@ -2986,6 +2991,18 @@ async function shareVerseCard({ text, attribution, eyebrow, title, url, filename
       } catch (err2) {
         // fall through to the text-only fallback below
       }
+    }
+  }
+
+  // No image available at all (e.g. canvas rendering failed) but native
+  // share still exists: still better than a bare clipboard copy, and
+  // doesn't touch the file-sharing bridge since there's no file here.
+  if (!file && navigator.share) {
+    try {
+      await navigator.share({ title, text: shareText, url });
+      return "shared";
+    } catch (err) {
+      return "cancelled";
     }
   }
 
