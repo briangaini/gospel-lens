@@ -2942,11 +2942,21 @@ async function shareVerseCard({ text, attribution, eyebrow, title, url, filename
   // for each. Where file-sharing isn't supported but text sharing still
   // is, still use it rather than dropping straight to a clipboard copy --
   // the link travels correctly either way.
+  //
+  // IMPORTANT: the separate `url` field is deliberately left OUT when a
+  // file is being shared. Confirmed live on desktop that including both
+  // makes some share destinations independently fetch a rich link
+  // preview for `url` (the site's own generic icon/logo) *in addition to*
+  // the actual attached card image -- showing up as a second, unrelated
+  // image (or the destination's "Copy" action copying both to the
+  // clipboard at once, pasting as two images instead of one). The link
+  // is already inside `shareText` above, so nothing is lost by omitting
+  // the separate field here -- only the unwanted duplicate preview is.
   if (navigator.share) {
     const canShareFile = file && navigator.canShare && navigator.canShare({ files: [file] });
     try {
       if (canShareFile) {
-        await navigator.share({ title, text: shareText, url, files: [file] });
+        await navigator.share({ title, text: shareText, files: [file] });
       } else {
         await navigator.share({ title, text: shareText, url });
       }
