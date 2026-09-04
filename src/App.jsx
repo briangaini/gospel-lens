@@ -2926,14 +2926,26 @@ async function generateVerseCardBlob({ text, attribution, eyebrow = "VERSE OF TH
 // clipboard copy on desktop, or a plain text+link copy as a last resort.
 // Returns a status string the caller uses to pick its own button label.
 async function shareVerseCard({ text, attribution, eyebrow, title, url, filename }) {
-  const shareText = `"${text}" — ${attribution}`;
-  const isMobile = typeof navigator !== "undefined" && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  // The link now lives directly inside the shared text itself (not just a
+  // separate structural `url` field) -- WhatsApp and most chat apps
+  // auto-linkify a plain URL sitting in message text into a real tappable
+  // link, which survives far more consistently than relying on an app's
+  // own handling of a separate `url` field.
+  const shareText = `"${text}" — ${attribution}\n\nRead more: ${url}`;
   const blob = await generateVerseCardBlob({ text, attribution, eyebrow });
   const file = blob ? new File([blob], filename, { type: "image/png" }) : null;
 
-  if (isMobile && navigator.share) {
+  // Try the native share sheet on ANY device that can share files, not
+  // just phones -- modern desktop Safari/Chrome increasingly support this
+  // too, and it's the only way to hand the picture and the link to
+  // another app as one bundled action instead of a separate copy-paste
+  // for each. Where file-sharing isn't supported but text sharing still
+  // is, still use it rather than dropping straight to a clipboard copy --
+  // the link travels correctly either way.
+  if (navigator.share) {
+    const canShareFile = file && navigator.canShare && navigator.canShare({ files: [file] });
     try {
-      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (canShareFile) {
         await navigator.share({ title, text: shareText, url, files: [file] });
       } else {
         await navigator.share({ title, text: shareText, url });
@@ -2944,17 +2956,31 @@ async function shareVerseCard({ text, attribution, eyebrow, title, url, filename
     }
   }
 
+  // No native share available in this browser: copy the image to the
+  // clipboard for pasting, and -- in that same clipboard write -- include
+  // the caption text too, so a paste target that reads text (like a
+  // caption box) can pick up the link without a second, separate copy.
   if (file && navigator.clipboard && window.ClipboardItem) {
     try {
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": file })]);
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": file, "text/plain": new Blob([shareText], { type: "text/plain" }) }),
+      ]);
       return "copied-image";
     } catch (err) {
-      // fall through to the text fallback below
+      // Some browsers reject a multi-type ClipboardItem outright -- retry
+      // with just the image, which matters most, rather than failing
+      // entirely and falling all the way through to text-only.
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": file })]);
+        return "copied-image";
+      } catch (err2) {
+        // fall through to the text-only fallback below
+      }
     }
   }
 
   try {
-    await navigator.clipboard.writeText(`${shareText}\n\nRead more at ${url}`);
+    await navigator.clipboard.writeText(shareText);
     return "copied-text";
   } catch (err) {
     return "cancelled";
