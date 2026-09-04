@@ -86,6 +86,29 @@ function loadAuthors(src) {
   });
 }
 
+// POST_TAGS is a flat object: "Topic Name": [id, id, ...]. Much simpler
+// shape than AUTHORS, so a single regex over the whole block is enough --
+// no need to split into per-entry chunks first.
+function loadTopics(src) {
+  const start = src.indexOf("const POST_TAGS = {");
+  if (start === -1) return [];
+  const end = src.indexOf("\n};", start);
+  const block = src.slice(start, end);
+  const entryRe = /"([^"]+)":\s*\[([^\]]*)\]/g;
+  const topics = [];
+  let m;
+  while ((m = entryRe.exec(block))) {
+    const name = m[1];
+    const ids = m[2]
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map(Number);
+    topics.push({ name, ids, slug: slugify(name) });
+  }
+  return topics;
+}
+
 function truncateAtWord(str, max) {
   if (str.length <= max) return str;
   const cut = str.slice(0, max);
@@ -174,7 +197,7 @@ function writeHtml(relativeSlug, html) {
   writeFileSync(filePath, html);
 }
 
-function buildSitemap(posts, authors) {
+function buildSitemap(posts, authors, topics) {
   const today = new Date().toISOString().slice(0, 10);
   const urls = [
     { loc: `${SITE_URL}/`, priority: "1.0" },
@@ -182,6 +205,7 @@ function buildSitemap(posts, authors) {
     { loc: `${SITE_URL}/about`, priority: "0.5" },
     { loc: `${SITE_URL}/rss.xml`, priority: "0.3" },
     ...authors.map((a) => ({ loc: `${SITE_URL}/collection/${a.slug}`, priority: "0.5" })),
+    ...topics.map((t) => ({ loc: `${SITE_URL}/topics/${t.slug}`, priority: "0.5" })),
     ...posts.map((p) => ({ loc: `${SITE_URL}/${p.slug}`, priority: "0.6" })),
   ];
   const body = urls
@@ -327,13 +351,19 @@ async function main() {
 
   const posts = loadPosts(src);
   const authors = loadAuthors(src);
+  const topics = loadTopics(src);
 
-  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved"]);
+  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved", "liked", "start-here", "topics"]);
   const seenSlugs = new Set();
   for (const p of posts) {
     if (seenSlugs.has(p.slug)) throw new Error(`Duplicate post slug detected: "${p.slug}" (id ${p.id}) — two titles slugify to the same URL.`);
     if (RESERVED_SLUGS.has(p.slug)) throw new Error(`Post "${p.title}" (id ${p.id}) slugifies to "${p.slug}", which collides with a reserved route. Rename the post or change its title slightly.`);
     seenSlugs.add(p.slug);
+  }
+  const seenTopicSlugs = new Set();
+  for (const t of topics) {
+    if (seenTopicSlugs.has(t.slug)) throw new Error(`Duplicate topic slug detected: "${t.slug}" ("${t.name}") — two topic names slugify to the same URL.`);
+    seenTopicSlugs.add(t.slug);
   }
 
   const ogImageUrl = `${SITE_URL}/og-image.png`;
@@ -365,22 +395,39 @@ async function main() {
     writeHtml(path.join("collection", author.slug), html);
   }
 
-  // /blog, /about, and /saved need their own flat files too — verified
-  // live that vercel.json's rewrites catch-all does NOT reliably fall back
-  // to index.html here even with cleanUrls on, so these known routes get
-  // real files (generic site-wide meta, same as the template) rather than
-  // depending on that fallback. /saved is a personal, per-browser page
-  // (nothing server-side to show), so it deliberately isn't added to the
-  // sitemap below — same reasoning as leaving 404 out of it.
+  // One real page per topic (added 2026-09-04) -- same reasoning as author
+  // collection pages: gives each topic its own indexable, shareable URL
+  // instead of only existing as a filter chip.
+  for (const topic of topics) {
+    const count = topic.ids.length;
+    const html = withMeta(template, {
+      title: topic.name,
+      description: `${count} ${count === 1 ? "post" : "posts"} on The Gospel Lens about ${topic.name}.`,
+      url: `${SITE_URL}/topics/${topic.slug}`,
+    });
+    writeHtml(path.join("topics", topic.slug), html);
+  }
+
+  // /blog, /about, /saved, /liked, and /start-here need their own flat
+  // files too — verified live that vercel.json's rewrites catch-all does
+  // NOT reliably fall back to index.html here even with cleanUrls on, so
+  // these known routes get real files (generic site-wide meta, same as
+  // the template) rather than depending on that fallback. /saved and
+  // /liked are personal, per-browser pages (nothing server-side to show),
+  // and /start-here's actual content is just posts that already have
+  // their own pages — none of the three are added to the sitemap below,
+  // same reasoning as leaving 404 out of it.
   writeHtml("blog", template);
   writeHtml("about", template);
   writeHtml("saved", template);
+  writeHtml("liked", template);
+  writeHtml("start-here", template);
   writeFileSync(path.join(distDir, "404.html"), build404Page());
 
-  writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors));
+  writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors, topics));
   writeFileSync(path.join(distDir, "rss.xml"), buildRss(posts));
 
-  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), blog/about, and 404. Sitemap, RSS feed, and per-post share cards regenerated.`);
+  console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), ${topics.length} topic page(s), blog/about, and 404. Sitemap, RSS feed, and per-post share cards regenerated.`);
 }
 
 main().catch((err) => {

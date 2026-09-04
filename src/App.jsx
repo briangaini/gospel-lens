@@ -3242,6 +3242,67 @@ function CollectionView({ authorName, openPost, setView }) {
   );
 }
 
+function postsByTag(tagName) {
+  const ids = POST_TAGS[tagName] || [];
+  return [...POSTS].filter((p) => ids.includes(p.id)).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+// A real, permanent page per topic (added 2026-09-04) -- previously topics
+// only existed as filter chips on the Blogs page with no page of their own
+// to link to or for search engines to index. Mirrors CollectionView's
+// structure closely. Carries a "Back to Blogs" link *and* a row of every
+// other topic, so a visitor can jump straight between topics without ever
+// going back to Blogs first -- Brian asked specifically that switching
+// topics not force a round trip through the Blogs page.
+function TopicView({ topicName, openPost, setView, openTopic }) {
+  const posts = postsByTag(topicName);
+  if (posts.length === 0) return null;
+
+  const otherTopics = Object.keys(POST_TAGS).filter((t) => t !== topicName);
+
+  return (
+    <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
+      <button
+        onClick={() => setView("blog")}
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+      >
+        <ArrowLeft size={15} strokeWidth={2} />
+        Back to Blogs
+      </button>
+
+      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Topic</p>
+      <h1
+        className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-3"
+        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+      >
+        {topicName}
+      </h1>
+      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10">
+        {posts.length} {posts.length === 1 ? "post" : "posts"} on The Gospel Lens.
+      </p>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-14">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} onOpen={openPost} />
+        ))}
+      </div>
+
+      <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mb-4">Other Topics</p>
+      <div className="flex flex-wrap gap-2">
+        {otherTopics.map((t) => (
+          <button
+            key={t}
+            onClick={() => openTopic(t)}
+            className="text-xs text-[#5B5F6B] dark:text-[#A9ADB6] bg-[#4A5D4E]/6 hover:bg-[#4A5D4E]/12 hover:text-[#4A5D4E] px-3 py-1.5 rounded-full transition-colors duration-200"
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // Quiet "pick up where you left off" nudge — only appears once a visitor
 // has actually opened a post before (see READ HISTORY above), pointing at
 // the most recent one. Reads localStorage once per mount, which is enough
@@ -3374,7 +3435,7 @@ function HomeView({ setView, openPost }) {
 
 const PAGE_SIZE = 9;
 
-function BlogListView({ openPost, initialSearch = "" }) {
+function BlogListView({ openPost, initialSearch = "", openTopic }) {
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState("All");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -3482,7 +3543,7 @@ function BlogListView({ openPost, initialSearch = "" }) {
         {topics.map((tag) => (
           <button
             key={tag}
-            onClick={() => setSearch(tag)}
+            onClick={() => openTopic(tag)}
             className="text-xs text-[#5B5F6B] dark:text-[#A9ADB6] bg-[#4A5D4E]/6 hover:bg-[#4A5D4E]/12 hover:text-[#4A5D4E] px-3 py-1.5 rounded-full transition-colors duration-200"
           >
             {tag}
@@ -3820,6 +3881,7 @@ export default function GospelLensApp() {
   const [view, setView] = useState("home");
   const [activePost, setActivePost] = useState(null);
   const [activeAuthor, setActiveAuthor] = useState(null);
+  const [activeTopic, setActiveTopic] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   // The inline script in index.html already applied the right class to
   // <html> before this ever mounts (saved localStorage choice, else the
@@ -3903,6 +3965,23 @@ export default function GospelLensApp() {
           return;
         }
       }
+      if (path.startsWith("/topics/")) {
+        const topicSlug = path.replace("/topics/", "");
+        const topicName = Object.keys(POST_TAGS).find((name) => slugify(name) === topicSlug);
+        if (topicName) {
+          setActiveTopic(topicName);
+          setView("topic");
+          return;
+        }
+      }
+      if (path === "/liked") {
+        setView("liked");
+        return;
+      }
+      if (path === "/start-here") {
+        setView("readingplan");
+        return;
+      }
       if (path !== "/") {
         const found = getPostBySlug(path.replace(/^\//, ""));
         if (found) {
@@ -3933,14 +4012,20 @@ export default function GospelLensApp() {
       document.title = "The Person Behind the Lens — The Gospel Lens";
     } else if (view === "collection" && activeAuthor) {
       document.title = `${activeAuthor} — The Gospel Lens`;
+    } else if (view === "topic" && activeTopic) {
+      document.title = `${activeTopic} — The Gospel Lens`;
     } else if (view === "saved") {
       document.title = "Saved Posts — The Gospel Lens";
+    } else if (view === "liked") {
+      document.title = "Liked Posts — The Gospel Lens";
+    } else if (view === "readingplan") {
+      document.title = "4 Days to Understand the Gospel — The Gospel Lens";
     } else if (view === "notfound") {
       document.title = "Page Not Found — The Gospel Lens";
     } else {
       document.title = "The Gospel Lens";
     }
-  }, [view, activePost, activeAuthor]);
+  }, [view, activePost, activeAuthor, activeTopic]);
 
   const openPost = (post) => {
     setActivePost(post);
@@ -3953,6 +4038,13 @@ export default function GospelLensApp() {
     setActiveAuthor(authorName);
     setView("collection");
     window.history.pushState(null, "", `/collection/${slugify(authorName)}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const openTopic = (topicName) => {
+    setActiveTopic(topicName);
+    setView("topic");
+    window.history.pushState(null, "", `/topics/${slugify(topicName)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -4002,9 +4094,10 @@ export default function GospelLensApp() {
 
       <main className="flex-1">
         {view === "home" && <HomeView setView={changeView} openPost={openPost} />}
-        {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} />}
+        {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} openTopic={openTopic} />}
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
+        {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} />}
         {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} />}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
