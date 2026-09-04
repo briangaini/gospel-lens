@@ -19,6 +19,8 @@ import {
   RotateCcw,
   Printer,
   Bookmark,
+  Archive,
+  Heart,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -1858,6 +1860,27 @@ function getVerseOfDay() {
 // of the gospel itself, pulled out from the general post stream.
 const FOUNDATIONAL_POST_IDS = [1, 12, 19];
 
+// "From the Archive" — resurfaces an older post on the homepage, one per
+// calendar week. Originally proposed as a date-anniversary ("one year ago
+// today") widget, but every post on the site so far is from the same
+// year, so that version would have shown nothing until 2027 — this
+// version works immediately instead, and everyone sees the same pick
+// during the same week (not a different one per page load) so it reads as
+// a deliberate choice rather than a random shuffle.
+function getFromArchivePost() {
+  const recentIds = new Set(
+    [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3).map((p) => p.id)
+  );
+  // Sorted by id (not array position) so the cycling order stays stable
+  // even if posts are edited or reordered in the array later.
+  const eligible = [...POSTS].filter((p) => !recentIds.has(p.id)).sort((a, b) => a.id - b.id);
+  if (eligible.length === 0) return null;
+
+  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+  const weekNumber = Math.floor(Date.now() / msPerWeek);
+  return eligible[weekNumber % eligible.length];
+}
+
 // ---------------------------------------------------------------------------
 // READ HISTORY — a light, entirely local memory of which posts a visitor has
 // opened, kept in their own browser's localStorage. Nothing is sent
@@ -3336,6 +3359,33 @@ function ContinueReadingCard({ openPost }) {
   );
 }
 
+// Dark solid card, deliberately distinct from the lighter Continue Reading
+// card just above it, matching the treatment approved in the mockup —
+// makes it read as a separate "worth a second look" moment rather than
+// blending into ordinary post cards.
+function FromArchiveCard({ openPost }) {
+  const [post] = useState(() => getFromArchivePost());
+  if (!post) return null;
+
+  return (
+    <section className="max-w-3xl mx-auto px-6 sm:px-8 pb-4">
+      <button
+        onClick={() => openPost(post)}
+        className="w-full text-left flex items-center gap-4 bg-[#1C1F26] rounded-sm px-6 py-5 hover:bg-[#252932] transition-colors duration-200"
+      >
+        <Archive size={20} strokeWidth={1.75} className="text-[#B08D57] shrink-0" />
+        <div className="min-w-0">
+          <span className="text-[10px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold">From the Archive</span>
+          <div className="text-[#F8F7F3] font-medium mt-0.5 truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {post.title}
+          </div>
+          <span className="text-[11px] text-[#8A8D96]">Originally published {post.date}</span>
+        </div>
+      </button>
+    </section>
+  );
+}
+
 function HomeView({ setView, openPost }) {
   return (
     <>
@@ -3429,6 +3479,8 @@ function HomeView({ setView, openPost }) {
           </button>
         </div>
       </section>
+
+      <FromArchiveCard openPost={openPost} />
     </>
   );
 }
