@@ -328,7 +328,7 @@ async function main() {
   const posts = loadPosts(src);
   const authors = loadAuthors(src);
 
-  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404"]);
+  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved"]);
   const seenSlugs = new Set();
   for (const p of posts) {
     if (seenSlugs.has(p.slug)) throw new Error(`Duplicate post slug detected: "${p.slug}" (id ${p.id}) — two titles slugify to the same URL.`);
@@ -365,13 +365,16 @@ async function main() {
     writeHtml(path.join("collection", author.slug), html);
   }
 
-  // /blog and /about need their own flat files too — verified live that
-  // vercel.json's rewrites catch-all does NOT reliably fall back to
-  // index.html here even with cleanUrls on, so these two known routes get
+  // /blog, /about, and /saved need their own flat files too — verified
+  // live that vercel.json's rewrites catch-all does NOT reliably fall back
+  // to index.html here even with cleanUrls on, so these known routes get
   // real files (generic site-wide meta, same as the template) rather than
-  // depending on that fallback.
+  // depending on that fallback. /saved is a personal, per-browser page
+  // (nothing server-side to show), so it deliberately isn't added to the
+  // sitemap below — same reasoning as leaving 404 out of it.
   writeHtml("blog", template);
   writeHtml("about", template);
+  writeHtml("saved", template);
   writeFileSync(path.join(distDir, "404.html"), build404Page());
 
   writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors));

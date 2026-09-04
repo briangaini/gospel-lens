@@ -18,6 +18,7 @@ import {
   Pause,
   RotateCcw,
   Printer,
+  Bookmark,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -1895,6 +1896,48 @@ function recordPostRead(postId) {
 }
 
 // ---------------------------------------------------------------------------
+// SAVED POSTS — a deliberate "come back to this" list, distinct from the
+// read-history-driven Continue Reading above. Same local-only approach
+// (nothing sent anywhere, no account), but this is opt-in per post via the
+// bookmark icon rather than automatic on every visit.
+// ---------------------------------------------------------------------------
+
+const SAVED_POSTS_KEY = "gospel-lens-saved-posts";
+
+function getSavedPostIds() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(SAVED_POSTS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function isPostSaved(postId) {
+  return getSavedPostIds().includes(postId);
+}
+
+// Toggles postId in the saved list and returns the resulting state (true =
+// now saved, false = now removed) so a caller can update its own local
+// state without a second localStorage read.
+function toggleSavedPost(postId) {
+  if (typeof window === "undefined") return false;
+  try {
+    const ids = getSavedPostIds();
+    const idx = ids.indexOf(postId);
+    const nowSaved = idx === -1;
+    if (nowSaved) ids.push(postId);
+    else ids.splice(idx, 1);
+    window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(ids));
+    return nowSaved;
+  } catch {
+    return isPostSaved(postId);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // READING TIME — calculated from actual word count (~200 wpm) instead of
 // a hand-typed estimate, so it stays accurate as posts get edited.
 // ---------------------------------------------------------------------------
@@ -2178,6 +2221,29 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
     setQuery("");
   };
 
+  // "/" or Cmd/Ctrl+K opens search from anywhere on the site, the same
+  // convention used by GitHub, Linear, Notion, etc. "/" is ignored while
+  // the visitor is already typing somewhere (so it can still be typed as
+  // a literal character); Cmd/Ctrl+K is a deliberate modifier combo, so it
+  // always fires regardless of focus.
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const key = e.key.toLowerCase();
+      const isCmdK = (e.metaKey || e.ctrlKey) && key === "k";
+      const isSlash = key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey;
+      if (!isCmdK && !isSlash) return;
+
+      const target = e.target;
+      const isEditableTarget = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
+      if (isSlash && isEditableTarget) return;
+
+      e.preventDefault();
+      setSearchOpen(true);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   return (
     <header className="sticky top-0 z-30 bg-[#F8F7F3]/90 dark:bg-[#14161B]/90 backdrop-blur-sm border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
       <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between gap-3">
@@ -2225,9 +2291,22 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search"
+                title="Search (press / or ⌘K)"
                 className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
               >
                 <Search size={18} strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => setView("saved")}
+                aria-label="Saved Posts"
+                title="Saved Posts"
+                className={`transition-colors duration-200 ${
+                  view === "saved"
+                    ? "text-[#B08D57]"
+                    : "text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+                }`}
+              >
+                <Bookmark size={18} strokeWidth={2} fill={view === "saved" ? "currentColor" : "none"} />
               </button>
               <button
                 onClick={toggleDark}
@@ -2422,34 +2501,59 @@ function CategoryTag({ category }) {
   );
 }
 
-function PostCard({ post, onOpen, featured = false }) {
+// Not a <button> anymore -- an invisible full-cover button handles "open
+// the post" (still real keyboard/screen-reader accessible), and the
+// bookmark toggle is its own real button layered on top, since a <button>
+// can't legally contain another <button>. The visible content in between
+// is pointer-events-none so clicks pass through to whichever of the two
+// buttons is actually underneath that point.
+function PostCard({ post, onOpen, featured = false, onToggleSave }) {
+  const [saved, setSaved] = useState(() => isPostSaved(post.id));
+
+  const handleToggleSave = (e) => {
+    e.stopPropagation();
+    const nowSaved = toggleSavedPost(post.id);
+    setSaved(nowSaved);
+    onToggleSave?.(post.id, nowSaved);
+  };
+
   return (
-    <button
-      onClick={() => onOpen(post)}
-      className={`group text-left flex flex-col bg-white dark:bg-[#1E2128] border border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 hover:border-[#B08D57]/40 rounded-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_-15px_rgba(28,31,38,0.25)] ${
+    <div
+      className={`group relative flex flex-col bg-white dark:bg-[#1E2128] border border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 hover:border-[#B08D57]/40 rounded-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_-15px_rgba(28,31,38,0.25)] ${
         featured ? "p-8" : "p-7"
       }`}
     >
-      <div className="flex items-center justify-between mb-4">
-        <CategoryTag category={post.category} />
-        <span className="text-[11px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A]">{estimateReadTime(post)}</span>
-      </div>
-      <h3
-        className={`text-[#1C1F26] dark:text-[#F2F1EC] mb-2 leading-snug ${featured ? "text-2xl" : "text-xl"}`}
-        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+      <button onClick={() => onOpen(post)} className="absolute inset-0 z-0 text-left" aria-label={`Read ${post.title}`} />
+      <button
+        onClick={handleToggleSave}
+        aria-label={saved ? "Remove from Saved Posts" : "Save for later"}
+        title={saved ? "Remove from Saved Posts" : "Save for later"}
+        className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-[#14161B]/85 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#B08D57] transition-colors duration-200"
       >
-        {post.title}
-      </h3>
-      <span className="text-[11px] text-[#8A8D96] dark:text-[#7C808A] mb-3">
-        {post.author ? `By ${post.author} · ` : ""}
-        {post.date}
-      </span>
-      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] leading-relaxed mb-6 flex-1">{post.excerpt}</p>
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4A5D4E] group-hover:gap-2.5 transition-all duration-300">
-        Read More
-        <ArrowRight size={14} strokeWidth={2} />
-      </span>
-    </button>
+        <Bookmark size={15} strokeWidth={2} className={saved ? "text-[#B08D57]" : ""} fill={saved ? "currentColor" : "none"} />
+      </button>
+      <div className="pointer-events-none flex flex-col flex-1">
+        <div className="flex items-center justify-between mb-4 pr-8">
+          <CategoryTag category={post.category} />
+          <span className="text-[11px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A]">{estimateReadTime(post)}</span>
+        </div>
+        <h3
+          className={`text-[#1C1F26] dark:text-[#F2F1EC] mb-2 leading-snug ${featured ? "text-2xl" : "text-xl"}`}
+          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+        >
+          {post.title}
+        </h3>
+        <span className="text-[11px] text-[#8A8D96] dark:text-[#7C808A] mb-3">
+          {post.author ? `By ${post.author} · ` : ""}
+          {post.date}
+        </span>
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] leading-relaxed mb-6 flex-1">{post.excerpt}</p>
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4A5D4E] group-hover:gap-2.5 transition-all duration-300">
+          Read More
+          <ArrowRight size={14} strokeWidth={2} />
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -2457,7 +2561,51 @@ function PostCard({ post, onOpen, featured = false }) {
 // POST BODY RENDERER — turns the `blocks` array into styled sections
 // ---------------------------------------------------------------------------
 
-function PostBody({ blocks }) {
+// "Share this verse," but for a specific post's Scripture Focus box rather
+// than the homepage Verse of the Day -- reuses the exact same card-image
+// generation. Multiple verses in one box are joined into a single quote,
+// matching how the box already displays them together.
+function ScriptureShareButton({ post, reference, verses }) {
+  const [status, setStatus] = useState("idle"); // idle | working | done | fallback
+
+  const handleShare = async () => {
+    setStatus("working");
+    const result = await shareVerseCard({
+      text: verses.join(" "),
+      attribution: reference,
+      eyebrow: "SCRIPTURE FOCUS",
+      title: `${post.title} — The Gospel Lens`,
+      url: `${window.location.origin}/${slugify(post.title)}`,
+      filename: `${slugify(post.title)}-scripture.png`,
+    });
+    if (result === "shared" || result === "cancelled") {
+      setStatus("idle");
+      return;
+    }
+    setStatus(result === "copied-image" ? "done" : "fallback");
+    setTimeout(() => setStatus("idle"), 2500);
+  };
+
+  const labels = {
+    idle: "Share this verse",
+    working: "Preparing image…",
+    done: "Verse card copied — paste anywhere",
+    fallback: "Text + link copied",
+  };
+
+  return (
+    <button
+      onClick={handleShare}
+      disabled={status === "working"}
+      className="no-print inline-flex items-center gap-1.5 text-xs font-medium text-[#4A5D4E] dark:text-[#8FAE95] hover:text-[#B08D57] mt-4 transition-colors duration-200 disabled:opacity-60"
+    >
+      {status === "done" || status === "fallback" ? <Check size={13} strokeWidth={2} /> : <Share2 size={13} strokeWidth={2} />}
+      {labels[status]}
+    </button>
+  );
+}
+
+function PostBody({ blocks, post }) {
   let paragraphIndex = -1;
 
   return (
@@ -2544,6 +2692,7 @@ function PostBody({ blocks }) {
                   </p>
                 ))}
               </div>
+              {post && <ScriptureShareButton post={post} reference={block.reference} verses={block.verses} />}
             </div>
           );
         }
@@ -2671,7 +2820,12 @@ function wrapCanvasText(ctx, text, maxWidth) {
   return lines;
 }
 
-async function generateVerseCardBlob(verse) {
+// `attribution` is used verbatim (e.g. "Romans 10:9, ESV" or a post's own
+// scripture-block reference like "John 15:4-5; Philippians 2:12-13") rather
+// than a hardcoded translation suffix, since this now also generates cards
+// for a post's own Scripture Focus box, not just the homepage Verse of the
+// Day, and those references don't all share one translation.
+async function generateVerseCardBlob({ text, attribution, eyebrow = "VERSE OF THE DAY" }) {
   if (document.fonts && document.fonts.ready) {
     try {
       await document.fonts.load("700 48px 'Playfair Display'");
@@ -2704,26 +2858,51 @@ async function generateVerseCardBlob(verse) {
   ctx.font = "600 22px Inter, sans-serif";
   ctx.textAlign = "center";
   ctx.letterSpacing = "3px";
-  ctx.fillText("VERSE OF THE DAY", size / 2, 200);
+  ctx.fillText(eyebrow, size / 2, 200);
   ctx.letterSpacing = "0px";
 
-  // Verse text, wrapped and centered
-  ctx.fillStyle = "#F8F7F3";
-  ctx.font = "italic 500 46px 'Playfair Display', Georgia, serif";
+  // Verse text, wrapped, centered, and auto-shrunk to fit -- a post's own
+  // Scripture Focus box can combine several verses into one much longer
+  // quote than a single Verse of the Day ever is, and a fixed font size
+  // risked exactly the kind of overflow found and fixed in the per-post
+  // share cards (see scripts/build-share-cards.js's fitTitle). Two layers
+  // of defense here too: shrink to fit, then clamp the reference line's
+  // position as a hard backstop regardless of how the text wrapped.
   const maxTextWidth = size - 200;
-  const lines = wrapCanvasText(ctx, `"${verse.text}"`, maxTextWidth);
-  const lineHeight = 62;
+  const topBound = 260;
+  const bottomBound = size - 260;
+  const quoted = `"${text}"`;
+  let fontSize = 46;
+  let lines = [];
+  let lineHeight = 62;
+  while (fontSize >= 24) {
+    ctx.font = `italic 500 ${fontSize}px 'Playfair Display', Georgia, serif`;
+    lines = wrapCanvasText(ctx, quoted, maxTextWidth);
+    lineHeight = fontSize * 1.35;
+    if (lines.length * lineHeight <= bottomBound - topBound) break;
+    fontSize -= 2;
+  }
+  ctx.fillStyle = "#F8F7F3";
+  ctx.font = `italic 500 ${fontSize}px 'Playfair Display', Georgia, serif`;
   const totalTextHeight = lines.length * lineHeight;
-  let y = size / 2 - totalTextHeight / 2 + 40;
+  let y = topBound + Math.max(0, (bottomBound - topBound - totalTextHeight) / 2) + fontSize * 0.75;
   for (const line of lines) {
     ctx.fillText(line, size / 2, y);
     y += lineHeight;
   }
 
-  // Reference
+  // Reference -- shrunk to fit horizontally too, since a combined
+  // multi-reference citation (e.g. three passages joined with ";") can run
+  // considerably longer than a single "Book Chapter:Verse".
+  let refFontSize = 30;
+  ctx.font = `400 ${refFontSize}px Inter, sans-serif`;
+  const refText = `— ${attribution}`;
+  while (refFontSize > 18 && ctx.measureText(refText).width > maxTextWidth) {
+    refFontSize -= 2;
+    ctx.font = `400 ${refFontSize}px Inter, sans-serif`;
+  }
   ctx.fillStyle = "#B0B4BD";
-  ctx.font = "400 30px Inter, sans-serif";
-  ctx.fillText(`— ${verse.reference}, ESV`, size / 2, y + 30);
+  ctx.fillText(refText, size / 2, Math.min(y + 20, size - 160));
 
   // Footer wordmark + URL baked into the image itself
   ctx.fillStyle = "#B08D57";
@@ -2740,67 +2919,67 @@ async function generateVerseCardBlob(verse) {
   });
 }
 
+// Shared by VerseOfDay's "Share this verse" and ScriptureShareButton (on
+// each post's Scripture Focus box) -- generates the card image, then picks
+// the best available way to actually hand it to the visitor: the native
+// share sheet with the image attached on phones, a straight image-to-
+// clipboard copy on desktop, or a plain text+link copy as a last resort.
+// Returns a status string the caller uses to pick its own button label.
+async function shareVerseCard({ text, attribution, eyebrow, title, url, filename }) {
+  const shareText = `"${text}" — ${attribution}`;
+  const isMobile = typeof navigator !== "undefined" && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const blob = await generateVerseCardBlob({ text, attribution, eyebrow });
+  const file = blob ? new File([blob], filename, { type: "image/png" }) : null;
+
+  if (isMobile && navigator.share) {
+    try {
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title, text: shareText, url, files: [file] });
+      } else {
+        await navigator.share({ title, text: shareText, url });
+      }
+      return "shared";
+    } catch (err) {
+      return "cancelled"; // user closed the share sheet
+    }
+  }
+
+  if (file && navigator.clipboard && window.ClipboardItem) {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": file })]);
+      return "copied-image";
+    } catch (err) {
+      // fall through to the text fallback below
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(`${shareText}\n\nRead more at ${url}`);
+    return "copied-text";
+  } catch (err) {
+    return "cancelled";
+  }
+}
+
 function VerseOfDay() {
   const verse = useMemo(() => getVerseOfDay(), []);
   const [status, setStatus] = useState("idle"); // idle | working | done | fallback
 
-  const shareText = `"${verse.text}" — ${verse.reference} (ESV)`;
-  const shareUrl = () => window.location.href.split("#")[0];
-
-  const isMobile = () =>
-    typeof navigator !== "undefined" && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
   const handleShare = async () => {
     setStatus("working");
-    const url = shareUrl();
-    const blob = await generateVerseCardBlob(verse);
-    const file = blob ? new File([blob], "verse-of-the-day.png", { type: "image/png" }) : null;
-
-    // On phones: use the native share sheet with the image attached, so
-    // whoever receives it gets the card and the link together.
-    if (isMobile() && navigator.share) {
-      try {
-        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: "Verse of the Day — The Gospel Lens",
-            text: shareText,
-            url,
-            files: [file],
-          });
-        } else {
-          await navigator.share({ title: "Verse of the Day — The Gospel Lens", text: shareText, url });
-        }
-        setStatus("idle");
-        return;
-      } catch (err) {
-        setStatus("idle");
-        return; // user cancelled the share sheet
-      }
-    }
-
-    // On desktop (including Mac, where the native share panel is limited):
-    // copy the actual verse card image to the clipboard so it can be
-    // pasted directly into Messages, email, or social apps. The site URL
-    // is already baked into the image itself.
-    if (file && navigator.clipboard && window.ClipboardItem) {
-      try {
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": file })]);
-        setStatus("done");
-        setTimeout(() => setStatus("idle"), 2500);
-        return;
-      } catch (err) {
-        // fall through to text fallback below
-      }
-    }
-
-    // Last resort: copy verse text + link as plain text
-    try {
-      await navigator.clipboard.writeText(`${shareText}\n\nRead more at ${url}`);
-      setStatus("fallback");
-      setTimeout(() => setStatus("idle"), 2500);
-    } catch (err) {
+    const result = await shareVerseCard({
+      text: verse.text,
+      attribution: `${verse.reference}, ESV`,
+      title: "Verse of the Day — The Gospel Lens",
+      url: window.location.href.split("#")[0],
+      filename: "verse-of-the-day.png",
+    });
+    if (result === "shared" || result === "cancelled") {
       setStatus("idle");
+      return;
     }
+    setStatus(result === "copied-image" ? "done" : "fallback");
+    setTimeout(() => setStatus("idle"), 2500);
   };
 
   const labels = {
@@ -2867,6 +3046,53 @@ function AboutView() {
           This isn't a pulpit, and I'm not a pastor or a theologian. I'm just someone who wants that news explained plainly, and who's gathered voices — some mine, some from teachers I trust — to help do that. My hope is simple: that whoever lands on this page, wherever they're starting from, walks away seeing the gospel a little more clearly than before.
         </p>
       </div>
+    </section>
+  );
+}
+
+// The deliberate "come back to this" list -- see the SAVED POSTS section
+// above. Distinct from Continue Reading (which is automatic and shows only
+// the single most recent post); this shows everything the visitor chose to
+// bookmark, newest-saved first, and updates live if they unsave one right
+// from this page.
+function SavedPostsView({ openPost, setView }) {
+  const [savedIds, setSavedIds] = useState(() => [...getSavedPostIds()].reverse());
+
+  const handleToggleSave = (postId, nowSaved) => {
+    if (!nowSaved) setSavedIds((ids) => ids.filter((id) => id !== postId));
+  };
+
+  const savedPosts = savedIds.map((id) => POSTS.find((p) => p.id === id)).filter(Boolean);
+
+  return (
+    <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-24">
+      <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+        Saved Posts
+      </h1>
+      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
+        Posts you've deliberately set aside to come back to — stored privately in this browser only, never sent anywhere.
+      </p>
+
+      {savedPosts.length === 0 ? (
+        <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
+          <Bookmark size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
+          <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-6">
+            Nothing saved yet — tap the bookmark icon on any post to add it here.
+          </p>
+          <button
+            onClick={() => setView("blog")}
+            className="inline-flex items-center gap-2 border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 text-[#1C1F26] dark:text-[#F2F1EC] px-6 py-2.5 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
+          >
+            Browse the Blogs
+          </button>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {savedPosts.map((post) => (
+            <PostCard key={post.id} post={post} onOpen={openPost} onToggleSave={handleToggleSave} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -3370,13 +3596,23 @@ function ShareBar({ post }) {
 
 function SinglePostView({ post, setView, openPost, openCollection }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
+  const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
 
   // Quietly note this post as read — see the READ HISTORY section above.
   useEffect(() => {
     if (post) recordPostRead(post.id);
   }, [post?.id]);
 
+  // This component doesn't unmount between posts (only `post` changes), so
+  // the bookmark toggle's own local state needs an explicit refresh here
+  // rather than just a useState initializer.
+  useEffect(() => {
+    if (post) setSaved(isPostSaved(post.id));
+  }, [post?.id]);
+
   if (!post) return null;
+
+  const handleToggleSave = () => setSaved(toggleSavedPost(post.id));
 
   const related = getRelatedPosts(post, 2);
 
@@ -3421,9 +3657,16 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
 
         <div className="no-print flex flex-wrap gap-3 mb-10">
           <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
+          <button
+            onClick={handleToggleSave}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+          >
+            <Bookmark size={14} strokeWidth={2} className={saved ? "text-[#B08D57]" : ""} fill={saved ? "currentColor" : "none"} />
+            {saved ? "Saved" : "Save for Later"}
+          </button>
         </div>
 
-        <PostBody blocks={post.blocks} />
+        <PostBody blocks={post.blocks} post={post} />
 
         <div className="no-print flex flex-wrap gap-3 mb-6">
           <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
@@ -3594,6 +3837,10 @@ export default function GospelLensApp() {
         setView("about");
         return;
       }
+      if (path === "/saved") {
+        setView("saved");
+        return;
+      }
       if (path.startsWith("/collection/")) {
         const authorSlug = path.replace("/collection/", "");
         const authorName = Object.keys(AUTHORS).find((name) => slugify(name) === authorSlug);
@@ -3633,6 +3880,8 @@ export default function GospelLensApp() {
       document.title = "The Person Behind the Lens — The Gospel Lens";
     } else if (view === "collection" && activeAuthor) {
       document.title = `${activeAuthor} — The Gospel Lens`;
+    } else if (view === "saved") {
+      document.title = "Saved Posts — The Gospel Lens";
     } else if (view === "notfound") {
       document.title = "Page Not Found — The Gospel Lens";
     } else {
@@ -3704,6 +3953,7 @@ export default function GospelLensApp() {
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
         {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} />}
+        {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
 
