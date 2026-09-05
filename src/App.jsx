@@ -2412,7 +2412,12 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
               >
                 {dark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
               </button>
-              <button className="sm:hidden text-[#1C1F26] dark:text-[#F2F1EC]" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+              {/* Visible on desktop too, per Brian's explicit ask (2026-09-05) --
+                  he wanted the familiar 3-line hamburger icon at the top right
+                  even on desktop, alongside (not replacing) the Home/About/Blogs
+                  text links and the other icons. Opens the same dropdown list
+                  used on mobile at every screen size now. */}
+              <button className="text-[#1C1F26] dark:text-[#F2F1EC]" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
                 {menuOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
@@ -2421,22 +2426,27 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
       </div>
 
       {menuOpen && (
-        <div className="sm:hidden border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 px-6 py-4 flex flex-col gap-4 bg-[#F8F7F3] dark:bg-[#14161B]">
-          <button onClick={() => { setView("home"); setMenuOpen(false); }} className={`text-left ${linkClass("home")}`}>
-            Home
-          </button>
-          <button onClick={() => { setView("about"); setMenuOpen(false); }} className={`text-left ${linkClass("about")}`}>
-            About
-          </button>
-          <button onClick={() => { setView("blog"); setMenuOpen(false); }} className={`text-left ${linkClass("blog")}`}>
-            Blogs
-          </button>
-          <button onClick={() => { setView("saved"); setMenuOpen(false); }} className={`text-left ${linkClass("saved")}`}>
-            Saved Posts
-          </button>
-          <button onClick={() => { setView("liked"); setMenuOpen(false); }} className={`text-left ${linkClass("liked")}`}>
-            Liked Posts
-          </button>
+        <div className="border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 bg-[#F8F7F3] dark:bg-[#14161B]">
+          {/* Inner max-w-5xl wrapper keeps this dropdown's links aligned under
+              the header's own content column on wide desktop screens, instead
+              of sitting flush against the far edges of the browser window. */}
+          <div className="max-w-5xl mx-auto px-6 sm:px-8 py-4 flex flex-col gap-4">
+            <button onClick={() => { setView("home"); setMenuOpen(false); }} className={`text-left ${linkClass("home")}`}>
+              Home
+            </button>
+            <button onClick={() => { setView("about"); setMenuOpen(false); }} className={`text-left ${linkClass("about")}`}>
+              About
+            </button>
+            <button onClick={() => { setView("blog"); setMenuOpen(false); }} className={`text-left ${linkClass("blog")}`}>
+              Blogs
+            </button>
+            <button onClick={() => { setView("saved"); setMenuOpen(false); }} className={`text-left ${linkClass("saved")}`}>
+              Saved Posts
+            </button>
+            <button onClick={() => { setView("liked"); setMenuOpen(false); }} className={`text-left ${linkClass("liked")}`}>
+              Liked Posts
+            </button>
+          </div>
         </div>
       )}
     </header>
