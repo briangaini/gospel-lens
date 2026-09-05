@@ -3331,7 +3331,7 @@ function LikedPostsView({ openPost, setView }) {
 // are visually distinct from "next" and "done," but every single one is a
 // real, clickable link the whole time -- nothing here is ever actually
 // gated behind finishing an earlier day.
-function ReadingPlanView({ openPost }) {
+function ReadingPlanView({ openPlanPost }) {
   const readIds = new Set(getReadHistory());
   const planPosts = READING_PLAN_POST_IDS.map((id) => POSTS.find((p) => p.id === id)).filter(Boolean);
   const readCount = planPosts.filter((p) => readIds.has(p.id)).length;
@@ -3345,21 +3345,25 @@ function ReadingPlanView({ openPost }) {
         style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
       >
         {/* Playfair Display's "4" is an old-style figure -- it has a real
-            descender and a shorter ascent than the surrounding cap letters
-            (verified directly: measured its ink at ~75% of "D"'s cap height,
-            dipping below the baseline), which is what actually made it read
-            as "small" here. There's no OpenType alternate to switch to --
-            tested font-feature-settings "lnum" first and confirmed via a
-            rendered side-by-side comparison that this font has no lining-
-            figure glyph at all, so that setting was a no-op. Fixed instead by
-            manually upsizing just this character and nudging it up to
-            compensate for the low sit -- calibrated by comparing several
-            values side by side against a capital letter until it read as the
-            same size, not by a formula. */}
-        <span style={{ fontSize: "1.22em", verticalAlign: "-0.07em" }}>4</span> Days to Understand the Gospel
+            descender and a shorter ascent than the surrounding cap letters,
+            which is what originally made it read as "small." First fix
+            (1.22em at the heading's own 700 weight) technically matched the
+            height but Brian caught a real follow-up problem: at that size,
+            700-weight ink reads as visibly heavier/darker than the letters
+            around it -- a numeral's shape has less internal counter-space
+            than most letters, so scaling it up compounds into a "bold dark
+            blob" rather than a same-size match. Settled on a smaller bump
+            (1.05em) at the lighter 600 weight instead -- also a real, loaded
+            weight for this font (see the @import a few lines below), not a
+            synthetic/unloaded one a browser might render inconsistently --
+            which reads as blending with the rest of the heading rather than
+            standing out, verified by rendering it directly in the actual
+            heading (not an isolated test) and comparing several candidates
+            side by side. */}
+        <span style={{ fontSize: "1.05em", fontWeight: 600, verticalAlign: "-0.02em" }}>4</span> Days to Understand the Gospel
       </h1>
       <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
-        A short path through the posts that explain the gospel most clearly — one each day, in order, since each one builds on the last. Every post is still a real, open link if you ever need to jump ahead or revisit one, but the order is deliberate: read a day, then take a few minutes to sit with what you read before moving on to the next.
+        A short path through the posts that explain the gospel most clearly — one each day, in order, since each one builds on the last. Read a post a day, then take a few minutes to sit with what you read before moving on to the next.
       </p>
 
       <div className="flex items-center gap-3 mb-8">
@@ -3378,7 +3382,7 @@ function ReadingPlanView({ openPost }) {
           return (
             <button
               key={post.id}
-              onClick={() => openPost(post)}
+              onClick={() => openPlanPost(post)}
               className={`flex items-center gap-4 text-left bg-white dark:bg-[#1E2128] border rounded-sm px-5 py-4 transition-colors duration-200 hover:border-[#4A5D4E]/50 ${
                 isNext ? "border-[#B08D57]" : "border-[#1C1F26]/10 dark:border-[#F2F1EC]/12"
               }`}
@@ -4005,7 +4009,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, openPost, openCollection, openReadingPlan }) {
+function SinglePostView({ post, setView, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
@@ -4032,16 +4036,23 @@ function SinglePostView({ post, setView, openPost, openCollection, openReadingPl
 
   const related = getRelatedPosts(post, 2);
 
-  // Is this post one of the 4-Day Reading Plan's days? If so, surface a
-  // banner up top (which day, and a way back to the plan overview) and a
-  // "continue to the next day" card at the bottom -- added 2026-09-05 after
-  // Brian pointed out that finishing Day 1 dropped a reader with no way to
-  // find Day 2 or the plan itself again except by remembering the URL. Index
-  // lookup, not a stored/gated state -- matches every other reading-plan
-  // reference in this file in treating the plan as a suggested path over a
-  // real, always-open post, never a locked sequence.
+  // Is this post one of the 4-Day Reading Plan's days, AND did the reader
+  // actually get here by following the plan (its overview, or "Continue" on
+  // the previous day)? If both, surface a banner up top (which day, and a
+  // way back to the plan overview) and a "continue to the next day" card at
+  // the bottom -- added 2026-09-05 after Brian pointed out that finishing
+  // Day 1 dropped a reader with no way to find Day 2 or the plan itself
+  // again except by remembering the URL. Gating on `cameFromPlan` too (not
+  // just the id lookup) is deliberate, per Brian's explicit follow-up: the
+  // same post opened from the Blogs page, search, Saved/Liked, a share
+  // link, or Older/Newer nav should look exactly like any other post -- the
+  // plan's outline is specific to actually being on the guided path, not a
+  // permanent property of the post itself. `openPost` (used by every other
+  // navigation path) resets `cameFromPlan` to false; only the plan overview
+  // and this component's own "Continue" button use `openPlanPost`, which
+  // sets it true.
   const planIndex = READING_PLAN_POST_IDS.indexOf(post.id);
-  const isPlanPost = planIndex !== -1;
+  const isPlanPost = cameFromPlan && planIndex !== -1;
   const isLastPlanDay = isPlanPost && planIndex === READING_PLAN_POST_IDS.length - 1;
   const nextPlanPost = isPlanPost && !isLastPlanDay ? POSTS.find((p) => p.id === READING_PLAN_POST_IDS[planIndex + 1]) : null;
 
@@ -4137,7 +4148,7 @@ function SinglePostView({ post, setView, openPost, openCollection, openReadingPl
                   Take a few minutes to think about what you just read. Ready for Day {planIndex + 2}?
                 </p>
                 <button
-                  onClick={() => openPost(nextPlanPost)}
+                  onClick={() => openPlanPost(nextPlanPost)}
                   className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-white transition-colors duration-200"
                 >
                   Continue to Day {planIndex + 2}: {nextPlanPost.title}
@@ -4246,6 +4257,17 @@ function BackToTop() {
 export default function GospelLensApp() {
   const [view, setView] = useState("home");
   const [activePost, setActivePost] = useState(null);
+  // Whether the currently-open post was reached by actually following the
+  // 4-Day Reading Plan (from its overview, or by tapping "Continue" from the
+  // previous day) -- as opposed to landing on the exact same post through
+  // the Blogs page, search, a share link, Saved/Liked, related posts, or
+  // Older/Newer nav. The plan's banner/"continue to next day" UI in
+  // SinglePostView is gated on this, not just on whether the post happens to
+  // be one of the 4 plan posts -- Brian was explicit that a plan post read
+  // outside the plan should look like any other post. Deliberately plain
+  // React state, not persisted -- a reload or a direct link is exactly the
+  // "not currently in the plan" case this is meant to catch.
+  const [cameFromPlan, setCameFromPlan] = useState(false);
   const [activeAuthor, setActiveAuthor] = useState(null);
   const [activeTopic, setActiveTopic] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -4395,6 +4417,22 @@ export default function GospelLensApp() {
 
   const openPost = (post) => {
     setActivePost(post);
+    setCameFromPlan(false);
+    setView("post");
+    window.history.pushState(null, "", `/${slugify(post.title)}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Same as openPost, except it marks the post as reached via the guided
+  // plan -- used only by the plan overview's own day rows and by the
+  // "Continue to Day X" button on a plan post itself, so the sequence stays
+  // intact from one day to the next. Any other way of opening a post
+  // (Blogs page, search, a share link, Older/Newer nav, etc.) goes through
+  // plain openPost above and correctly shows the post with no plan UI at
+  // all, even if it happens to be one of the 4 plan posts.
+  const openPlanPost = (post) => {
+    setActivePost(post);
+    setCameFromPlan(true);
     setView("post");
     window.history.pushState(null, "", `/${slugify(post.title)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -4471,11 +4509,19 @@ export default function GospelLensApp() {
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
         {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} />}
         {view === "post" && (
-          <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} openReadingPlan={openReadingPlan} />
+          <SinglePostView
+            post={activePost}
+            setView={changeView}
+            openPost={openPost}
+            openPlanPost={openPlanPost}
+            openCollection={openCollection}
+            openReadingPlan={openReadingPlan}
+            cameFromPlan={cameFromPlan}
+          />
         )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} />}
         {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} />}
-        {view === "readingplan" && <ReadingPlanView openPost={openPost} />}
+        {view === "readingplan" && <ReadingPlanView openPlanPost={openPlanPost} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
 
