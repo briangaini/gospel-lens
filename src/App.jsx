@@ -2320,7 +2320,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
 
   return (
     <header className="sticky top-0 z-30 bg-[#F8F7F3]/90 dark:bg-[#14161B]/90 backdrop-blur-sm border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between gap-2 sm:gap-3">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between gap-3">
         <button onClick={() => setView("home")} className="flex items-center gap-2.5 group shrink-0">
           <span className="relative flex items-center justify-center w-8 h-8 rounded-full border border-[#B08D57] text-[#B08D57] group-hover:bg-[#B08D57] group-hover:text-[#F8F7F3] transition-colors duration-300">
             <BookOpen size={15} strokeWidth={1.75} />
@@ -2361,7 +2361,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
               </button>
             </nav>
 
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search"
@@ -2370,11 +2370,22 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
               >
                 <Search size={18} strokeWidth={2} />
               </button>
+              {/* Saved/Liked icons hidden on mobile only, per Brian's explicit ask
+                  (2026-09-05) -- with search/dark-toggle/hamburger already in this
+                  row, a 4th or 5th icon crowded the top bar and, at one point,
+                  pushed the hamburger menu button off the edge of a real
+                  375px-wide phone screen. Brian said it "looks neat on mobile when
+                  there aren't many icons cramped" and asked to go back to exactly
+                  search + dark mode + hamburger on mobile, same as before Saved/
+                  Liked existed. Both stay one tap away on mobile via the hamburger
+                  menu's own "Saved Posts"/"Liked Posts" entries below -- nothing
+                  is unreachable, just decluttered from this top bar. Desktop
+                  (sm and up) keeps both icons, unchanged. */}
               <button
                 onClick={() => setView("saved")}
                 aria-label="Saved Posts"
                 title="Saved Posts"
-                className={`transition-colors duration-200 ${
+                className={`hidden sm:inline-block transition-colors duration-200 ${
                   view === "saved"
                     ? "text-[#B08D57]"
                     : "text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
@@ -2382,12 +2393,6 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
               >
                 <Bookmark size={18} strokeWidth={2} fill={view === "saved" ? "currentColor" : "none"} />
               </button>
-              {/* Hidden on mobile only -- with search/saved/dark-toggle/menu already
-                  in this row, adding a 5th icon pushed the hamburger menu button
-                  past the edge of a real 375px-wide phone screen (verified: it
-                  landed 20px off-screen, forcing a horizontal scroll to reach it).
-                  Liked Posts stays reachable on mobile via the hamburger menu list
-                  below instead of living in this already-tight top bar. */}
               <button
                 onClick={() => setView("liked")}
                 aria-label="Liked Posts"
