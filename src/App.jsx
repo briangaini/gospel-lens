@@ -3344,10 +3344,22 @@ function ReadingPlanView({ openPost }) {
         className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-4"
         style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
       >
-        4 Days to Understand the Gospel
+        {/* Playfair Display's "4" is an old-style figure -- it has a real
+            descender and a shorter ascent than the surrounding cap letters
+            (verified directly: measured its ink at ~75% of "D"'s cap height,
+            dipping below the baseline), which is what actually made it read
+            as "small" here. There's no OpenType alternate to switch to --
+            tested font-feature-settings "lnum" first and confirmed via a
+            rendered side-by-side comparison that this font has no lining-
+            figure glyph at all, so that setting was a no-op. Fixed instead by
+            manually upsizing just this character and nudging it up to
+            compensate for the low sit -- calibrated by comparing several
+            values side by side against a capital letter until it read as the
+            same size, not by a formula. */}
+        <span style={{ fontSize: "1.22em", verticalAlign: "-0.07em" }}>4</span> Days to Understand the Gospel
       </h1>
       <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
-        A short path through the posts that explain the gospel most clearly, in order. Every post below is a real, open link — read them in any order you like; this is just a suggested path, not a requirement.
+        A short path through the posts that explain the gospel most clearly — one each day, in order, since each one builds on the last. Every post is still a real, open link if you ever need to jump ahead or revisit one, but the order is deliberate: read a day, then take a few minutes to sit with what you read before moving on to the next.
       </p>
 
       <div className="flex items-center gap-3 mb-8">
@@ -3993,7 +4005,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, openPost, openCollection }) {
+function SinglePostView({ post, setView, openPost, openCollection, openReadingPlan }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
@@ -4020,6 +4032,19 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
 
   const related = getRelatedPosts(post, 2);
 
+  // Is this post one of the 4-Day Reading Plan's days? If so, surface a
+  // banner up top (which day, and a way back to the plan overview) and a
+  // "continue to the next day" card at the bottom -- added 2026-09-05 after
+  // Brian pointed out that finishing Day 1 dropped a reader with no way to
+  // find Day 2 or the plan itself again except by remembering the URL. Index
+  // lookup, not a stored/gated state -- matches every other reading-plan
+  // reference in this file in treating the plan as a suggested path over a
+  // real, always-open post, never a locked sequence.
+  const planIndex = READING_PLAN_POST_IDS.indexOf(post.id);
+  const isPlanPost = planIndex !== -1;
+  const isLastPlanDay = isPlanPost && planIndex === READING_PLAN_POST_IDS.length - 1;
+  const nextPlanPost = isPlanPost && !isLastPlanDay ? POSTS.find((p) => p.id === READING_PLAN_POST_IDS[planIndex + 1]) : null;
+
   const sortedByDate = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
   const currentIndex = sortedByDate.findIndex((p) => p.id === post.id);
   const newerPost = currentIndex > 0 ? sortedByDate[currentIndex - 1] : null;
@@ -4036,6 +4061,17 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
           <ArrowLeft size={15} strokeWidth={2} />
           Back to Blogs
         </button>
+
+        {isPlanPost && (
+          <div className="no-print flex items-center justify-between gap-3 mb-8 bg-[#B08D57]/10 border border-[#B08D57]/30 rounded-sm px-4 py-3">
+            <span className="text-[13px] font-medium text-[#8A6D3F] dark:text-[#D9B77C]">
+              Day {planIndex + 1} of {READING_PLAN_POST_IDS.length} · 4-Day Reading Plan
+            </span>
+            <button onClick={openReadingPlan} className="text-[13px] font-medium text-[#B08D57] hover:underline whitespace-nowrap shrink-0">
+              View Plan
+            </button>
+          </div>
+        )}
 
         <CategoryTag category={post.category} />
         <p className="post-byline text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mt-3">
@@ -4091,6 +4127,39 @@ function SinglePostView({ post, setView, openPost, openCollection }) {
         </div>
 
         <ShareBar post={post} />
+
+        {isPlanPost && (
+          <div className="no-print bg-[#1C1F26] dark:bg-[#14161B] border border-[#F2F1EC]/10 rounded-sm px-6 py-6 mt-8">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold mb-2">4-Day Reading Plan</p>
+            {nextPlanPost ? (
+              <>
+                <p className="text-[#F2F1EC] text-[15px] mb-4">
+                  Take a few minutes to think about what you just read. Ready for Day {planIndex + 2}?
+                </p>
+                <button
+                  onClick={() => openPost(nextPlanPost)}
+                  className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-white transition-colors duration-200"
+                >
+                  Continue to Day {planIndex + 2}: {nextPlanPost.title}
+                  <ArrowRight size={14} strokeWidth={2} />
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-[#F2F1EC] text-[15px] mb-4">
+                  That's all 4 days — you've read the whole plan. Take a moment to sit with what you've read before you go.
+                </p>
+                <button
+                  onClick={openReadingPlan}
+                  className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-white transition-colors duration-200"
+                >
+                  Review the Plan
+                  <ArrowRight size={14} strokeWidth={2} />
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {(olderPost || newerPost) && (
           <div className="no-print grid grid-cols-2 gap-4 mt-8">
@@ -4401,7 +4470,9 @@ export default function GospelLensApp() {
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
         {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} />}
-        {view === "post" && <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} />}
+        {view === "post" && (
+          <SinglePostView post={activePost} setView={changeView} openPost={openPost} openCollection={openCollection} openReadingPlan={openReadingPlan} />
+        )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} />}
         {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} />}
         {view === "readingplan" && <ReadingPlanView openPost={openPost} />}
