@@ -2320,7 +2320,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
 
   return (
     <header className="sticky top-0 z-30 bg-[#F8F7F3]/90 dark:bg-[#14161B]/90 backdrop-blur-sm border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between gap-3">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between gap-2 sm:gap-3">
         <button onClick={() => setView("home")} className="flex items-center gap-2.5 group shrink-0">
           <span className="relative flex items-center justify-center w-8 h-8 rounded-full border border-[#B08D57] text-[#B08D57] group-hover:bg-[#B08D57] group-hover:text-[#F8F7F3] transition-colors duration-300">
             <BookOpen size={15} strokeWidth={1.75} />
@@ -2361,7 +2361,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
               </button>
             </nav>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search"
@@ -2382,11 +2382,17 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
               >
                 <Bookmark size={18} strokeWidth={2} fill={view === "saved" ? "currentColor" : "none"} />
               </button>
+              {/* Hidden on mobile only -- with search/saved/dark-toggle/menu already
+                  in this row, adding a 5th icon pushed the hamburger menu button
+                  past the edge of a real 375px-wide phone screen (verified: it
+                  landed 20px off-screen, forcing a horizontal scroll to reach it).
+                  Liked Posts stays reachable on mobile via the hamburger menu list
+                  below instead of living in this already-tight top bar. */}
               <button
                 onClick={() => setView("liked")}
                 aria-label="Liked Posts"
                 title="Liked Posts"
-                className={`transition-colors duration-200 ${
+                className={`hidden sm:inline-block transition-colors duration-200 ${
                   view === "liked"
                     ? "text-[#C1584A]"
                     : "text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
