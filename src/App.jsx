@@ -21,7 +21,27 @@ import {
   Bookmark,
   Archive,
   Heart,
+  LogIn,
+  LogOut,
 } from "lucide-react";
+
+// Firebase (Google sign-in + Saved/Liked sync, see src/firebase.js) is
+// loaded lazily via dynamic import(), not a static import up here --
+// statically importing it nearly TRIPLED this app's main JS bundle (365KB
+// -> 1030KB gzip'd, measured directly via a build before/after), which
+// every visitor would pay for on first load whether or not they ever sign
+// in. Vite automatically splits a dynamic import() into its own separate
+// chunk, so the bundle every visitor actually downloads on first paint
+// stays exactly as small as before this feature existed; Firebase's code
+// only downloads for someone who's already signed in from a previous visit
+// (checked once on mount, so returning users don't have to re-click sign-in
+// every time) or who actively clicks "Sign in with Google." `getFirebase()`
+// memoizes the import so it only ever fetches once per page load.
+let firebaseModulePromise = null;
+function getFirebase() {
+  if (!firebaseModulePromise) firebaseModulePromise = import("./firebase");
+  return firebaseModulePromise;
+}
 
 // ---------------------------------------------------------------------------
 // CONTENT MODEL
@@ -1964,6 +1984,7 @@ function toggleSavedPost(postId) {
     if (nowSaved) ids.push(postId);
     else ids.splice(idx, 1);
     window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(ids));
+    syncListsToCloudIfSignedIn();
     return nowSaved;
   } catch {
     return isPostSaved(postId);
@@ -2005,10 +2026,31 @@ function toggleLikedPost(postId) {
     if (nowLiked) ids.push(postId);
     else ids.splice(idx, 1);
     window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(ids));
+    syncListsToCloudIfSignedIn();
     return nowLiked;
   } catch {
     return isPostLiked(postId);
   }
+}
+
+// Fire-and-forget: whenever a save/like toggle happens locally AND someone
+// is actually signed in, push the current full local snapshot of both
+// lists to their Firestore doc. Writes both lists together (not just the
+// one that changed) -- they're tiny (a handful of ids at most) and this
+// avoids any chance of the two lists drifting out of sync with each other
+// in Firestore. Deliberately silent on failure (e.g. offline, or nobody's
+// signed in so the Firebase chunk was never even fetched) -- the local
+// save/like itself already succeeded and is what the UI reflects; a
+// missed cloud sync just means the next successful toggle (or the next
+// sign-in-triggered merge) reconciles it, not a lost user action.
+function syncListsToCloudIfSignedIn() {
+  getFirebase()
+    .then((fb) => {
+      const uid = fb.auth.currentUser?.uid;
+      if (!uid) return;
+      return fb.writeCloudLists(uid, { savedPostIds: getSavedPostIds(), likedPostIds: getLikedPostIds() });
+    })
+    .catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -2276,7 +2318,7 @@ function Eyebrow({ children, center = false }) {
   );
 }
 
-function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark }) {
+function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark, user, onSignIn, onSignOut }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -2446,6 +2488,37 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark 
             <button onClick={() => { setView("liked"); setMenuOpen(false); }} className={`text-left ${linkClass("liked")}`}>
               Liked Posts
             </button>
+
+            {/* Sign-in lives here, in the dropdown, rather than as another
+                persistent header icon -- deliberately, after the mobile
+                header overflow saga a few days earlier taught the same
+                lesson twice: the top bar has no room left, and everything
+                (Saved Posts, Liked Posts) that isn't search/dark-mode/menu
+                already lives in this dropdown for exactly that reason. */}
+            <div className="pt-3 mt-1 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
+              {user ? (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6] truncate">
+                    Synced as {user.email}
+                  </span>
+                  <button
+                    onClick={() => { onSignOut(); setMenuOpen(false); }}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] shrink-0"
+                  >
+                    <LogOut size={14} strokeWidth={2} />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { onSignIn(); setMenuOpen(false); }}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] hover:underline"
+                >
+                  <LogIn size={15} strokeWidth={2} />
+                  Sign in with Google to sync Saved &amp; Liked posts
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -3239,7 +3312,7 @@ function AboutView() {
 // the single most recent post); this shows everything the visitor chose to
 // bookmark, newest-saved first, and updates live if they unsave one right
 // from this page.
-function SavedPostsView({ openPost, setView }) {
+function SavedPostsView({ openPost, setView, user, onSignIn }) {
   const [savedIds, setSavedIds] = useState(() => [...getSavedPostIds()].reverse());
 
   const handleToggleSave = (postId, nowSaved) => {
@@ -3253,9 +3326,19 @@ function SavedPostsView({ openPost, setView }) {
       <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
         Saved Posts
       </h1>
-      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
-        Posts you've deliberately set aside to come back to — stored privately in this browser only, never sent anywhere.
-      </p>
+      {user ? (
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
+          Posts you've deliberately set aside to come back to — synced to your account, so they'll show up on any device you sign in on.
+        </p>
+      ) : (
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
+          Posts you've deliberately set aside to come back to — stored privately in this browser only, never sent anywhere.{" "}
+          <button onClick={onSignIn} className="text-[#4A5D4E] font-medium hover:underline">
+            Sign in with Google
+          </button>{" "}
+          to sync these across your devices instead.
+        </p>
+      )}
 
       {savedPosts.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
@@ -3285,7 +3368,7 @@ function SavedPostsView({ openPost, setView }) {
 // "Saved" is "I want to come back to this," "Liked" is "this one meant
 // something to me," not necessarily meant to be revisited). Mirrors
 // SavedPostsView exactly on purpose.
-function LikedPostsView({ openPost, setView }) {
+function LikedPostsView({ openPost, setView, user, onSignIn }) {
   const [likedIds, setLikedIds] = useState(() => [...getLikedPostIds()].reverse());
 
   const handleToggleLike = (postId, nowLiked) => {
@@ -3299,9 +3382,19 @@ function LikedPostsView({ openPost, setView }) {
       <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
         Liked Posts
       </h1>
-      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
-        Posts that meant something to you — stored privately in this browser only, never sent anywhere.
-      </p>
+      {user ? (
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
+          Posts that meant something to you — synced to your account, so they'll show up on any device you sign in on.
+        </p>
+      ) : (
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
+          Posts that meant something to you — stored privately in this browser only, never sent anywhere.{" "}
+          <button onClick={onSignIn} className="text-[#4A5D4E] font-medium hover:underline">
+            Sign in with Google
+          </button>{" "}
+          to sync these across your devices instead.
+        </p>
+      )}
 
       {likedPosts.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
@@ -4278,6 +4371,63 @@ export default function GospelLensApp() {
   // instead of a toggle being needed to "notice" dark mode is already on.
   const [dark, setDark] = useState(() => typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
   const [navSearch, setNavSearch] = useState("");
+  // Signed-in Firebase user, or null. Added 2026-09-07 so Saved/Liked posts
+  // can follow someone across devices/browsers instead of living only in
+  // one browser's localStorage -- see src/firebase.js for the "why" and
+  // what this deliberately does NOT touch (dark mode, read history stay
+  // local-only; Brian only asked about saved/liked).
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let unsubscribe = () => {};
+    let cancelled = false;
+    // getFirebase() runs inside this effect (not at module load), so it
+    // fires after the initial page has already rendered -- not before or
+    // during it. `onAuthStateChanged` always delivers the CURRENT sign-in
+    // state the instant something subscribes, even if the actual sign-in
+    // happened earlier (e.g. from a previous visit, or because someone
+    // clicked "Sign in with Google" before this promise resolved) -- so
+    // deferring the subscription to after first paint doesn't risk missing
+    // or racing a sign-in, it just avoids making every visitor wait on
+    // Firebase's JS before they see the page at all.
+    getFirebase().then((fb) => {
+      if (cancelled) return;
+      unsubscribe = fb.onAuthChange(async (firebaseUser) => {
+        setUser(firebaseUser);
+        if (!firebaseUser) return;
+        // First time we see this signed-in user this session: merge
+        // whatever is already saved/liked in THIS browser's localStorage
+        // with whatever's already in their account (e.g. saved from
+        // another device) -- a union of both, written back to both places,
+        // so nothing either side already has gets lost. Per Brian's
+        // explicit choice when this was proposed: merge, don't overwrite.
+        try {
+          const cloud = await fb.fetchCloudLists(firebaseUser.uid);
+          const mergedSaved = Array.from(new Set([...cloud.savedPostIds, ...getSavedPostIds()]));
+          const mergedLiked = Array.from(new Set([...cloud.likedPostIds, ...getLikedPostIds()]));
+          window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(mergedSaved));
+          window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(mergedLiked));
+          await fb.writeCloudLists(firebaseUser.uid, { savedPostIds: mergedSaved, likedPostIds: mergedLiked });
+          // Every PostCard/SinglePostView reads saved/liked state via a
+          // useState initializer (isPostSaved/isPostLiked), which only runs
+          // once on mount -- a background merge after mount wouldn't
+          // otherwise be reflected without this. A full reload is simple,
+          // cheap for a static SPA, and guarantees every already-mounted
+          // component picks up the merged localStorage the same way a
+          // normal page load already does everywhere else in this app.
+          window.location.reload();
+        } catch {
+          // Offline, or Firestore rules not yet published -- sign-in itself
+          // still succeeded (setUser already ran above), just without a
+          // sync this time. Not fatal; the next toggle or reload retries.
+        }
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
 
   const toggleDark = () => {
     setDark((d) => {
@@ -4465,6 +4615,22 @@ export default function GospelLensApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Sign-in itself doesn't need to do anything beyond call Firebase --
+  // the useEffect above (onAuthChange) picks up the resulting signed-in
+  // user and runs the merge. Errors here are almost always the visitor
+  // closing the Google popup themselves, not worth surfacing as an error.
+  const handleSignIn = () => {
+    getFirebase()
+      .then((fb) => fb.signInWithGoogle())
+      .catch(() => {});
+  };
+
+  const handleSignOut = () => {
+    getFirebase()
+      .then((fb) => fb.signOutOfGoogle())
+      .catch(() => {});
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F7F3] dark:bg-[#14161B] flex flex-col transition-colors duration-300">
       <style>{`
@@ -4500,7 +4666,18 @@ export default function GospelLensApp() {
         }
       `}</style>
 
-      <Nav view={view} setView={changeView} menuOpen={menuOpen} setMenuOpen={setMenuOpen} onSearch={handleNavSearch} dark={dark} toggleDark={toggleDark} />
+      <Nav
+        view={view}
+        setView={changeView}
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        onSearch={handleNavSearch}
+        dark={dark}
+        toggleDark={toggleDark}
+        user={user}
+        onSignIn={handleSignIn}
+        onSignOut={handleSignOut}
+      />
 
       <main className="flex-1">
         {view === "home" && <HomeView setView={changeView} openPost={openPost} openReadingPlan={openReadingPlan} />}
@@ -4519,8 +4696,8 @@ export default function GospelLensApp() {
             cameFromPlan={cameFromPlan}
           />
         )}
-        {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} />}
-        {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} />}
+        {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
+        {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
         {view === "readingplan" && <ReadingPlanView openPlanPost={openPlanPost} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>

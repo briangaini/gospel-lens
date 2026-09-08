@@ -34,6 +34,16 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,xml,txt}"],
+        // The Firebase chunk (see src/App.jsx's getFirebase()) is
+        // deliberately loaded via a lazy dynamic import(), not bundled into
+        // the main JS, specifically so the vast majority of visitors who
+        // never sign in never have to download it. Precaching it here would
+        // undo that for anyone with the PWA installed -- it'd download in
+        // the background on every install/update whether or not that
+        // person ever uses sign-in. Excluded from the precache list; it's
+        // still fetched (and then cached by the browser normally) the
+        // moment someone actually clicks "Sign in with Google."
+        globIgnores: ["**/assets/firebase-*.js"],
       },
     }),
   ],
