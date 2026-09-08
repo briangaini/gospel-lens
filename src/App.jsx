@@ -39,7 +39,25 @@ import {
 // memoizes the import so it only ever fetches once per page load.
 let firebaseModulePromise = null;
 function getFirebase() {
-  if (!firebaseModulePromise) firebaseModulePromise = import("./firebase");
+  if (!firebaseModulePromise) {
+    // If the dynamic import itself fails -- e.g. a visitor's browser is
+    // still holding an older cached page from before a deploy, whose main
+    // bundle references a chunk filename that a newer deploy no longer
+    // serves (verified directly: Vercel returns a genuine 404 for an old
+    // deploy's asset once a newer one has superseded it, not a soft
+    // fallback) -- fall back to a full page reload, which fetches the
+    // current index.html and therefore the current, correct chunk
+    // references, self-healing the same way the site's existing PWA
+    // auto-update mechanism already does for the main bundle itself.
+    // Without this, a failed import here left "Sign in with Google"
+    // silently doing nothing at all -- no error, no feedback, just a
+    // dead button -- which is worse than a visible reload.
+    firebaseModulePromise = import("./firebase").catch((err) => {
+      firebaseModulePromise = null;
+      window.location.reload();
+      throw err;
+    });
+  }
   return firebaseModulePromise;
 }
 
