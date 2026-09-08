@@ -104,8 +104,29 @@ function loadTopics(src) {
       .map((s) => s.trim())
       .filter(Boolean)
       .map(Number);
-    topics.push({ name, ids, slug: slugify(name) });
+    topics.push({ name, ids, slug: slugify(name), description: null });
   }
+
+  // TOPIC_DESCRIPTIONS (added 2026-09-08) -- a real per-topic description,
+  // shown on TopicView and reused here as that page's meta description
+  // instead of a generic "N posts about X" line. Same regex-extraction
+  // approach as everything else in this file, deliberately not importing
+  // the module.
+  const descStart = src.indexOf("const TOPIC_DESCRIPTIONS = {");
+  if (descStart !== -1) {
+    const descEnd = src.indexOf("\n};", descStart);
+    const descBlock = src.slice(descStart, descEnd);
+    const descRe = /"([^"]+)":\s*"([^"]*)"/g;
+    const descriptions = {};
+    let dm;
+    while ((dm = descRe.exec(descBlock))) {
+      descriptions[dm[1]] = dm[2];
+    }
+    for (const topic of topics) {
+      if (descriptions[topic.name]) topic.description = descriptions[topic.name];
+    }
+  }
+
   return topics;
 }
 
@@ -430,9 +451,14 @@ async function main() {
   // instead of only existing as a filter chip.
   for (const topic of topics) {
     const count = topic.ids.length;
+    // Real description (TOPIC_DESCRIPTIONS in App.jsx) when there is one --
+    // matches what a visitor actually sees on the page itself, better for
+    // search results than a generic count. Falls back to the old generic
+    // line only if a topic is ever added without a description.
+    const description = topic.description || `${count} ${count === 1 ? "post" : "posts"} on The Gospel Lens about ${topic.name}.`;
     const html = withMeta(template, {
       title: topic.name,
-      description: `${count} ${count === 1 ? "post" : "posts"} on The Gospel Lens about ${topic.name}.`,
+      description,
       url: `${SITE_URL}/topics/${topic.slug}`,
     });
     writeHtml(path.join("topics", topic.slug), html);

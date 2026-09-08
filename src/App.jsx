@@ -1773,6 +1773,25 @@ const POST_TAGS = {
   "Peace": [36, 41],
 };
 
+// A short, real description per topic (added 2026-09-08, per Brian's
+// request) -- shown at the top of TopicView and used as that topic page's
+// meta description in scripts/prerender.js, so a search engine sees the
+// same honest description a visitor does, not a generic "N posts about X."
+// Keep these in sync if a topic name ever changes.
+const TOPIC_DESCRIPTIONS = {
+  "The Gospel Explained": "What the gospel actually is, and why it changes everything — the clearest place to start if any of this is new to you.",
+  "Grace & Assurance": "Why God's acceptance comes first, not last, and how to actually rest in that instead of always wondering if you've done enough.",
+  "Sin & Repentance": "Honest posts on what sin really costs, and what real repentance — not just guilt — looks like.",
+  "Grief & Comfort": "For the seasons that hurt. Loss, sorrow, and where God actually is in the middle of it.",
+  "Purpose & Calling": "What it means to live for something bigger than yourself, and how to find your place in God's story.",
+  "Prayer": "Practical, honest posts on actually talking to God, not just about him.",
+  "Worship": "What worship really is, beyond a Sunday morning — a whole life oriented toward God.",
+  "Friendship": "On the kind of friendship Scripture actually calls us to — costly, loyal, and gospel-shaped.",
+  "Discipline & Growth": "The slow, ordinary work of becoming more like Christ — habits, discipline, and real spiritual growth.",
+  "Identity in Christ": "Who you actually are if you belong to Jesus, and why that matters more than anything else you've been told about yourself.",
+  "Peace": "Real peace — not the absence of trouble, but the presence of God in the middle of it.",
+};
+
 // ---------------------------------------------------------------------------
 // AUTHORS — bio info for contributors whose byline should link somewhere.
 // A post's author only becomes clickable if their name has an entry here.
@@ -3718,7 +3737,10 @@ function TopicView({ topicName, openPost, setView, openTopic }) {
       >
         {topicName}
       </h1>
-      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10">
+      {TOPIC_DESCRIPTIONS[topicName] && (
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[16px] leading-relaxed max-w-xl mb-3">{TOPIC_DESCRIPTIONS[topicName]}</p>
+      )}
+      <p className="text-[#8A8D96] dark:text-[#7C808A] text-[13px] mb-10">
         {posts.length} {posts.length === 1 ? "post" : "posts"} on The Gospel Lens.
       </p>
 
@@ -3794,7 +3816,8 @@ function FromArchiveCard({ openPost }) {
         <Archive size={20} strokeWidth={1.75} className="text-[#B08D57] shrink-0" />
         <div className="min-w-0">
           <span className="text-[10px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold">From the Archive</span>
-          <div className="text-[#F8F7F3] font-medium mt-0.5 truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <p className="text-[12px] text-[#8A8D96] mt-0.5 mb-1.5">A post worth another look — resurfaced from the archive here each week.</p>
+          <div className="text-[#F8F7F3] font-medium truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
             {post.title}
           </div>
           <span className="text-[11px] text-[#8A8D96]">Originally published {post.date}</span>
