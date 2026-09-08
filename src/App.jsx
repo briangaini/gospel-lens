@@ -2506,7 +2506,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
               {user ? (
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6] truncate">
-                    Synced as {user.email}
+                    Signed in as {user.email}
                   </span>
                   <button
                     onClick={() => { onSignOut(); setMenuOpen(false); }}
