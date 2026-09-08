@@ -22,7 +22,7 @@
 
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBTU34vwUnRvJreTLVEUdSt4H1fJyUsf_o",
@@ -63,20 +63,34 @@ function userDocRef(uid) {
   return doc(db, "users", uid);
 }
 
-export async function fetchCloudLists(uid) {
-  const snap = await getDoc(userDocRef(uid));
-  if (!snap.exists()) return { savedPostIds: [], likedPostIds: [] };
-  const data = snap.data();
-  return {
-    savedPostIds: Array.isArray(data.savedPostIds) ? data.savedPostIds : [],
-    likedPostIds: Array.isArray(data.likedPostIds) ? data.likedPostIds : [],
-  };
+// Live subscription, not a one-time read -- added 2026-09-08 after Brian
+// found that a change made on one device (e.g. saving a post on his
+// laptop) took "many refreshes and some time" to show up on another
+// device (his phone). The original design only ever read the cloud lists
+// once, at the moment of signing in -- after that, a browser tab had no
+// way to learn about a change made elsewhere short of a fresh sign-in.
+// onSnapshot instead keeps pushing the current server state to every
+// subscribed callback as it changes, typically within a second or two of
+// a write landing anywhere. Returns the unsubscribe function.
+export function subscribeToCloudLists(uid, callback) {
+  return onSnapshot(userDocRef(uid), (snap) => {
+    if (!snap.exists()) {
+      callback({ savedPostIds: [], likedPostIds: [] });
+      return;
+    }
+    const data = snap.data();
+    callback({
+      savedPostIds: Array.isArray(data.savedPostIds) ? data.savedPostIds : [],
+      likedPostIds: Array.isArray(data.likedPostIds) ? data.likedPostIds : [],
+    });
+  });
 }
 
 // Overwrites the whole document with the given lists. Used both for the
-// one-time merge on first sign-in and for every subsequent toggle -- these
-// lists are small (a handful of post ids at most), so a full overwrite is
-// simpler and cheap, not worth the complexity of arrayUnion/arrayRemove.
+// merge reconciliation in App.jsx's onAuthChange handler and for every
+// individual save/like toggle -- these lists are small (a handful of post
+// ids at most), so a full overwrite is simpler and cheap, not worth the
+// complexity of arrayUnion/arrayRemove.
 export async function writeCloudLists(uid, { savedPostIds, likedPostIds }) {
   await setDoc(userDocRef(uid), { savedPostIds, likedPostIds }, { merge: true });
 }

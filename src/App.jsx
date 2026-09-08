@@ -2002,12 +2002,70 @@ function toggleSavedPost(postId) {
 
 const LIKED_POSTS_KEY = "gospel-lens-liked-posts";
 
-// sessionStorage (not localStorage) flag guarding the one-time cloud merge
-// on sign-in, keyed to the signed-in uid -- see the onAuthChange handler in
-// GospelLensApp. sessionStorage specifically because it should reset for a
-// genuinely new browser tab/session, but survive the reload that handler
-// itself triggers.
-const CLOUD_MERGE_FLAG_KEY = "gospel-lens-cloud-merged-uid";
+// A tiny cached { email } object (NOT the real Firebase user, just enough
+// to render correctly), written every time a real sign-in is confirmed and
+// cleared on sign-out. Purely a UI optimization -- see the `user` useState
+// initializer in GospelLensApp for why this exists: Firebase is lazy-
+// loaded for page-weight reasons (see getFirebase() above), so on every
+// page load there's a real gap, however brief, before the app actually
+// knows whether someone's signed in. Without this cache, a returning
+// signed-in visitor would see the "not signed in" copy flash for a moment
+// on every single page load/refresh before flipping to the real state --
+// exactly what Brian reported. Seeding the initial state from this cache
+// means a repeat signed-in visitor sees the correct copy from the very
+// first render, and Firebase's real check (once it loads) just quietly
+// confirms it rather than visibly correcting it.
+const CACHED_USER_KEY = "gospel-lens-cached-user";
+
+// Order-independent equality for two arrays of post ids -- used to decide
+// whether an incoming cloud update actually changes anything worth acting
+// on. Comparing plain arrays index-by-index would treat differently-
+// ordered-but-identical sets as "different" and cause needless writes/
+// reloads; these lists are conceptually sets, not ordered lists.
+function sameIdSet(a, b) {
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].sort((x, y) => x - y);
+  const sortedB = [...b].sort((x, y) => x - y);
+  return sortedA.every((v, i) => v === sortedB[i]);
+}
+
+// Persisted (localStorage, not sessionStorage) list of uids this specific
+// browser has already run its one-time "merge local into the account"
+// reconciliation for -- see the onSnapshot handler in GospelLensApp for
+// why this needs to be permanent, not per-session. A pure union-merge is
+// safe to run once, to fold in whatever was saved/liked locally before
+// ever signing in -- but a union can only ever ADD, never remove, so
+// running it on EVERY incoming update would silently resurrect a post
+// unsaved/unliked on another device the next time this browser reloads
+// with stale local data (a real second bug caught before shipping, not
+// hypothetical -- verified directly: stale local [1,2,3] plus a cloud
+// that had already dropped to [1,2] after a removal elsewhere produces a
+// union of [1,2,3], which would get written straight back to the cloud,
+// undoing the removal). Past that one genuine first-contact merge, every
+// later update trusts the cloud's exact contents instead -- see below.
+const MERGED_UIDS_KEY = "gospel-lens-merged-uids";
+
+function hasMergedUid(uid) {
+  try {
+    const raw = window.localStorage.getItem(MERGED_UIDS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) && parsed.includes(uid);
+  } catch {
+    return false;
+  }
+}
+
+function markUidMerged(uid) {
+  try {
+    const raw = window.localStorage.getItem(MERGED_UIDS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    const ids = Array.isArray(parsed) ? parsed : [];
+    if (!ids.includes(uid)) {
+      ids.push(uid);
+      window.localStorage.setItem(MERGED_UIDS_KEY, JSON.stringify(ids));
+    }
+  } catch {}
+}
 
 function getLikedPostIds() {
   if (typeof window === "undefined") return [];
@@ -4382,11 +4440,23 @@ export default function GospelLensApp() {
   // can follow someone across devices/browsers instead of living only in
   // one browser's localStorage -- see src/firebase.js for the "why" and
   // what this deliberately does NOT touch (dark mode, read history stay
-  // local-only; Brian only asked about saved/liked).
-  const [user, setUser] = useState(null);
+  // local-only; Brian only asked about saved/liked). Seeded from a cached
+  // { email } (see CACHED_USER_KEY above), not always null, so a repeat
+  // signed-in visitor's very first render already shows the right sign-in
+  // state instead of a "not signed in" flash that then corrects itself
+  // once Firebase's real, lazily-loaded check resolves a moment later.
+  const [user, setUser] = useState(() => {
+    try {
+      const cached = window.localStorage.getItem(CACHED_USER_KEY);
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
-    let unsubscribe = () => {};
+    let unsubscribeAuth = () => {};
+    let unsubscribeSnapshot = () => {};
     let cancelled = false;
     // getFirebase() runs inside this effect (not at module load), so it
     // fires after the initial page has already rendered -- not before or
@@ -4399,72 +4469,91 @@ export default function GospelLensApp() {
     // Firebase's JS before they see the page at all.
     getFirebase().then((fb) => {
       if (cancelled) return;
-      unsubscribe = fb.onAuthChange(async (firebaseUser) => {
+      unsubscribeAuth = fb.onAuthChange((firebaseUser) => {
         setUser(firebaseUser);
+        // Tear down any previous doc subscription first -- covers signing
+        // out, and signing into a *different* account without a full page
+        // reload in between.
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = () => {};
+
         if (!firebaseUser) {
-          // Signed out: clear the merge flag below so a later sign-in
-          // (same tab, same or different account) merges fresh instead of
-          // being skipped as "already done."
           try {
-            window.sessionStorage.removeItem(CLOUD_MERGE_FLAG_KEY);
+            window.localStorage.removeItem(CACHED_USER_KEY);
           } catch {}
           return;
         }
-        // `onAuthStateChanged` fires with the CURRENT user on every single
-        // page load while someone's signed in (Firebase persists the
-        // session) -- not just once at the moment they actually sign in.
-        // A real bug shipped here at first: this whole block ran on every
-        // load with no guard, and since it ends in reload(), that meant
-        // sign in -> merge -> reload -> page loads -> "already signed in"
-        // -> merge -> reload -> ... forever. Brian hit this live ("it
-        // crashes," "glitching to previous text and newer text" -- exactly
-        // what a reload loop looks like from the outside). Fixed with a
-        // sessionStorage flag so the merge+reload below only ever runs
-        // once per actual new sign-in in a given browser tab, not on every
-        // subsequent page load while that sign-in persists.
-        let alreadyMergedThisSignIn = false;
         try {
-          alreadyMergedThisSignIn = window.sessionStorage.getItem(CLOUD_MERGE_FLAG_KEY) === firebaseUser.uid;
+          window.localStorage.setItem(CACHED_USER_KEY, JSON.stringify({ email: firebaseUser.email }));
         } catch {}
-        if (alreadyMergedThisSignIn) return;
 
-        // Merge whatever is already saved/liked in THIS browser's
-        // localStorage with whatever's already in their account (e.g.
-        // saved from another device) -- a union of both, written back to
-        // both places, so nothing either side already has gets lost. Per
-        // Brian's explicit choice when this was proposed: merge, don't
-        // overwrite.
-        try {
-          const cloud = await fb.fetchCloudLists(firebaseUser.uid);
-          const mergedSaved = Array.from(new Set([...cloud.savedPostIds, ...getSavedPostIds()]));
-          const mergedLiked = Array.from(new Set([...cloud.likedPostIds, ...getLikedPostIds()]));
-          window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(mergedSaved));
-          window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(mergedLiked));
-          await fb.writeCloudLists(firebaseUser.uid, { savedPostIds: mergedSaved, likedPostIds: mergedLiked });
-          // Record the merge BEFORE reloading, so the reload's own
-          // onAuthChange firing sees the flag already set and stops here
-          // instead of merging (and reloading) again.
-          try {
-            window.sessionStorage.setItem(CLOUD_MERGE_FLAG_KEY, firebaseUser.uid);
-          } catch {}
+        // Live subscription, not a one-time read -- added 2026-09-08 after
+        // Brian found a change made on one device took "many refreshes and
+        // some time" to reach another. This fires immediately with the
+        // current server state, then again every time the doc actually
+        // changes (from any device, including this one's own writes).
+        //
+        // Two deliberately different phases, not the same logic every
+        // time -- caught a real second bug before shipping by actually
+        // tracing a removal scenario, not just an addition: a pure union-
+        // merge run on every event can only ever ADD ids, never remove
+        // them, so if this were unconditional, unsaving a post on one
+        // device would get silently undone the next time ANY other device
+        // reloaded with stale local data (verified directly: stale local
+        // [1,2,3] plus a cloud that had already dropped to [1,2] unions
+        // back to [1,2,3] and gets written straight back to the cloud).
+        //
+        // - The FIRST time this browser ever sees THIS uid's cloud data
+        //   (tracked permanently via hasMergedUid/markUidMerged, not per
+        //   session) -- union-merge cloud with whatever's already saved/
+        //   liked locally, so nothing saved before ever signing in gets
+        //   lost. This is the one and only place a removal can be
+        //   silently "undone," and only for the narrow, one-time case of
+        //   reconciling pre-existing local data into a fresh account.
+        // - Every event after that first one, on this device, forever --
+        //   trust the cloud's exact contents directly, no union. This is
+        //   what actually lets a removal made elsewhere propagate
+        //   correctly, and is safe for this device's OWN pending writes
+        //   too: Firestore's snapshot listener reflects a client's own
+        //   in-flight write immediately (not just after server
+        //   confirmation), so by the time this fires for a local toggle,
+        //   `cloud` already matches what was just written locally.
+        unsubscribeSnapshot = fb.subscribeToCloudLists(firebaseUser.uid, (cloud) => {
+          const localSaved = getSavedPostIds();
+          const localLiked = getLikedPostIds();
+
+          let nextSaved = cloud.savedPostIds;
+          let nextLiked = cloud.likedPostIds;
+
+          if (!hasMergedUid(firebaseUser.uid)) {
+            nextSaved = Array.from(new Set([...cloud.savedPostIds, ...localSaved]));
+            nextLiked = Array.from(new Set([...cloud.likedPostIds, ...localLiked]));
+            const cloudNeedsUpdate = !sameIdSet(nextSaved, cloud.savedPostIds) || !sameIdSet(nextLiked, cloud.likedPostIds);
+            if (cloudNeedsUpdate) {
+              fb.writeCloudLists(firebaseUser.uid, { savedPostIds: nextSaved, likedPostIds: nextLiked }).catch(() => {});
+            }
+            markUidMerged(firebaseUser.uid);
+          }
+
+          const localNeedsUpdate = !sameIdSet(nextSaved, localSaved) || !sameIdSet(nextLiked, localLiked);
+          if (!localNeedsUpdate) return;
+          window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(nextSaved));
+          window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(nextLiked));
           // Every PostCard/SinglePostView reads saved/liked state via a
           // useState initializer (isPostSaved/isPostLiked), which only runs
-          // once on mount -- a background merge after mount wouldn't
+          // once on mount -- a background update after mount wouldn't
           // otherwise be reflected without this. A full reload is simple,
           // cheap for a static SPA, and guarantees every already-mounted
-          // component picks up the merged localStorage the same way a
-          // normal page load already does everywhere else in this app.
+          // component picks up the change the same way a normal page load
+          // already does everywhere else in this app.
           window.location.reload();
-        } catch {
-          // Offline, or Firestore rules not yet published -- sign-in itself
-          // still succeeded (setUser already ran above), just without a
-          // sync this time. Not fatal; the next toggle or reload retries.
-        }
+        });
       });
     });
     return () => {
       cancelled = true;
-      unsubscribe();
+      unsubscribeSnapshot();
+      unsubscribeAuth();
     };
   }, []);
 
