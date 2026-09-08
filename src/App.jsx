@@ -1745,6 +1745,71 @@ const POSTS = [
       { type: "prayer", text: "God, I now realize that eternal life began the moment I accepted your free gifts of grace and salvation. As I follow You, please help me to remember to look up to have an eternal mindset. Give me the wisdom to be mindful of heaven as I'm living here on earth. In Jesus' name, Amen." },
     ],
   },
+  {
+    id: 45,
+    title: "What Humility Actually Looks Like",
+    author: null,
+    date: "September 8, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Humility is often mistaken for insecurity — but insecurity is actually a form of pride. What real humility costs, and why it leads to abundant life instead of away from it.",
+    blocks: [
+      p("When you think of humility, what comes to mind?"),
+      p("In our world, humility is often seen as a self-degrading concept that reveals our insecurities and keeps us from becoming our best selves."),
+      p("But true humility never leads to insecurity, because insecurity is a form of pride. Pride either puffs us up or tears us down. Pride is self-sufficient, but also self-destructive. If we're doing great, pride makes our confidence soar. But if we're going through a rough season, pride makes us sensitive to our failures. Pride links our worth to our accomplishments, and it prevents us from seeing who we truly are."),
+      p("Pride makes us think that if we try hard enough, we can become good enough. Humility helps us realize that we are not enough—but God is enough for us."),
+      p("Humility will often ask us to risk something. It might mean laying down our social standing, our reputation, our financial security, our sense of authority, or our expertise."),
+      p("But surrendering our self-sufficiency lets us embrace God's authority. And our God did miracles through Moses, established David as king of Israel, worked through Isaiah in the midst of chaos, publicly honored Mary, abundantly provided for Peter, and glorified Jesus by raising Him from the dead."),
+      p("When we surrender ourselves to God, we allow Him to be glorified through us. Humility might cost us something—but it leads to abundant life."),
+      {
+        type: "reflection",
+        items: [
+          "So today, how can you humble yourself before God? Take a few moments and process what you need to lay down in order to draw closer to God within the upcoming weeks.",
+        ],
+      },
+    ],
+  },
+  {
+    id: 46,
+    title: "In Adam or In Christ",
+    author: "Jonny Ardavanis",
+    date: "September 7, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "Every person who has ever lived is in one of two categories — in Adam, or in Christ. There's no spiritual Switzerland. What the two Adams mean for your identity, your struggle with temptation, and your eternal destiny.",
+    blocks: [
+      p("Do you want to know why so many Christians have difficulty overcoming temptation? Do you want to know why so many Christians are riddled with doubt about their identity? Do you want to know why so many Christians are sapped of spiritual strength? It is because they are ignorant of—or have forgotten—who they are in Christ."),
+      { type: "quote", text: "If Satan can keep us ignorant, he can keep us impotent.", attribution: "John Wearsby" },
+      {
+        type: "scripture",
+        reference: "1 Corinthians 15:22; Romans 5:12, 17-19; 2 Corinthians 5:17",
+        verses: [
+          "For as in Adam all die, so also in Christ all will be made alive.",
+          "For if by the transgression of the one, death reigned through the one, much more those who receive the abundance of grace and of the gift of righteousness will reign in life through the one, Jesus Christ.",
+          "If anyone is in Christ, he is a new creation.",
+        ],
+      },
+      p("Every single person reading this—every single person you have ever met or will ever meet—is in one of two categories. They are either in Adam or they are in Christ. There is no spiritual Switzerland."),
+      p("Romans 5:12: \"Therefore, just as through one man sin entered into the world, and death through sin, and so death spread to all men because all sinned.\" That word for one is used eleven times in Romans 5. This is a real historical man at a real point in history. Adam. And every single person born into this world is born in Adam—sharing the same fate, the same status of doom."),
+      p("How do we know we are born in Adam? Because we all sin and we all die. The Bible is the only book that makes any logical sense of the world in which we live."),
+      p("Think about Genesis 5 - it begins by saying, \"Here are the generations of Adam.\" And then over and over again throughout the chapter you read, \"and then he died... and then he died... and then he died.\" All of Adam's sons, grandsons, great-grandsons, what? Die. You could live as long as Methuselah—and then you're going to die. The Bible wants you to grasp something obvious: people die because they are born in sin."),
+      p("But here is the grand story of Scripture. The Old Testament begins with \"the generations of Adam\"—and ends with a curse. The New Testament begins with \"the generations of Jesus\"—and ends by saying the curse is no more."),
+      p("Because there is a second Adam. One who does what the first Adam failed to do. He obeys God perfectly. Adam ushers in death. Jesus ushers in life. Adam ushers in condemnation and judgment. Jesus brings in resurrection, justification, sanctification, glorification."),
+      p("And the gospel is this: those who are in Adam can now be in Christ."),
+      p("Second Corinthians 5:17—\"If anyone is in Christ, he is a new creation.\" Not just clean. Not just reformed. Not just rinsed. Absolutely, totally, radically new."),
+      {
+        type: "reflection",
+        items: [
+          "Are you in Adam or in Christ? That is not a question to answer casually — your eternal destiny hinges on it.",
+          "Do you truly understand that by nature you are born in Adam — not neutral, but under condemnation?",
+          "Have you come to Jesus Christ — the second Adam — who breaks the curse and clothes you with His righteousness?",
+        ],
+      },
+      { type: "heart", text: "By nature I am in Adam. By grace through faith I am in Christ. The old me is dead. The curse is broken. The second Adam has won." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
