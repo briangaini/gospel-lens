@@ -2002,6 +2002,13 @@ function toggleSavedPost(postId) {
 
 const LIKED_POSTS_KEY = "gospel-lens-liked-posts";
 
+// sessionStorage (not localStorage) flag guarding the one-time cloud merge
+// on sign-in, keyed to the signed-in uid -- see the onAuthChange handler in
+// GospelLensApp. sessionStorage specifically because it should reset for a
+// genuinely new browser tab/session, but survive the reload that handler
+// itself triggers.
+const CLOUD_MERGE_FLAG_KEY = "gospel-lens-cloud-merged-uid";
+
 function getLikedPostIds() {
   if (typeof window === "undefined") return [];
   try {
@@ -4394,13 +4401,39 @@ export default function GospelLensApp() {
       if (cancelled) return;
       unsubscribe = fb.onAuthChange(async (firebaseUser) => {
         setUser(firebaseUser);
-        if (!firebaseUser) return;
-        // First time we see this signed-in user this session: merge
-        // whatever is already saved/liked in THIS browser's localStorage
-        // with whatever's already in their account (e.g. saved from
-        // another device) -- a union of both, written back to both places,
-        // so nothing either side already has gets lost. Per Brian's
-        // explicit choice when this was proposed: merge, don't overwrite.
+        if (!firebaseUser) {
+          // Signed out: clear the merge flag below so a later sign-in
+          // (same tab, same or different account) merges fresh instead of
+          // being skipped as "already done."
+          try {
+            window.sessionStorage.removeItem(CLOUD_MERGE_FLAG_KEY);
+          } catch {}
+          return;
+        }
+        // `onAuthStateChanged` fires with the CURRENT user on every single
+        // page load while someone's signed in (Firebase persists the
+        // session) -- not just once at the moment they actually sign in.
+        // A real bug shipped here at first: this whole block ran on every
+        // load with no guard, and since it ends in reload(), that meant
+        // sign in -> merge -> reload -> page loads -> "already signed in"
+        // -> merge -> reload -> ... forever. Brian hit this live ("it
+        // crashes," "glitching to previous text and newer text" -- exactly
+        // what a reload loop looks like from the outside). Fixed with a
+        // sessionStorage flag so the merge+reload below only ever runs
+        // once per actual new sign-in in a given browser tab, not on every
+        // subsequent page load while that sign-in persists.
+        let alreadyMergedThisSignIn = false;
+        try {
+          alreadyMergedThisSignIn = window.sessionStorage.getItem(CLOUD_MERGE_FLAG_KEY) === firebaseUser.uid;
+        } catch {}
+        if (alreadyMergedThisSignIn) return;
+
+        // Merge whatever is already saved/liked in THIS browser's
+        // localStorage with whatever's already in their account (e.g.
+        // saved from another device) -- a union of both, written back to
+        // both places, so nothing either side already has gets lost. Per
+        // Brian's explicit choice when this was proposed: merge, don't
+        // overwrite.
         try {
           const cloud = await fb.fetchCloudLists(firebaseUser.uid);
           const mergedSaved = Array.from(new Set([...cloud.savedPostIds, ...getSavedPostIds()]));
@@ -4408,6 +4441,12 @@ export default function GospelLensApp() {
           window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(mergedSaved));
           window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(mergedLiked));
           await fb.writeCloudLists(firebaseUser.uid, { savedPostIds: mergedSaved, likedPostIds: mergedLiked });
+          // Record the merge BEFORE reloading, so the reload's own
+          // onAuthChange firing sees the flag already set and stops here
+          // instead of merging (and reloading) again.
+          try {
+            window.sessionStorage.setItem(CLOUD_MERGE_FLAG_KEY, firebaseUser.uid);
+          } catch {}
           // Every PostCard/SinglePostView reads saved/liked state via a
           // useState initializer (isPostSaved/isPostLiked), which only runs
           // once on mount -- a background merge after mount wouldn't
