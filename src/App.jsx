@@ -1810,6 +1810,51 @@ const POSTS = [
       { type: "heart", text: "By nature I am in Adam. By grace through faith I am in Christ. The old me is dead. The curse is broken. The second Adam has won." },
     ],
   },
+  {
+    id: 47,
+    title: "Reckon Yourself Dead to Sin",
+    author: "Jonny Ardavanis",
+    date: "September 9, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "The New Testament never tells you to become dead to sin — it tells you that you already are, and to reckon it true. What that means for temptation, Christian liberty, and the joy of obedience.",
+    blocks: [
+      p('The term "Christian" is used three times in the New Testament—and all three times as a mocking derision. But the phrase "in Christ" appears nearly 200 times. That is not an accident. That is the grand thrust of the New Testament.'),
+      {
+        type: "quote",
+        text: "God loves you no more on your best day than He does on your worst day. Because God's love was never dispensed to you because of you—but in spite of you.",
+        attribution: "Jonny Ardavanis",
+      },
+      {
+        type: "scripture",
+        reference: "Romans 6:11; Romans 6:1-7; Colossians 3:3",
+        verses: [
+          "Even so, consider yourselves to be dead to sin, but alive to God in Christ Jesus.",
+          "How shall we who died to sin still live in it?",
+          "For you have died and your life is hidden with Christ in God.",
+        ],
+      },
+      p("Romans 6:11—\"Even so, consider yourselves dead to sin, but alive to God in Christ Jesus.\" That word consider—it can be translated reckon, count, calculate. Paul says this 41 times in the New Testament, 19 times in Romans alone. Reckon this to be an actual fact."),
+      p("And I am very thankful it doesn't say experience this to be true. Because it's not about our experience. It's about taking God at His word."),
+      p("God does not tell you to become dead to sin. He tells you that you are dead to sin—and you have to reckon that to be a fact."),
+      p("Your old self—who you were before Christ—was crucified with Him in order that your body of sin might be done away with, so that you would no longer be slaves to sin. He who has died is freed from sin."),
+      p("Colossians 3:3 says, \"For you have died and your life is hidden with Christ in God.\" Your life is so wrapped up in Christ that there is no such concept in the New Testament as a once-a-week follower of Jesus. You've died. And your life is hidden—wrapped up—in Christ."),
+      p("Now here is the implication of all this. A lot of talk goes around about Christian liberty. But Christian liberty is not freedom to sin. It is freedom from sin (Tozer). You have been set free. You are no longer in Adam. Therefore, sin is not only ungodly—it's illogical. Why? Because you are dead to it."),
+      p("Paul asks in Romans 6:1, \"Are we to continue in sin so that grace may increase?\" Should I just take the grace of God, use it like a credit card I swipe whenever I want to sin? No. Paul says that idea is unthinkable—the strongest form of Greek repudiation. How shall we who have died to sin still live in it?"),
+      p("A Christian should find more joy in obedience than the prodigal ever had in his iniquity. If you've truly tasted God's grace, you will not want to abuse it."),
+      p("As you flee from temptation—you can look over your shoulder and say, \"I'm dead to you. Absolutely dead to that sin. No power over me.\" Why? Because Jesus didn't just die for sin. He died to sin—which means He rendered it powerless over those whose life is hidden with Christ in God."),
+      {
+        type: "reflection",
+        items: [
+          "Are you reckoning yourself dead to sin—taking God at His word—or are you still living as if the old you is alive and in charge?",
+          "When temptation comes, do you flee from it with the confidence that you are dead to it in Christ?",
+          "Is there an area of habitual sin in your life that suggests you've forgotten who you are in Christ?",
+        ],
+      },
+      { type: "heart", text: "I am dead to sin. Not dying to it. Dead. It has no power over me because I am in Christ and He is in me. I reckon this to be true." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
