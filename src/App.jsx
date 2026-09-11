@@ -3251,16 +3251,33 @@ function PostBody({ blocks, post, openScriptureIndex }) {
                     corner, on purpose: his direct feedback on the first
                     version of this button was that it read too long/big
                     sitting next to "Share this verse" -- moved here,
-                    icon-only, opposite the label instead. */}
+                    icon-only, opposite the label instead.
+
+                    The hover label is hand-built with group-hover, not the
+                    native `title` attribute -- Brian asked for a real "on
+                    hover it reads Scripture Index, on mouse-out it
+                    disappears" tooltip (2026-09-11). A browser's native
+                    title tooltip is unreliable exactly where this site is
+                    also used: installed as a desktop app, its OS-level
+                    tooltip rendering isn't guaranteed the same way it is in
+                    a normal browser tab. This one is plain CSS, so it works
+                    identically either way. */}
                 {openScriptureIndex && (
-                  <button
-                    onClick={openScriptureIndex}
-                    aria-label="View Scripture Index"
-                    title="View Scripture Index — every verse cited on this site"
-                    className="no-print shrink-0 w-6 h-6 -mt-0.5 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
-                  >
-                    <List size={13} strokeWidth={2} />
-                  </button>
+                  <div className="relative shrink-0 -mt-0.5">
+                    <button
+                      onClick={openScriptureIndex}
+                      aria-label="View Scripture Index"
+                      className="group/tooltip no-print relative w-6 h-6 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
+                    >
+                      <List size={13} strokeWidth={2} />
+                      <span
+                        role="tooltip"
+                        className="no-print pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded-sm bg-[#1C1F26] dark:bg-[#F2F1EC] px-2 py-1 text-[11px] font-medium text-[#F8F7F3] dark:text-[#1C1F26] opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100 transition-opacity duration-150 z-10"
+                      >
+                        Scripture Index
+                      </span>
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="space-y-3">
@@ -3931,7 +3948,7 @@ function NotFoundView({ setView, openPost }) {
   );
 }
 
-function CollectionView({ authorName, openPost, setView }) {
+function CollectionView({ authorName, openPost, setView, goBack }) {
   const info = AUTHORS[authorName];
   if (!info) return null;
 
@@ -3940,11 +3957,11 @@ function CollectionView({ authorName, openPost, setView }) {
   return (
     <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
-        onClick={() => setView("blog")}
+        onClick={() => goBack("blog")}
         className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
-        Back to Blogs
+        Back
       </button>
 
       <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Teaching From</p>
@@ -4074,18 +4091,18 @@ function buildScriptureIndex() {
 // a mocked demo first (per Brian's ask to see anything visual before it's
 // built), including his explicit correction from the first pass: one
 // shared index page grouped by book, not a separate page per verse.
-function ScriptureIndexView({ openPost, setView }) {
+function ScriptureIndexView({ openPost, setView, goBack }) {
   const groups = useMemo(() => buildScriptureIndex(), []);
   const total = groups.reduce((sum, g) => sum + g.entries.length, 0);
 
   return (
     <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
-        onClick={() => setView("blog")}
+        onClick={() => goBack("blog")}
         className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
-        Back to Blogs
+        Back
       </button>
 
       <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Scripture Index</p>
@@ -4144,7 +4161,7 @@ function ScriptureIndexView({ openPost, setView }) {
 // other topic, so a visitor can jump straight between topics without ever
 // going back to Blogs first -- Brian asked specifically that switching
 // topics not force a round trip through the Blogs page.
-function TopicView({ topicName, openPost, setView, openTopic }) {
+function TopicView({ topicName, openPost, setView, openTopic, goBack }) {
   const posts = postsByTag(topicName);
   if (posts.length === 0) return null;
 
@@ -4153,11 +4170,11 @@ function TopicView({ topicName, openPost, setView, openTopic }) {
   return (
     <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
-        onClick={() => setView("blog")}
+        onClick={() => goBack("blog")}
         className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
-        Back to Blogs
+        Back
       </button>
 
       <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Topic</p>
@@ -4638,7 +4655,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex }) {
+function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
@@ -4695,11 +4712,11 @@ function SinglePostView({ post, setView, openPost, openPlanPost, openCollection,
       <ReadingProgress />
       <div className="max-w-2xl mx-auto px-6 sm:px-8">
         <button
-          onClick={() => setView("blog")}
+          onClick={() => goBack("blog")}
           className="no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
         >
           <ArrowLeft size={15} strokeWidth={2} />
-          Back to Blogs
+          Back
         </button>
 
         {isPlanPost && (
@@ -4830,11 +4847,11 @@ function SinglePostView({ post, setView, openPost, openPlanPost, openCollection,
 
         <div className="no-print mt-8">
           <button
-            onClick={() => setView("blog")}
+            onClick={() => goBack("blog")}
             className="inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] hover:text-[#4A5D4E] transition-colors duration-300"
           >
             <ArrowLeft size={15} strokeWidth={2} />
-            Back to Blogs
+            Back
           </button>
         </div>
       </div>
@@ -4897,6 +4914,22 @@ export default function GospelLensApp() {
   // React state, not persisted -- a reload or a direct link is exactly the
   // "not currently in the plan" case this is meant to catch.
   const [cameFromPlan, setCameFromPlan] = useState(false);
+  // How many of OUR OWN pushState navigations sit behind the current history
+  // entry -- lets goBack() (below) tell "there's an in-app page to return
+  // to" apart from "this is the first thing loaded this session, going back
+  // would leave the site entirely." Read from history.state.navDepth (set
+  // by pushHistoryState below) rather than a plain incrementing counter, so
+  // it stays correct through real forward/back navigation too, not just
+  // our own pushes. Added 2026-09-11 fixing a real Brian report: "Back to
+  // Blogs" always landed on the Blogs list no matter where you actually
+  // came from (e.g. a post reached via the Scripture Index), and he
+  // specifically needs this to work with no dependency on the browser's own
+  // back button, since the site is also used installed as a desktop app,
+  // which has no visible back/forward chrome at all -- window.history.back()
+  // still works perfectly there (it's a plain web-platform API, unrelated
+  // to whether the browser draws a back button), it just needed our own
+  // in-app "Back" buttons to actually call it instead of hardcoding /blog.
+  const navDepthRef = useRef(0);
   const [activeAuthor, setActiveAuthor] = useState(null);
   const [activeTopic, setActiveTopic] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -5092,10 +5125,42 @@ export default function GospelLensApp() {
     });
   };
 
+  // Every forward, in-app navigation goes through this instead of a bare
+  // window.history.pushState(null, ...) -- tagging each entry with how deep
+  // it sits (navDepthRef, see above) is what lets goBack() below tell real
+  // in-app history apart from "nothing to go back to."
+  const pushHistoryState = (url) => {
+    navDepthRef.current += 1;
+    window.history.pushState({ navDepth: navDepthRef.current }, "", url);
+  };
+
+  // Used by every real "Back to Blogs" link (Scripture Index, Topic pages,
+  // Collection pages, a single post) instead of hardcoding a jump straight
+  // to /blog. Added 2026-09-11 -- Brian pointed out that opening a post from
+  // the Scripture Index, then hitting "Back to Blogs," dropped him on the
+  // main Blogs list instead of back on the Scripture Index (and from there,
+  // back on the exact post he was originally reading) -- and that this
+  // needs to work as an in-app button, not just via the browser's own back
+  // button, since he also uses the site installed as a desktop app, which
+  // has no visible back/forward chrome at all. window.history.back() is a
+  // plain web-platform API that works identically either way (it's the
+  // browser drawing a back BUTTON that's optional, not the underlying
+  // session history itself) -- so real in-app history just needed to
+  // actually call it, with a safe fallback for the one case there's nothing
+  // to go back to (e.g. a post opened directly from a shared link, with no
+  // prior in-app navigation this session).
+  const goBack = (fallbackView = "blog") => {
+    if (navDepthRef.current > 0) {
+      window.history.back();
+    } else {
+      changeView(fallbackView);
+    }
+  };
+
   const handleNavSearch = (query) => {
     setNavSearch(query);
     setView("blog");
-    window.history.pushState(null, "", "/blog");
+    pushHistoryState("/blog");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -5107,6 +5172,14 @@ export default function GospelLensApp() {
   // redirect, so links already shared out in the wild keep working.
   useEffect(() => {
     const applyLocation = () => {
+      // Keep navDepthRef in sync with whichever history entry we've actually
+      // landed on -- this runs on the initial load (state is whatever it is,
+      // usually none) AND on every popstate (our own goBack()'s
+      // history.back(), the browser's native back/forward buttons, a
+      // trackpad swipe, etc.), so it stays correct no matter how the user
+      // got here, not just through our own in-app buttons.
+      navDepthRef.current = window.history.state?.navDepth ?? 0;
+
       const path = window.location.pathname.replace(/\/+$/, "") || "/";
       const hash = window.location.hash.replace("#", "");
 
@@ -5225,7 +5298,7 @@ export default function GospelLensApp() {
     setActivePost(post);
     setCameFromPlan(false);
     setView("post");
-    window.history.pushState(null, "", `/${slugify(post.title)}`);
+    pushHistoryState(`/${slugify(post.title)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -5240,27 +5313,27 @@ export default function GospelLensApp() {
     setActivePost(post);
     setCameFromPlan(true);
     setView("post");
-    window.history.pushState(null, "", `/${slugify(post.title)}`);
+    pushHistoryState(`/${slugify(post.title)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const openCollection = (authorName) => {
     setActiveAuthor(authorName);
     setView("collection");
-    window.history.pushState(null, "", `/collection/${slugify(authorName)}`);
+    pushHistoryState(`/collection/${slugify(authorName)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const openTopic = (topicName) => {
     setActiveTopic(topicName);
     setView("topic");
-    window.history.pushState(null, "", `/topics/${slugify(topicName)}`);
+    pushHistoryState(`/topics/${slugify(topicName)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const openReadingPlan = () => {
     setView("readingplan");
-    window.history.pushState(null, "", "/start-here");
+    pushHistoryState("/start-here");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -5269,14 +5342,14 @@ export default function GospelLensApp() {
   // Brian's explicit ask that it not live on the nav or homepage.
   const openScriptureIndex = () => {
     setView("verses");
-    window.history.pushState(null, "", "/verses");
+    pushHistoryState("/verses");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const changeView = (v) => {
     setView(v);
     setMenuOpen(false);
-    window.history.pushState(null, "", v === "home" ? "/" : `/${v}`);
+    pushHistoryState(v === "home" ? "/" : `/${v}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -5348,12 +5421,13 @@ export default function GospelLensApp() {
         {view === "home" && <HomeView setView={changeView} openPost={openPost} openReadingPlan={openReadingPlan} />}
         {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} openTopic={openTopic} />}
         {view === "about" && <AboutView />}
-        {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} />}
-        {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} />}
+        {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} goBack={goBack} />}
+        {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} goBack={goBack} />}
         {view === "post" && (
           <SinglePostView
             post={activePost}
             setView={changeView}
+            goBack={goBack}
             openPost={openPost}
             openPlanPost={openPlanPost}
             openCollection={openCollection}
@@ -5364,7 +5438,7 @@ export default function GospelLensApp() {
         )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
         {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
-        {view === "verses" && <ScriptureIndexView openPost={openPost} setView={changeView} />}
+        {view === "verses" && <ScriptureIndexView openPost={openPost} setView={changeView} goBack={goBack} />}
         {view === "readingplan" && <ReadingPlanView openPlanPost={openPlanPost} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
