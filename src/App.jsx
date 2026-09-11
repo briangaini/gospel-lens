@@ -1855,6 +1855,73 @@ const POSTS = [
       { type: "heart", text: "I am dead to sin. Not dying to it. Dead. It has no power over me because I am in Christ and He is in me. I reckon this to be true." },
     ],
   },
+  {
+    id: 48,
+    title: "Breaking Hard Ground",
+    author: null,
+    date: "September 11, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Israel's hearts had grown hard toward God, and Hosea's answer wasn't more effort — it was breaking up the ground first. What it means to seek the Lord before you expect anything to grow.",
+    blocks: [
+      p("Imagine yourself as a farmer, and your life is a vast field. You sow seeds on soil sparingly, and these seeds represent your intentions, choices, and actions."),
+      p("Hosea uses a similar analogy in Hosea 10:12 to describe God's people. Israel had sown seeds of sin and unrighteousness, causing the soil of their hearts to become unreceptive to God's commands. And right as God's people were about to reap a harvest of God's judgment, the prophet Hosea spoke with urgency:"),
+      {
+        type: "scripture",
+        reference: "Hosea 10:12",
+        verses: [
+          "Sow righteousness for yourselves, reap the fruit of unfailing love, and break up your unplowed ground; for it is time to seek the LORD until he comes and showers his righteousness on you.",
+        ],
+      },
+      p("Just as a farmer reaps far more than they sow, our God promises that we, too, will reap what we sow (Galatians 6:7-9). But, this verse also shows us it's not enough to sow righteousness. We must also break up the uncultivated ground (Hosea 10:12)."),
+      p("Our hearts become like idle ground when we allow it to grow hard and stubborn—resisting God's Word and work in our lives. But God wants His people to prepare the soil of their hearts to receive the seed of His Word by seeking Him. Seeking the Lord is like the early rain in farming season; it's that essential ingredient that softens the soil and readies it for growth."),
+      p('Do you desire to grow spiritually? "It is time to seek the Lord." "It is time to seek the Lord." "It is time to seek the Lord."'),
+      p("Don't wait. Seek Him eagerly and expectantly today. Meditate on Hosea 10:12; let it move you to examine your own life: Are you sowing seeds of righteousness and reaping the fruit of unfailing love?"),
+      p("It is never too late to seek the Lord—turn your heart to the One who promises to shower His abundant mercy and grace upon you."),
+      {
+        type: "prayer",
+        text: "God, there are some hard parts of my heart that need to be broken up. Help me. I want to sow seeds of faith, hope, and love—not anger, resentment, and bitterness. I surrender those hard parts to You! Today, I want to walk in Your righteousness and be covered by Your blessings. In Jesus' name, Amen.",
+      },
+    ],
+  },
+  {
+    id: 49,
+    title: "The Support You Need",
+    author: null,
+    date: "September 11, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "We weren't meant to carry our burdens alone. What it means to be \"yoked\" to Jesus — and how that changes what it looks like to carry your own burdens, and other people's.",
+    blocks: [
+      p("Everyone carries burdens. The things we go through shape the way we view the world, and ourselves. But we weren't meant to carry our burdens alone."),
+      p("In Matthew 11:28-30 NLT, Jesus says to the people following Him..."),
+      {
+        type: "scripture",
+        reference: "Matthew 11:28-30, NLT",
+        verses: [
+          "Come to me, all of you who are weary and carry heavy burdens, and I will give you rest. Take my yoke upon you. Let me teach you, because I am humble and gentle at heart, and you will find rest for your souls. For my yoke is easy to bear, and the burden I give you is light.",
+        ],
+      },
+      p("A yoke is a heavy wooden beam that lies across a pair of oxen, evenly distributing the weight of the loads they carry. But the term was also used by Jewish Rabbis. \"The yoke of the law\" symbolized complete submission to God's law, and Rabbis taught that becoming yoked to it would free the Jews from enslavement to the world."),
+      p("Jesus is using a phrase that His Jewish followers would have easily understood, but then He flips the illustration. He tells the crowd that they must yoke themselves to Him—because He is the fulfillment of their law."),
+      p("When they do this, the burdens they carry won't be heavy at all—because He will bear the weight of their burdens. Paul references this teaching in his letter to the Galatian Christians:"),
+      {
+        type: "scripture",
+        reference: "Galatians 6:2, NLT",
+        verses: ["Share each other's burdens, and in this way obey the law of Christ."],
+      },
+      p("The law of Christ is to love God with all our heart, soul, mind, and strength, and to love others as ourselves (Matthew 22:37-40). But the only way we can fulfill the law of Christ is if we bind ourselves to Him."),
+      p("When we are yoked to Jesus, He becomes our source of strength. He helps us endure hard situations and enables us to walk away from poor decisions. He fills us up with His love so that we can spill His love out onto others. He gives us the capacity to support other Christ-followers just like He supports us."),
+      p("Just as Jesus bore our sins and suffering, we are called to bear the suffering of others. In this way, we show them the love of Christ and guide them toward Jesus."),
+      p("Right now, spend a few minutes talking to God about the burdens you need help carrying, and then allow Him to show you the people in your life He wants you to support."),
+      {
+        type: "prayer",
+        text: "God, help me to be quick to help others, and willing to accept help when I need it. Please empower me to love others well—to be a good listener, to act when I see a need, to welcome accountability, and to pray for the people in my life. Help me to become more like You. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
