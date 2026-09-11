@@ -249,6 +249,7 @@ function buildSitemap(posts, authors, topics) {
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/blog`, priority: "0.8" },
     { loc: `${SITE_URL}/about`, priority: "0.5" },
+    { loc: `${SITE_URL}/verses`, priority: "0.6" },
     { loc: `${SITE_URL}/rss.xml`, priority: "0.3" },
     ...authors.map((a) => ({ loc: `${SITE_URL}/collection/${a.slug}`, priority: "0.5" })),
     ...topics.map((t) => ({ loc: `${SITE_URL}/topics/${t.slug}`, priority: "0.5" })),
@@ -399,7 +400,7 @@ async function main() {
   const authors = loadAuthors(src);
   const topics = loadTopics(src);
 
-  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved", "liked", "start-here", "topics"]);
+  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved", "liked", "start-here", "topics", "verses"]);
   const seenSlugs = new Set();
   for (const p of posts) {
     if (seenSlugs.has(p.slug)) throw new Error(`Duplicate post slug detected: "${p.slug}" (id ${p.id}) — two titles slugify to the same URL.`);
@@ -478,6 +479,29 @@ async function main() {
   writeHtml("saved", template);
   writeHtml("liked", template);
   writeHtml("start-here", template);
+
+  // /verses (the Scripture Index, added 2026-09-11) is different from
+  // saved/liked/start-here above -- it's a genuinely public, indexable page
+  // (every visitor sees the same content), so unlike those it gets a real,
+  // specific meta description and a sitemap entry. Its actual content
+  // (every verse, grouped by book) is derived client-side from POSTS in
+  // App.jsx (buildScriptureIndex()) rather than duplicated here in Node --
+  // this file only needs the page's title/description to exist, the same
+  // "meta-only" static file every other list-style page (topics,
+  // collections) already gets.
+  writeHtml(
+    "verses",
+    withMeta(template, {
+      title: "Scripture Index",
+      description: "A browsable index of every Bible verse cited across The Gospel Lens, organized by book — Genesis to Revelation.",
+      url: `${SITE_URL}/verses`,
+      jsonLd: buildBreadcrumbJsonLd([
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Scripture Index", url: `${SITE_URL}/verses` },
+      ]),
+    })
+  );
+
   writeFileSync(path.join(distDir, "404.html"), build404Page());
 
   writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors, topics));

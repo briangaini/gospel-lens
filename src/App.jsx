@@ -23,6 +23,7 @@ import {
   Heart,
   LogIn,
   LogOut,
+  List,
 } from "lucide-react";
 
 // Firebase (Google sign-in + Saved/Liked sync, see src/firebase.js) is
@@ -3163,7 +3164,7 @@ function ScriptureShareButton({ post, reference, verses }) {
   );
 }
 
-function PostBody({ blocks, post }) {
+function PostBody({ blocks, post, openScriptureIndex }) {
   let paragraphIndex = -1;
 
   return (
@@ -3240,9 +3241,28 @@ function PostBody({ blocks, post }) {
         if (block.type === "scripture") {
           return (
             <div key={i} className="not-prose border-l-4 border-[#B08D57] bg-[#4A5D4E]/6 rounded-r-sm px-6 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-3">
-                Scripture Focus · {block.reference}
-              </p>
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold">
+                  Scripture Focus · {block.reference}
+                </p>
+                {/* Entry point to the Scripture Index (/verses) -- the ONLY
+                    way in, deliberately, per Brian's explicit ask that it
+                    not live on the nav or homepage. Small and in the
+                    corner, on purpose: his direct feedback on the first
+                    version of this button was that it read too long/big
+                    sitting next to "Share this verse" -- moved here,
+                    icon-only, opposite the label instead. */}
+                {openScriptureIndex && (
+                  <button
+                    onClick={openScriptureIndex}
+                    aria-label="View Scripture Index"
+                    title="View Scripture Index — every verse cited on this site"
+                    className="no-print shrink-0 w-6 h-6 -mt-0.5 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
+                  >
+                    <List size={13} strokeWidth={2} />
+                  </button>
+                )}
+              </div>
               <div className="space-y-3">
                 {block.verses.map((v, vi) => (
                   <p key={vi} className="text-[17px] leading-relaxed italic text-[#2E323B] dark:text-[#D9D9D9]" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -3959,6 +3979,164 @@ function postsByTag(tagName) {
   return [...POSTS].filter((p) => ids.includes(p.id)).sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
+// ---------------------------------------------------------------------------
+// SCRIPTURE INDEX -- added 2026-09-11 ("Idea 1" from the brainstorm round).
+// One shared page (/verses) listing every `scripture` block cited across
+// every post, grouped by Bible book in real canonical order (Genesis ->
+// Revelation, the same convention a printed concordance uses), each entry
+// linking to the post it's from. Deliberately reachable only via a small
+// button inside each post's own Scripture Focus box -- per Brian's explicit
+// ask, NOT on the nav or homepage.
+// ---------------------------------------------------------------------------
+
+const BIBLE_BOOK_ORDER = [
+  "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
+  "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
+  "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job",
+  "Psalm", "Proverbs", "Ecclesiastes", "Song of Solomon",
+  "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel",
+  "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum",
+  "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi",
+  "Matthew", "Mark", "Luke", "John", "Acts", "Romans",
+  "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians",
+  "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy",
+  "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter",
+  "1 John", "2 John", "3 John", "Jude", "Revelation",
+];
+
+// A `scripture` block's `reference` can be several references cited
+// together ("Romans 6:11; Romans 6:1-7; Colossians 3:3") and often carries
+// a trailing translation abbreviation ("Psalm 34:18 NLT") or a comma before
+// one ("Colossians 3:1, NLT"). This pulls out just the book name from the
+// FIRST reference in the string -- multi-reference boxes are indexed under
+// that first book, in one place, rather than guessing how to split a
+// combined citation apart (see the design note shown on the page itself).
+function extractReferenceBook(firstRef) {
+  const m = firstRef.match(/^((?:[123]\s+)?[A-Za-z]+(?:\s+[A-Za-z]+)*?)\s+\d+:\d+/);
+  return m ? m[1].trim() : firstRef.trim();
+}
+
+// Sort key for ordering entries *within* a book by chapter, then verse --
+// so "Psalm 34:18" lands before "Psalm 100:5", not just in whatever order
+// the posts happen to appear in.
+function chapterVerseSortKey(chapterVerse) {
+  const m = chapterVerse.match(/(\d+):(\d+)/);
+  return m ? [Number(m[1]), Number(m[2])] : [9999, 9999];
+}
+
+// Derived fresh from POSTS every time (same approach as postsByTag/
+// getRelatedPosts above) -- there are only 49 posts and ~50 scripture
+// blocks total, cheap to recompute, and it can never drift out of sync
+// with the actual post content the way a separately-maintained list could.
+function buildScriptureIndex() {
+  const entries = [];
+  for (const post of POSTS) {
+    for (const block of post.blocks) {
+      if (block.type !== "scripture" || !block.verses || !block.verses.length) continue;
+      const firstRef = block.reference.split(";")[0].trim();
+      const book = extractReferenceBook(firstRef);
+      const chapterVerse = firstRef
+        .slice(book.length)
+        .replace(/^,?\s*/, "")
+        .replace(/,?\s*[A-Z]{2,5}$/, "")
+        .trim();
+      entries.push({ book, chapterVerse, verseText: block.verses[0], post });
+    }
+  }
+
+  const byBook = new Map();
+  for (const entry of entries) {
+    if (!byBook.has(entry.book)) byBook.set(entry.book, []);
+    byBook.get(entry.book).push(entry);
+  }
+
+  const sortedBooks = Array.from(byBook.keys()).sort((a, b) => {
+    const ia = BIBLE_BOOK_ORDER.indexOf(a);
+    const ib = BIBLE_BOOK_ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+
+  return sortedBooks.map((book) => ({
+    book,
+    entries: [...byBook.get(book)].sort((a, b) => {
+      const [ac, av] = chapterVerseSortKey(a.chapterVerse);
+      const [bc, bv] = chapterVerseSortKey(b.chapterVerse);
+      return ac - bc || av - bv;
+    }),
+  }));
+}
+
+// One shared page for every Scripture Focus reference on the site -- see
+// the SCRIPTURE INDEX section above for how the data's built. Approved via
+// a mocked demo first (per Brian's ask to see anything visual before it's
+// built), including his explicit correction from the first pass: one
+// shared index page grouped by book, not a separate page per verse.
+function ScriptureIndexView({ openPost, setView }) {
+  const groups = useMemo(() => buildScriptureIndex(), []);
+  const total = groups.reduce((sum, g) => sum + g.entries.length, 0);
+
+  return (
+    <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
+      <button
+        onClick={() => setView("blog")}
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+      >
+        <ArrowLeft size={15} strokeWidth={2} />
+        Back to Blogs
+      </button>
+
+      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Scripture Index</p>
+      <h1
+        className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-3"
+        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+      >
+        Every Verse, In One Place
+      </h1>
+      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] leading-relaxed max-w-xl mb-3">
+        Every Scripture Focus reference cited across The Gospel Lens, grouped by book — {total} in all. Tap any one to read it in context.
+      </p>
+
+      <div className="mt-10 space-y-10">
+        {groups.map((group) => (
+          <div key={group.book}>
+            <h2
+              className="text-[#B08D57] text-lg mb-2"
+              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+            >
+              {group.book}
+            </h2>
+            <div className="divide-y divide-[#1C1F26]/8 dark:divide-[#F2F1EC]/10 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
+              {group.entries.map((entry, i) => (
+                <button
+                  key={i}
+                  onClick={() => openPost(entry.post)}
+                  className="w-full text-left grid sm:grid-cols-[110px_1fr_auto] gap-x-4 gap-y-1 items-baseline py-3.5 group"
+                >
+                  <span
+                    className="text-[#1C1F26] dark:text-[#F2F1EC] text-[14.5px] font-bold"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {entry.chapterVerse}
+                  </span>
+                  <span className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[13.5px] italic leading-snug line-clamp-2">
+                    "{entry.verseText}"
+                  </span>
+                  <span className="text-[#B08D57] text-[12.5px] font-medium whitespace-nowrap group-hover:underline underline-offset-2">
+                    {entry.post.title} →
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // A real, permanent page per topic (added 2026-09-04) -- previously topics
 // only existed as filter chips on the Blogs page with no page of their own
 // to link to or for search engines to index. Mirrors CollectionView's
@@ -4460,7 +4638,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan }) {
+function SinglePostView({ post, setView, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
@@ -4575,7 +4753,7 @@ function SinglePostView({ post, setView, openPost, openPlanPost, openCollection,
           </button>
         </div>
 
-        <PostBody blocks={post.blocks} post={post} />
+        <PostBody blocks={post.blocks} post={post} openScriptureIndex={openScriptureIndex} />
 
         <div className="no-print flex flex-wrap gap-3 mb-6">
           <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
@@ -4992,6 +5170,10 @@ export default function GospelLensApp() {
         setView("readingplan");
         return;
       }
+      if (path === "/verses") {
+        setView("verses");
+        return;
+      }
       if (path !== "/") {
         const found = getPostBySlug(path.replace(/^\//, ""));
         if (found) {
@@ -5028,6 +5210,8 @@ export default function GospelLensApp() {
       document.title = "Saved Posts — The Gospel Lens";
     } else if (view === "liked") {
       document.title = "Liked Posts — The Gospel Lens";
+    } else if (view === "verses") {
+      document.title = "Scripture Index — The Gospel Lens";
     } else if (view === "readingplan") {
       document.title = "4 Days to Understand the Gospel — The Gospel Lens";
     } else if (view === "notfound") {
@@ -5077,6 +5261,15 @@ export default function GospelLensApp() {
   const openReadingPlan = () => {
     setView("readingplan");
     window.history.pushState(null, "", "/start-here");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Called from the small button inside a post's own Scripture Focus box
+  // (see PostBody) -- the only entry point to this page, deliberately, per
+  // Brian's explicit ask that it not live on the nav or homepage.
+  const openScriptureIndex = () => {
+    setView("verses");
+    window.history.pushState(null, "", "/verses");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -5166,10 +5359,12 @@ export default function GospelLensApp() {
             openCollection={openCollection}
             openReadingPlan={openReadingPlan}
             cameFromPlan={cameFromPlan}
+            openScriptureIndex={openScriptureIndex}
           />
         )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
         {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
+        {view === "verses" && <ScriptureIndexView openPost={openPost} setView={changeView} />}
         {view === "readingplan" && <ReadingPlanView openPlanPost={openPlanPost} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
