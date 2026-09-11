@@ -1,15 +1,18 @@
 // ---------------------------------------------------------------------------
-// FIREBASE -- Google sign-in + cross-device sync for Saved/Liked posts
+// FIREBASE -- Google sign-in + cross-device sync
 // ---------------------------------------------------------------------------
 // Added 2026-09-07, per Brian's explicit request: everything on this site
-// (saved posts, liked posts, read history, dark mode) was purely local to
-// one browser -- nothing ever left the device, which is also exactly why it
-// didn't follow him to another device or browser. This is the one place in
-// the app that genuinely needs a backend, so it's the one place that has
-// one now. Scope is deliberately narrow: only Saved Posts and Liked Posts
-// sync to an account. Dark mode and read history stay local-only -- Brian
-// only asked about saved/liked, and there's no reason to widen what leaves
-// the browser beyond what was actually requested.
+// was purely local to one browser -- nothing ever left the device, which is
+// also exactly why it didn't follow him to another device or browser. This
+// is the one place in the app that genuinely needs a backend, so it's the
+// one place that has one now.
+//
+// Scope, as of 2026-09-11: Saved Posts, Liked Posts, read history
+// ("Continue Reading" + the read-count stat), and the dark-mode preference
+// all sync to an account now -- Brian's explicit ask, to cover "all those
+// which normally would be synced when someone logs in their account," not
+// just the two he originally requested. Nothing else does -- there's no
+// other meaningful per-visitor state on this site to sync.
 //
 // `firebaseConfig` below is NOT a secret, unlike the Buttondown API key
 // incident earlier in this project's history -- it's safe to be visible in
@@ -56,9 +59,12 @@ export function onAuthChange(callback) {
 }
 
 // One document per signed-in user: users/{uid} -> { savedPostIds: [...],
-// likedPostIds: [...] }. Deliberately just two arrays of post ids, mirroring
-// the exact shape already used in localStorage -- this is a sync target,
-// not a redesign of the data model.
+// likedPostIds: [...], readHistory: [{id, readAt}...], theme: "dark"|"light" }.
+// Mirrors the exact shapes already used in localStorage -- this is a sync
+// target, not a redesign of the data model. `readHistory` carries a real
+// timestamp per entry (not just an id) specifically so two devices' histories
+// can be merged by *when* something was actually read, not just by which
+// device happened to write last -- see the merge logic in App.jsx.
 function userDocRef(uid) {
   return doc(db, "users", uid);
 }
@@ -75,22 +81,34 @@ function userDocRef(uid) {
 export function subscribeToCloudLists(uid, callback) {
   return onSnapshot(userDocRef(uid), (snap) => {
     if (!snap.exists()) {
-      callback({ savedPostIds: [], likedPostIds: [] });
+      callback({ savedPostIds: [], likedPostIds: [], readHistory: [], theme: null });
       return;
     }
     const data = snap.data();
     callback({
       savedPostIds: Array.isArray(data.savedPostIds) ? data.savedPostIds : [],
       likedPostIds: Array.isArray(data.likedPostIds) ? data.likedPostIds : [],
+      readHistory: Array.isArray(data.readHistory) ? data.readHistory : [],
+      theme: typeof data.theme === "string" ? data.theme : null,
     });
   });
 }
 
-// Overwrites the whole document with the given lists. Used both for the
-// merge reconciliation in App.jsx's onAuthChange handler and for every
-// individual save/like toggle -- these lists are small (a handful of post
-// ids at most), so a full overwrite is simpler and cheap, not worth the
-// complexity of arrayUnion/arrayRemove.
-export async function writeCloudLists(uid, { savedPostIds, likedPostIds }) {
-  await setDoc(userDocRef(uid), { savedPostIds, likedPostIds }, { merge: true });
+// Partial update -- only the fields actually passed get written, everything
+// else in the document is left untouched (setDoc's `merge: true` already
+// merges at the top level, but every caller here only ever passes a subset
+// of fields, e.g. a save/like toggle never touches readHistory or theme, so
+// this explicitly builds just the payload that was actually given rather
+// than writing `undefined` over fields the caller didn't mean to touch).
+// Used for the merge reconciliation in App.jsx's onAuthChange handler, for
+// every individual save/like toggle, for each new read-history entry, and
+// for a dark-mode toggle -- these are all small (a handful of ids/entries at
+// most), so a full-field overwrite is simpler than arrayUnion/arrayRemove.
+export async function writeCloudLists(uid, fields) {
+  const payload = {};
+  if (fields.savedPostIds !== undefined) payload.savedPostIds = fields.savedPostIds;
+  if (fields.likedPostIds !== undefined) payload.likedPostIds = fields.likedPostIds;
+  if (fields.readHistory !== undefined) payload.readHistory = fields.readHistory;
+  if (fields.theme !== undefined) payload.theme = fields.theme;
+  await setDoc(userDocRef(uid), payload, { merge: true });
 }

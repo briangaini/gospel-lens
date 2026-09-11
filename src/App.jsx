@@ -2137,12 +2137,23 @@ const READING_PLAN_POST_IDS = [1, 9, 12, 19];
 const READ_HISTORY_KEY = "gospel-lens-read-history";
 const READ_HISTORY_MAX = 100;
 
+// Each entry is { id, readAt } -- a real timestamp per post, not just an id.
+// Added 2026-09-11 when read history started syncing to the cloud: merging
+// two devices' histories correctly means knowing *when* each was read, not
+// just which device happened to write last (see the reconciliation effect
+// in GospelLensApp). getReadHistory() transparently migrates the old shape
+// (a plain array of ids, from before this) -- a legacy numeric entry gets a
+// small synthetic readAt (its own array index) rather than Date.now(), so
+// it sorts as older than anything read after the migration, preserving its
+// original relative order without claiming a read time that was never
+// actually recorded.
 function getReadHistory() {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(READ_HISTORY_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((entry, i) => (typeof entry === "number" ? { id: entry, readAt: i } : entry));
   } catch {
     return [];
   }
@@ -2150,16 +2161,50 @@ function getReadHistory() {
 
 // Records a post as read, moving it to the end (most-recent) if it was
 // already in the list rather than duplicating it, and caps the list length
-// so localStorage usage can't grow unbounded for a long-time reader.
+// so localStorage usage can't grow unbounded for a long-time reader. Also
+// pushes to the cloud when signed in (see syncReadHistoryToCloudIfSignedIn)
+// -- fire-and-forget, same as every other sync call in this file.
 function recordPostRead(postId) {
   if (typeof window === "undefined") return;
   try {
-    const history = getReadHistory().filter((id) => id !== postId);
-    history.push(postId);
+    const history = getReadHistory().filter((entry) => entry.id !== postId);
+    history.push({ id: postId, readAt: Date.now() });
+    history.sort((a, b) => a.readAt - b.readAt);
     window.localStorage.setItem(READ_HISTORY_KEY, JSON.stringify(history.slice(-READ_HISTORY_MAX)));
+    syncReadHistoryToCloudIfSignedIn();
   } catch {
     // localStorage unavailable — quietly skip, nothing else depends on this
   }
+}
+
+// Merges two read histories by taking, for every post id present in
+// either, the LATER of its two readAt timestamps -- then re-sorts and caps
+// to the most recent READ_HISTORY_MAX. Unlike Saved/Liked, this is safe to
+// run unconditionally on every reconciliation event, not just once ever per
+// device: there's no user action anywhere in this app that *removes* an
+// entry from read history (nothing "unreads" a post), so a pure union can
+// never silently undo a deletion the way it could for Saved/Liked -- the
+// bug class that fix had to guard against structurally doesn't exist here.
+function mergeReadHistory(cloudHistory, localHistory) {
+  const latestById = new Map();
+  for (const entry of cloudHistory) latestById.set(entry.id, entry.readAt);
+  for (const entry of localHistory) {
+    const existing = latestById.get(entry.id);
+    if (existing === undefined || entry.readAt > existing) latestById.set(entry.id, entry.readAt);
+  }
+  const merged = Array.from(latestById, ([id, readAt]) => ({ id, readAt }));
+  merged.sort((a, b) => a.readAt - b.readAt);
+  return merged.slice(-READ_HISTORY_MAX);
+}
+
+// Order-independent equality for two read-history arrays, comparing both id
+// and readAt per entry -- mirrors sameIdSet's role for Saved/Liked, used to
+// decide whether a merge result actually changed anything worth writing/
+// reloading for.
+function sameReadHistory(a, b) {
+  if (a.length !== b.length) return false;
+  const mapA = new Map(a.map((entry) => [entry.id, entry.readAt]));
+  return b.every((entry) => mapA.get(entry.id) === entry.readAt);
 }
 
 // ---------------------------------------------------------------------------
@@ -2328,6 +2373,36 @@ function syncListsToCloudIfSignedIn() {
       const uid = fb.auth.currentUser?.uid;
       if (!uid) return;
       return fb.writeCloudLists(uid, { savedPostIds: getSavedPostIds(), likedPostIds: getLikedPostIds() });
+    })
+    .catch(() => {});
+}
+
+// Same fire-and-forget pattern as syncListsToCloudIfSignedIn, for read
+// history -- called from recordPostRead. Read history was added to the
+// synced fields 2026-09-11, per Brian's explicit ask to sync "all those
+// which normally would be synced when someone logs in," not just Saved/
+// Liked -- Continue Reading was still stuck per-browser otherwise.
+function syncReadHistoryToCloudIfSignedIn() {
+  getFirebase()
+    .then((fb) => {
+      const uid = fb.auth.currentUser?.uid;
+      if (!uid) return;
+      return fb.writeCloudLists(uid, { readHistory: getReadHistory() });
+    })
+    .catch(() => {});
+}
+
+// Same pattern again, for the dark-mode preference -- called from
+// toggleDark. Unlike Saved/Liked/read-history (all lists), theme is a
+// single value, so there's no merge/union concept for it -- see the
+// reconciliation effect for how "establish once, then trust the cloud"
+// applies to a scalar preference instead.
+function syncThemeToCloudIfSignedIn(theme) {
+  getFirebase()
+    .then((fb) => {
+      const uid = fb.auth.currentUser?.uid;
+      if (!uid) return;
+      return fb.writeCloudLists(uid, { theme });
     })
     .catch(() => {});
 }
@@ -3704,7 +3779,7 @@ function LikedPostsView({ openPost, setView, user, onSignIn }) {
 // real, clickable link the whole time -- nothing here is ever actually
 // gated behind finishing an earlier day.
 function ReadingPlanView({ openPlanPost }) {
-  const readIds = new Set(getReadHistory());
+  const readIds = new Set(getReadHistory().map((entry) => entry.id));
   const planPosts = READING_PLAN_POST_IDS.map((id) => POSTS.find((p) => p.id === id)).filter(Boolean);
   const readCount = planPosts.filter((p) => readIds.has(p.id)).length;
   const nextIndex = planPosts.findIndex((p) => !readIds.has(p.id));
@@ -3951,7 +4026,7 @@ function ContinueReadingCard({ openPost }) {
   const [lastPost] = useState(() => {
     const history = getReadHistory();
     if (!history.length) return null;
-    return POSTS.find((p) => p.id === history[history.length - 1]) || null;
+    return POSTS.find((p) => p.id === history[history.length - 1].id) || null;
   });
 
   if (!lastPost) return null;
@@ -4710,16 +4785,21 @@ export default function GospelLensApp() {
         // some time" to reach another. This fires immediately with the
         // current server state, then again every time the doc actually
         // changes (from any device, including this one's own writes).
+        // Extended 2026-09-11 to also reconcile read history and dark mode,
+        // alongside Saved/Liked -- Brian's explicit ask to sync "all those
+        // which normally would be synced," not just the two he originally
+        // named.
         //
-        // Two deliberately different phases, not the same logic every
-        // time -- caught a real second bug before shipping by actually
-        // tracing a removal scenario, not just an addition: a pure union-
-        // merge run on every event can only ever ADD ids, never remove
-        // them, so if this were unconditional, unsaving a post on one
-        // device would get silently undone the next time ANY other device
-        // reloaded with stale local data (verified directly: stale local
-        // [1,2,3] plus a cloud that had already dropped to [1,2] unions
-        // back to [1,2,3] and gets written straight back to the cloud).
+        // Saved/Liked: two deliberately different phases, not the same
+        // logic every time -- caught a real second bug before shipping by
+        // actually tracing a removal scenario, not just an addition: a pure
+        // union-merge run on every event can only ever ADD ids, never
+        // remove them, so if this were unconditional, unsaving a post on
+        // one device would get silently undone the next time ANY other
+        // device reloaded with stale local data (verified directly: stale
+        // local [1,2,3] plus a cloud that had already dropped to [1,2]
+        // unions back to [1,2,3] and gets written straight back to the
+        // cloud).
         //
         // - The FIRST time this browser ever sees THIS uid's cloud data
         //   (tracked permanently via hasMergedUid/markUidMerged, not per
@@ -4736,34 +4816,78 @@ export default function GospelLensApp() {
         //   in-flight write immediately (not just after server
         //   confirmation), so by the time this fires for a local toggle,
         //   `cloud` already matches what was just written locally.
+        //
+        // Read history: safe to union-merge UNCONDITIONALLY on every event,
+        // not gated by hasMergedUid the way Saved/Liked are -- nothing ever
+        // "unreads" a post, so there's no removal a union could accidentally
+        // resurrect-then-undo the way there was for Saved/Liked. Merges by
+        // the LATER of the two timestamps per post id (see
+        // mergeReadHistory), so "Continue Reading" always reflects whichever
+        // device actually read something most recently, not just whichever
+        // device wrote to Firestore last.
+        //
+        // Theme: a single value, not a list, so "merge" doesn't apply --
+        // instead, establish it once (if the cloud doesn't have one yet,
+        // push whatever this device is currently using) and trust the cloud
+        // from then on, the same "establish once, then trust" shape as
+        // Saved/Liked's post-first-contact phase, just without a union step
+        // since there's nothing to union for a scalar.
         unsubscribeSnapshot = fb.subscribeToCloudLists(firebaseUser.uid, (cloud) => {
           const localSaved = getSavedPostIds();
           const localLiked = getLikedPostIds();
+          const localHistory = getReadHistory();
+          const localTheme = window.localStorage.getItem("gospel-lens-theme");
 
           let nextSaved = cloud.savedPostIds;
           let nextLiked = cloud.likedPostIds;
+          let cloudFieldsNeedingUpdate = {};
 
           if (!hasMergedUid(firebaseUser.uid)) {
             nextSaved = Array.from(new Set([...cloud.savedPostIds, ...localSaved]));
             nextLiked = Array.from(new Set([...cloud.likedPostIds, ...localLiked]));
-            const cloudNeedsUpdate = !sameIdSet(nextSaved, cloud.savedPostIds) || !sameIdSet(nextLiked, cloud.likedPostIds);
-            if (cloudNeedsUpdate) {
-              fb.writeCloudLists(firebaseUser.uid, { savedPostIds: nextSaved, likedPostIds: nextLiked }).catch(() => {});
-            }
+            if (!sameIdSet(nextSaved, cloud.savedPostIds)) cloudFieldsNeedingUpdate.savedPostIds = nextSaved;
+            if (!sameIdSet(nextLiked, cloud.likedPostIds)) cloudFieldsNeedingUpdate.likedPostIds = nextLiked;
             markUidMerged(firebaseUser.uid);
           }
 
-          const localNeedsUpdate = !sameIdSet(nextSaved, localSaved) || !sameIdSet(nextLiked, localLiked);
+          const nextHistory = mergeReadHistory(cloud.readHistory, localHistory);
+          if (!sameReadHistory(nextHistory, cloud.readHistory)) cloudFieldsNeedingUpdate.readHistory = nextHistory;
+
+          let nextTheme = localTheme;
+          if (cloud.theme === null) {
+            // No theme established for this account yet -- this device's
+            // current preference becomes the account's, the same way the
+            // very first device to ever save/like something becomes the
+            // seed for that list.
+            if (localTheme) cloudFieldsNeedingUpdate.theme = localTheme;
+          } else if (cloud.theme !== localTheme) {
+            nextTheme = cloud.theme;
+          }
+
+          if (Object.keys(cloudFieldsNeedingUpdate).length > 0) {
+            fb.writeCloudLists(firebaseUser.uid, cloudFieldsNeedingUpdate).catch(() => {});
+          }
+
+          const localNeedsUpdate =
+            !sameIdSet(nextSaved, localSaved) ||
+            !sameIdSet(nextLiked, localLiked) ||
+            !sameReadHistory(nextHistory, localHistory) ||
+            nextTheme !== localTheme;
           if (!localNeedsUpdate) return;
           window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(nextSaved));
           window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(nextLiked));
+          window.localStorage.setItem(READ_HISTORY_KEY, JSON.stringify(nextHistory));
+          if (nextTheme) window.localStorage.setItem("gospel-lens-theme", nextTheme);
           // Every PostCard/SinglePostView reads saved/liked state via a
           // useState initializer (isPostSaved/isPostLiked), which only runs
           // once on mount -- a background update after mount wouldn't
           // otherwise be reflected without this. A full reload is simple,
           // cheap for a static SPA, and guarantees every already-mounted
           // component picks up the change the same way a normal page load
-          // already does everywhere else in this app.
+          // already does everywhere else in this app -- including the
+          // inline pre-mount script in index.html correctly applying a
+          // synced theme change with no flash, the same way it already
+          // does for a returning visitor's own saved preference.
           window.location.reload();
         });
       });
@@ -4778,12 +4902,14 @@ export default function GospelLensApp() {
   const toggleDark = () => {
     setDark((d) => {
       const next = !d;
+      const nextTheme = next ? "dark" : "light";
       document.documentElement.classList.toggle("dark", next);
       try {
-        window.localStorage.setItem("gospel-lens-theme", next ? "dark" : "light");
+        window.localStorage.setItem("gospel-lens-theme", nextTheme);
       } catch (e) {
         // localStorage unavailable — theme just won't persist, non-fatal
       }
+      syncThemeToCloudIfSignedIn(nextTheme);
       return next;
     });
   };
