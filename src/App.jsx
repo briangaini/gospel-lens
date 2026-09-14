@@ -1923,6 +1923,83 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 50,
+    title: "Let There Be Light",
+    author: null,
+    date: "September 13, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Light and darkness can't coexist — and neither can sin and perfection. Jesus, the Light of the World, didn't just rescue us from the dark; He gave us His Spirit so we could carry that same light to others.",
+    blocks: [
+      p('The word "light" appears hundreds of times in the Bible. It first appears just three verses into the first book, Genesis, during the creation story:'),
+      {
+        type: "scripture",
+        reference: "Genesis 1:3-4, NIV",
+        verses: [
+          "And God said, 'Let there be light,' and there was light. God saw that the light was good, and he separated the light from the darkness.",
+        ],
+      },
+      p('Later, when the prophet Isaiah foretold Jesus\' coming, he framed the Messiah as a "great light" that would dawn on those who were "walking in darkness" (Isaiah 9:2). Jesus fulfilled the prophecy in John 8:12 when He declared, "I am the light of the world. Whoever follows me will never walk in darkness, but will have the light of life."'),
+      p("Darkness cannot exist where there is light. Genesis 1 says that God separated the light from the darkness that covered a formless, empty earth—because the two things cannot coexist. And the same is true of sin and perfection. The world fell into darkness when sin entered it."),
+      p("But the world wasn't completely consumed by darkness—we were only separated from God. That's why He sent Jesus, the Great Light, to guide us back to Him."),
+      p('Just as a flame burns brightly, its fire also spreads. When He returned to Heaven, Jesus gave us His Spirit, so that we might also be light to others! The Apostle Paul writes in Ephesians 5:8, "For you were once darkness, but now you are light in the Lord. Live as children of light."'),
+      p("As a child of light, you can be a light in our dark world by the way you live, speak, and act. Ask yourself: How will I continue to walk in step with Jesus as my guiding light? What will I do to be a light in my world? Who will I share His light with today?"),
+      {
+        type: "prayer",
+        text: "God, thank You for creating light, and for sending Your Son to be the Light of the world! Without it, I would be lost in darkness. Give me a passion to want others to experience Your Light. Empower me with boldness and love. In Jesus' name, Amen.",
+      },
+    ],
+  },
+  {
+    id: 51,
+    title: "He Will Lead the Way",
+    author: null,
+    date: "September 14, 2026",
+    category: "Devotional",
+    readTime: "5 min read",
+    excerpt:
+      "Moses' final words to Joshua weren't a leadership strategy — they were a reminder of who had really been carrying Israel all along. What it means to walk into whatever's next trusting that God goes before you.",
+    blocks: [
+      p("For forty years, Moses led a nation that didn't always want to be led. He walked them out of slavery in Egypt, through a sea that had no business parting, up a mountain to receive the very words of God, and across a wilderness that tested every ounce of their faith and his patience. He had seen miracles and mutinies, victories and grumbling, glory and exhaustion — often in the very same week."),
+      p("And then came the moment every leader eventually faces: it was time to let go."),
+      p("God told Moses his work was finished, and that Joshua would carry Israel the rest of the way into the promised land. So in his final address to the people, with Joshua standing there about to inherit an impossible task, Moses said this:"),
+      {
+        type: "scripture",
+        reference: "Deuteronomy 31:8, NIV",
+        verses: [
+          "The LORD himself goes before you and will be with you; he will never leave you nor forsake you. Do not be afraid; do not be discouraged.",
+        ],
+      },
+      p("That's it. That's the send-off."),
+      { type: "heading", text: "What Moses Didn't Say" },
+      p('It\'s worth noticing what\'s missing from these final words. Moses doesn\'t hand Joshua a strategy. He doesn\'t warn him, "This will be harder than you think," or offer a leadership playbook for managing a few million stubborn, weary people. He doesn\'t even really talk about Joshua at all.'),
+      p("He talks about God."),
+      p("After forty years of leading, Moses' parting wisdom wasn't a set of instructions — it was a redirected gaze. He wasn't teaching Joshua how to do the job. He was teaching him how to see everything. Because if Joshua walked into this next chapter thinking the outcome depended on his own strength, his own strategy, or his own ability to hold everything together, he would have been crushed under the weight of it before he ever crossed the Jordan."),
+      p("Moses knew something Joshua needed to know too: he had never actually been the one holding it all together. God had."),
+      { type: "heading", text: "The Real Author of the Story" },
+      p("Think about everything Moses had witnessed — a burning bush that didn't burn up, ten plagues, a sea splitting in two, water from a rock, bread falling from the sky every single morning for forty years. None of that was Moses' doing. He was present for it. He was often the one standing at the front of it. But he wasn't the source of it."),
+      p("That's the quiet confession tucked into his final words to Joshua: I was never the reason this worked — God was. And because God, not Moses, was the true author of Israel's story, His presence and provision didn't expire the moment Moses' leadership did. The same God who parted the sea for Moses was about to go ahead of Joshua into Jericho."),
+      p("This is what made Joshua's fear unnecessary. Not his own competence. Not his own courage. The presence of God going before him."),
+      { type: "heading", text: "What This Means for You" },
+      p('Most of us aren\'t leading a nation through the wilderness. But most of us know what it feels like to face a new season we don\'t feel ready for — a transition, a loss, a responsibility that\'s suddenly landed on our shoulders, a "what happens now" moment where the person or plan we leaned on is gone and it\'s just us and the unknown ahead.'),
+      p('In those moments, it\'s tempting to ask, "Do I have what it takes?" But that was never really the question God was asking Joshua to answer. The real question was, "Do you believe He\'ll go before you?"'),
+      p("He will never leave you. He will never forsake you. Those words weren't just spoken to a nervous new leader standing at the edge of Canaan thousands of years ago — they're a description of God's character that hasn't changed since. The same presence that steadied Joshua is available to steady you, whatever threshold you're standing at right now."),
+      p("Do not be afraid. Do not be discouraged. Not because the road ahead is easy, but because you were never meant to walk it by your own strength in the first place. He will lead the way."),
+      {
+        type: "reflection",
+        items: [
+          'What "unknown ahead" are you facing right now that feels like it requires more strength than you have?',
+          "What would change in how you approach it if you truly believed God was already going before you into it?",
+        ],
+      },
+      {
+        type: "prayer",
+        text: "God, thank You that You are the same God who has always led Your people — present, faithful, and unchanging. You are with me, and You will never forsake me. I don't have to face what's ahead in my own strength. I submit my life and this next season to You. Please lead me in the direction You want me to go, and give me courage to follow without fear. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
