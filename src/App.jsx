@@ -2537,9 +2537,23 @@ function postToSpeechSegments(post) {
 // not a hard requirement.
 const GOOD_DEFAULT_VOICE_NAMES = ["samantha", "ava", "google us english", "aria", "jenny", "zoe"];
 
+// Brian's explicit pick (2026-09-14, after comparing real options via a
+// dedicated voice-picker page): "Google US English" whenever a visitor's
+// browser actually offers it. This voice was already usually winning the
+// scoring below on Chrome anyway, but "usually" wasn't good enough — an
+// exact-name match here makes it deterministic, not just the current
+// highest scorer, so a future browser update can't quietly out-score it
+// and swap the voice out from under him. Chrome (and other Chromium
+// browsers) exposes this Google cloud voice; Safari and most mobile
+// browsers don't, since it's Google's, not Apple's or the OS's — those
+// fall through to the scored pick below exactly as before.
+const PREFERRED_VOICE_NAME = "google us english";
+
 function pickBestVoice() {
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return null;
+  const preferred = voices.find((v) => v.name.toLowerCase() === PREFERRED_VOICE_NAME);
+  if (preferred) return preferred;
   const english = voices.filter((v) => v.lang.toLowerCase().startsWith("en"));
   const pool = english.length ? english : voices;
   const scored = pool.map((v) => {
