@@ -2000,6 +2000,75 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 52,
+    title: "What You Treasure Reveals Who You Serve",
+    author: null,
+    date: "September 15, 2026",
+    category: "Teaching",
+    readTime: "6 min read",
+    excerpt:
+      "Jesus doesn't just ask what you do with your hands — He asks what you're chasing with your heart. A look at Matthew 6:19-24, and why you genuinely can't serve two masters at once.",
+    blocks: [
+      p("If someone quietly followed your bank statement, your calendar, and your daydreams for a month, what would they conclude you loved most?"),
+      p("It's an uncomfortable question, but it's essentially the one Jesus asks in the middle of the Sermon on the Mount. Right after teaching His disciples how to pray, fast, and give without needing an audience, He shifts to something even more personal — not what we do with our hands, but what we're actually chasing with our hearts."),
+      {
+        type: "scripture",
+        reference: "Matthew 6:19-21, NIV",
+        verses: [
+          "Do not store up for yourselves treasures on earth, where moths and vermin destroy, and where thieves break in and steal. But store up for yourselves treasures in heaven... For where your treasure is, there your heart will be also.",
+        ],
+      },
+      p("This isn't a passage about budgeting. It's a passage about identity — about what's actually sitting on the throne of your life."),
+      { type: "heading", text: 'Your Relationship to "Stuff" Reveals Your Heart' },
+      p('Jesus doesn\'t say money or possessions are inherently evil. He says something more searching than that: your relationship to earthly things exposes what your heart is actually holding onto. Everything He names as "treasure on earth" shares one trait — it\'s temporary. It can be eaten by moths, corroded by rust, or stolen in the night. In other words, none of it was built to last, and none of it can bear the weight of being someone\'s ultimate source of security or meaning.'),
+      p('Theologian D.A. Carson put it simply: earthly treasure is "any valuable which is perishable or which can be lost in one way or another." That\'s not a condemnation of having things. It\'s an honest assessment of what those things can and can\'t hold. A career, a bank account, a reputation, a relationship — all genuinely good gifts, but none of them were ever designed to be the foundation your soul stands on. When we ask them to be that foundation anyway, we set ourselves up for the exact kind of anxiety Jesus goes on to describe just a few verses later.'),
+      p("So what does it actually look like to store up treasure somewhere sturdier? A few threads run through this passage and its surrounding context:"),
+      {
+        type: "list",
+        items: [
+          "Living for God's approval rather than people's applause stores up treasure that lasts — the same posture Jesus already described in secret prayer, quiet fasting, and unseen generosity (Matthew 6:4, 6:6, 6:18).",
+          'Setting our hope on God rather than our net worth protects us from what Paul later warned Timothy about — the false security of trusting in "the uncertainty of riches" (1 Timothy 6:17).',
+          "Being generous and ready to share rather than hoarding reflects a heart that trusts God's provision over its own stockpile — echoing the warning in Deuteronomy against closing our hand to those in need (Deuteronomy 15:9-11).",
+          "Setting our minds on Christ, not our cravings, puts to death the quieter idols competing for our attention (Colossians 3:1-5).",
+        ],
+      },
+      p("None of these actions will secure a spot in heaven, but they're descriptions of a heart that has already decided where its true treasure is."),
+      { type: "heading", text: "What Your Heart Treasures Reveals Your Inner Master" },
+      p("Jesus doesn't stop at money. He moves next to something stranger — the eyes."),
+      {
+        type: "scripture",
+        reference: "Matthew 6:22-23, NIV",
+        verses: [
+          "The eye is the lamp of the body. If your eyes are healthy, your whole body will be full of light. But if your eyes are unhealthy, your whole body will be full of darkness.",
+        ],
+      },
+      p("At first glance this feels like a detour. But biblical scholar Jonathan Pennington helps connect the dots, describing the eye in this passage as a kind of window between a person's inside and outside world. What you consistently look at — what you fix your attention and longing on — doesn't stay outside you. It floods in and shapes what's inside. A heart fixed on heavenly treasure produces a life full of light. A heart fixed on earthly treasure, no matter how respectable it looks from the outside, produces a life quietly filling with darkness. Your treasure doesn't just sit in your bank account. It gets inside you."),
+      { type: "heading", text: "We Cannot Flourish Serving Two Masters" },
+      p("Which brings us to the verse this whole passage has been building toward:"),
+      {
+        type: "scripture",
+        reference: "Matthew 6:24, NIV",
+        verses: ["No one can serve two masters... You cannot serve both God and money."],
+      },
+      p("Jesus doesn't say it's difficult to serve two masters. He says it's impossible. Not because money is uniquely wicked, but because mastery, by definition, demands the whole of you. A master doesn't get your leftover time, your leftover trust, or your leftover devotion — that's not what mastery means. You will either organize your life around God's pleasure or around some other treasure competing for the same throne. There is no neutral third option where both get an equal share."),
+      p('This is why the question isn\'t really "do you have money, possessions, or ambitions?" Everyone does. The question is who — or what — is actually functioning as master over your heart because of them.'),
+      { type: "heading", text: "Where Is Your Treasure Actually Stored?" },
+      p("Here's the invitation buried in this passage: your treasure isn't just a reflection of your values — it's a diagnostic. Where you consistently spend your money, your time, your mental energy, and your hope will tell you the truth about who's really sitting on the throne, whether or not you'd say it out loud."),
+      p("The good news is that Jesus isn't asking you to muster up different feelings through sheer willpower. He's inviting you to relocate your treasure — to keep setting your heart, your eyes, and your hope on Him, again and again, until your whole life is full of light instead of divided between two masters. That's not a one-time decision. It's a daily reorientation. But it's one worth making, because only one of these masters was ever able to hold the weight of your whole heart."),
+      {
+        type: "reflection",
+        items: [
+          "If someone examined your calendar, spending, and daydreams this month, what would they conclude you treasure most?",
+          "Where in your life might you currently be trying to serve two masters instead of one?",
+        ],
+      },
+      {
+        type: "prayer",
+        text: "Lord, search my heart and show me where my treasure has quietly settled. Free me from asking perishable things to carry weight only You were meant to carry. Set my eyes on You so my whole life is filled with light, and help me serve You alone — not You and something else competing for the throne. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
