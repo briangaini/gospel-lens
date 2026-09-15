@@ -2717,7 +2717,17 @@ function useListenToPost(post) {
       return;
     }
     const u = new SpeechSynthesisUtterance(segments[index]);
-    if (voiceRef.current) u.voice = voiceRef.current;
+    if (voiceRef.current) {
+      u.voice = voiceRef.current;
+      // Also set `lang` explicitly to match the chosen voice, not just
+      // `voice` -- a real, documented Chrome quirk (setting `.voice` alone
+      // is unreliable and can silently fall back to a different, local
+      // default voice, especially for a "network"/cloud voice like Google
+      // US English) that this project hit for real: Brian confirmed
+      // "Google US English" was correctly marked auto-picked, yet Samantha
+      // kept playing on Mac Chrome regardless. This is the documented fix.
+      u.lang = voiceRef.current.lang;
+    }
     u.rate = 0.85; // slower, reflective reading pace rather than rushed
     u.pitch = 0.97;
     u.onend = () => {
