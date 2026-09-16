@@ -5285,26 +5285,48 @@ export default function GospelLensApp() {
             fb.writeCloudLists(firebaseUser.uid, cloudFieldsNeedingUpdate).catch(() => {});
           }
 
-          const localNeedsUpdate =
-            !sameIdSet(nextSaved, localSaved) ||
-            !sameIdSet(nextLiked, localLiked) ||
-            !sameReadHistory(nextHistory, localHistory) ||
-            nextTheme !== localTheme;
-          if (!localNeedsUpdate) return;
+          // Read history and theme are updated quietly, in place, WITHOUT a
+          // reload -- deliberately split off from Saved/Liked below. Found
+          // 2026-09-17: this used to reload for a mismatch in ANY of the
+          // four fields, and that was a real, serious bug in practice, not
+          // just a theoretical one. `recordPostRead` (called every time
+          // ANY post is opened) syncs the updated read history to the
+          // cloud on every single read -- and with Brian signed in on both
+          // his phone and his Mac, that write echoes back through this
+          // same live subscription on BOTH devices, including one just
+          // sitting open and idle in the background. Reloading for that
+          // meant literally every post read on either device force-
+          // reloaded the other one too. Reported as "the site glitches for
+          // a split second every 5 seconds" -- first noticed on his phone,
+          // then also on his Mac once both were open around the same time,
+          // and getting more frequent as more posts were read (several new
+          // ones were added and read through this same week). A full
+          // reload never actually needed to be the mechanism here: unlike
+          // Saved/Liked's bookmark/heart icons (see below), nothing reads
+          // read-history or theme through a one-time useState initializer
+          // that a background update can't otherwise reach -- the read-
+          // count stat and Continue Reading card just read localStorage at
+          // render time, whenever that next happens naturally, and theme
+          // can be applied directly right here instead.
+          if (!sameReadHistory(nextHistory, localHistory)) {
+            window.localStorage.setItem(READ_HISTORY_KEY, JSON.stringify(nextHistory));
+          }
+          if (nextTheme && nextTheme !== localTheme) {
+            window.localStorage.setItem("gospel-lens-theme", nextTheme);
+            document.documentElement.classList.toggle("dark", nextTheme === "dark");
+            setDark(nextTheme === "dark");
+          }
+
+          // Saved/Liked are the one thing that genuinely still needs a
+          // reload: every PostCard/SinglePostView reads that state via a
+          // useState initializer (isPostSaved/isPostLiked), which only
+          // runs once on mount, so a background update after mount
+          // wouldn't otherwise be reflected in an already-rendered
+          // bookmark/heart icon without one.
+          const identityNeedsReload = !sameIdSet(nextSaved, localSaved) || !sameIdSet(nextLiked, localLiked);
+          if (!identityNeedsReload) return;
           window.localStorage.setItem(SAVED_POSTS_KEY, JSON.stringify(nextSaved));
           window.localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(nextLiked));
-          window.localStorage.setItem(READ_HISTORY_KEY, JSON.stringify(nextHistory));
-          if (nextTheme) window.localStorage.setItem("gospel-lens-theme", nextTheme);
-          // Every PostCard/SinglePostView reads saved/liked state via a
-          // useState initializer (isPostSaved/isPostLiked), which only runs
-          // once on mount -- a background update after mount wouldn't
-          // otherwise be reflected without this. A full reload is simple,
-          // cheap for a static SPA, and guarantees every already-mounted
-          // component picks up the change the same way a normal page load
-          // already does everywhere else in this app -- including the
-          // inline pre-mount script in index.html correctly applying a
-          // synced theme change with no flash, the same way it already
-          // does for a returning visitor's own saved preference.
           window.location.reload();
         });
       });
