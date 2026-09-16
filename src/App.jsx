@@ -2069,6 +2069,42 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 53,
+    title: "New Mercies",
+    author: null,
+    date: "September 16, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "God's mercy isn't something you have to earn back after a bad day — it's new every single morning. A look at Lamentations 3:21-23, and why His faithfulness outlasts our failures.",
+    blocks: [
+      p("Your eyes opened this morning. The sun has risen again. Your heart is still beating. Your lungs are inhaling fresh oxygen. You are here, you are alive, and your life has intrinsic value."),
+      p("It's true."),
+      p("But this fractured world tries to beat us down, which can feel all-consuming at times. Our relationships are far from perfect, our desires are bent toward selfishness, and sometimes the everyday grind can feel like too much."),
+      p('The author of Lamentations, traditionally identified as Jeremiah (though his name isn\'t stated explicitly), is known as the "weeping prophet"—constantly undone because of the heartbreaking sin of his people and their open disregard for their Creator. The book is full of grief, distress, and lament. But still, he confidently writes:'),
+      {
+        type: "scripture",
+        reference: "Lamentations 3:21-23, ESV",
+        verses: [
+          "But this I call to mind, and therefore I have hope: The steadfast love of the Lord never ceases; his mercies never come to an end; they are new every morning; great is your faithfulness.",
+        ],
+      },
+      p("Even though God's people had rebelled, even though the strength of Israel was gone and they were facing the consequences of their idolatry, even though their unfaithfulness was making their lives fall apart…"),
+      p("God still poured out His steadfast love. God still showed off His endless mercy. God still lavished His people with His constant faithfulness."),
+      p("That is why they were not consumed. And that is why we still have hope."),
+      p("If you've run from God, ignored His good design, disregarded His warnings, purposely rebelled against Him, or simply chose to forget His existence all together, it's not too late to turn back."),
+      p("God doesn't ignore those who come to Him. He doesn't dismiss those with a humble and repentant heart. He is patiently and faithfully waiting for those who will return to Him."),
+      {
+        type: "reflection",
+        items: ["Have you messed up? Disappointed yourself, and others? Lean into God's mercy. Begin again today."],
+      },
+      {
+        type: "prayer",
+        text: "God, thank You for the mercy of a brand new day. When the troubles of my heart feel endless — You are still faithful. When I am tired, overwhelmed, burnt out, or grieving — Your love still covers me. Thank You for showing me kindness every day. Your mercies are truly endless, and Your steadfast love endures forever. Great is Your faithfulness! In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
