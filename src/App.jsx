@@ -2105,6 +2105,88 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 54,
+    title: "Calm in the Storm",
+    author: null,
+    date: "September 17, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "The disciples panicked in the boat while Jesus slept peacefully through the storm. What His gentle rebuke actually reveals — not that they didn't believe He could save them, but that they doubted He would see them through it.",
+    blocks: [
+      p("One of the most well-known stories in Jesus' life is the calming of the storm (Matthew 8:23-27, Mark 4:35-41, and Luke 8:22-25)."),
+      p("Think about the disciples hanging out on a boat with Jesus when a life-threatening storm erupts on the water. They're unprepared to face it. Panicking, they realize they might die. The entire time this is happening, Jesus is sleeping peacefully."),
+      p("Instead of looking at Jesus' reaction to their situation, the disciples allowed their situation to dictate their reactions."),
+      p('After begging Jesus to do something, He calms the storm … but not before asking them, "Why are you afraid?"'),
+      p("His gentle rebuke wasn't because they didn't believe Jesus could save them from the storm, but because they struggled to believe He would see them through it."),
+      p("They knew Jesus was in their boat, they just didn't understand what He was fully capable of doing."),
+      p("Jesus was their strength through the storm and over the storm."),
+      p("Jesus was their provider, protector, healer, and leader."),
+      p("Jesus was their source of peace and power."),
+      p("And the same God who was with the disciples in the boat is with us. No matter what your current storm looks like—Jesus is near. There is not a situation you have gone through that Jesus hasn't endured beside you."),
+      p("Jesus was, and is, and is to come. He was there at the beginning of time, and He will be there at the end of it. He has seen every event in human history, and He has not forsaken anyone who cries out for Him and trusts in Him."),
+      p("Nothing is impossible for God, and His character never changes. He is for you, and not against you—that's why you have nothing to fear. And that is why today, you can make Isaiah 41:13 your own personal promise:"),
+      {
+        type: "scripture",
+        reference: "Isaiah 41:13, NIV",
+        verses: [
+          "For I am the LORD your God who takes hold of your right hand and says to you, Do not fear; I will help you.",
+        ],
+      },
+      {
+        type: "prayer",
+        text: "God, You know exactly what I'm going through. You're not surprised or intimidated by it. Thank You for always being close; for standing by me through the good and bad. You never fail me. Today, please remind me that You're right here—closer than I can fathom. Remind me that I have nothing to fear, and give me the courage to live boldly for You. In Jesus' name, Amen.",
+      },
+    ],
+  },
+  {
+    id: 55,
+    title: "Think About What You Think About",
+    author: null,
+    date: "September 18, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "What you tell yourself every day matters — three ways to catch the lies you believe, replace them with what's actually true, and let your mind be shaped by God's Spirit instead.",
+    blocks: [
+      p("What you tell yourself every day matters. If you believe something about your identity that isn't true, then you will struggle to believe what God says about you."),
+      p("But, when you root your identity in God and allow His Spirit to shape your life, you will begin to see yourself the way He sees you—and this will influence the way you treat people, situations, opportunities, and events around you."),
+      p("So, here are three ways you can guard your thoughts and declare God's truth over your life:"),
+      { type: "heading", text: "1. Identify the Lies You Tell Yourself" },
+      p('Your words and actions reveal the narratives you tell yourself. To figure out if a narrative is false, ask yourself: Is this thought marked by fear, insecurity, pride, bitterness, or a lack of confidence? Is this thought leading me to cynical or self-serving behavior? If you can answer "yes" to either of those questions, then the narrative you\'re telling yourself probably needs to be addressed and adjusted.'),
+      p("When you can identify where and when you began believing a lie, it'll be easier to change the way you think."),
+      { type: "heading", text: "2. Shift Your Perspective" },
+      p("For every lie, there is a truth that can replace it—and those truths can be found in the Bible. Look over your list of lies, and ask God to show you in His Word what His truth is. Create mental space for the Holy Spirit to clearly show you how He sees you."),
+      { type: "heading", text: "3. Declare What's True" },
+      p("Turn the truths from Scripture into specific, intentional statements you can declare over your life each day."),
+      p("Here are some declarations to get you started:"),
+      {
+        type: "list",
+        items: [
+          "I am enough because I am a child of God.",
+          "I rejoice in suffering because Christ suffered for me.",
+          "I am not ashamed of Jesus because His sacrifice changes lives.",
+          "I am greatly loved, and so I love others like I have been loved.",
+          "Nothing can separate me from God's love.",
+        ],
+      },
+      p("As you practice these steps, keep in mind that if God—whose Word is truth—says something about you, then it must be true. So allow His Holy Spirit to transform the way you think. Let His thoughts about you become your thoughts about you."),
+      {
+        type: "reflection",
+        items: ["What's been occupying your mind lately—thoughts that point you to God, or thoughts that leave you feeling distant from Him?"],
+      },
+      {
+        type: "scripture",
+        reference: "Romans 8:6, ESV",
+        verses: ["For to set the mind on the flesh is death, but to set the mind on the Spirit is life and peace."],
+      },
+      {
+        type: "prayer",
+        text: "God, thank You for the gift of Your Spirit. Your Spirit is always with me, shaping my character. Today, I want to make an intentional decision to trust You by allowing Your Spirit to guide me. Please change the way I think and act so that my whole life revolves around You. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
