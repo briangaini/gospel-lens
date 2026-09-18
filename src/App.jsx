@@ -2187,6 +2187,51 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 56,
+    title: "Satan Is an Identity Thief",
+    author: "Jonny Ardavanis",
+    date: "September 18, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "Satan's most consistent whisper is \"you are in Adam.\" Why we constantly need to return to the fundamentals of being in Christ — and how to answer accusation from who you actually are.",
+    blocks: [
+      p("Jack Nicklaus—arguably the greatest golfer who ever lived—would return to his instructor every single year and say, \"Please, teach me how to play golf.\" A return to the fundamentals. Ben Hogan would return to his instructor every year and say, \"Review my grip.\" Because he understood: if you're gripping the club wrong, you can't make contact with the ball."),
+      {
+        type: "quote",
+        text: "When Satan tempts me to despair and tells me of the guilt within, upward I look and see Him there who made an end of all my sin.",
+        attribution: "Charitie Lees Bancroft",
+      },
+      {
+        type: "scripture",
+        reference: "Romans 8:1; Galatians 2:20; Colossians 3:3",
+        verses: [
+          "Therefore there is now no condemnation for those who are in Christ Jesus.",
+          "I have been crucified with Christ; and it is no longer I who live, but Christ lives in me.",
+          "Your life is hidden with Christ in God.",
+        ],
+      },
+      p("As Christians, we constantly need to return to the fundamentals. The \"grip\" of what it means to be in Christ. Sinclair Ferguson says we are all prone to spiritual amnesia. We forget who we are. And there is a reason why Paul describes your identity in Christ not just in every book of the New Testament, not just in every chapter, but in nearly every paragraph. Because if you forget, the consequences are devastating."),
+      p("What happens when you forget your union with Christ? Your assurance fluctuates like an endless yo-yo. Michael Reeves says your identity becomes dictated by the kind of day you've had. Up when you feel spiritual. Down when you fail. But God loves you no more on your best day than He does on your worst day. Because His love was never dispensed to you because of you—but in spite of you. He loves you because you are in Christ."),
+      p("And you need to understand this: the way Satan operates is as an identity thief."),
+      p("He wants to rob you of your assurance and your security in Christ. He whispers, \"Go back to Egypt.\" He tells you once you're in Egypt that this is where you belong, this is more satisfying. And even if God were to take you back, you're not deserving of His grace—so you'd better try to earn your way back."),
+      p("That is the strongest, most consistent whisper of the devil: \"You are in Adam.\""),
+      p("This is why the consistent theme of Scripture is: you are in Christ. Don't forget. Don't forget. Don't forget."),
+      p("And when you understand concretely who you are, when Satan says your sin is so great—you can say back, \"You're right. And you don't know the half of it. But my God is a greater Savior than I am a sinner. And my righteousness is not my own. It is Christ, my Victor, the second Adam who came to the fight. When God looks at me, He sees me clothed in the spotless, perfect, sinless righteousness of Jesus.\""),
+      p("And when you stumble—because you will—you don't need to be saved all over again. Romans 8:1: \"Therefore there is now no condemnation for those who are in Christ Jesus.\" In the moment you feel the most immense amount of guilt, that is the moment you remind yourself: I am covered by the blood of the Lamb. And that doesn't make me want to sin. It makes me hate my sin all the more."),
+      p("My life is hidden with Christ in God. Enveloped in His righteousness. That is who I am."),
+      {
+        type: "reflection",
+        items: [
+          "Have you experienced the fluctuating assurance that comes from forgetting your identity in Christ—feeling saved when you perform well and condemned when you fail?",
+          "Are you living as someone whose life is hidden with Christ in God—or are you still living as if you have to earn your way back after every failure?",
+          "What would it look like today to reckon yourself in Christ and answer Satan's accusations from that foundation?",
+        ],
+      },
+      { type: "heart", text: "Satan is an identity thief. But my life is hidden with Christ in God. There is no condemnation. He clothed me. I am in Him and He is in me." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
