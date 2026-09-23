@@ -2232,6 +2232,83 @@ const POSTS = [
       { type: "heart", text: "Satan is an identity thief. But my life is hidden with Christ in God. There is no condemnation. He clothed me. I am in Him and He is in me." },
     ],
   },
+  {
+    id: 57,
+    title: "From Promises to Fulfilled Covenants",
+    author: null,
+    date: "September 20, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "From Abraham to Moses to David to Jeremiah's promise of a New Covenant — every one of God's covenant promises meets its fulfillment in Jesus. What that says about the kind of love He actually has for you.",
+    blocks: [
+      p("God made promises to Abraham in Genesis about his lineage, and He gave the Ten Commandments to Moses in Exodus. He made a covenant to David in 2 Samuel, and declared a New Covenant to come in the book of Jeremiah (Jeremiah 31:31-34)."),
+      p("All of those stories point to the arrival of Jesus Christ—where all God's covenant promises are fulfilled (2 Corinthians 1:20)."),
+      p("These stories remind us of God's faithfulness (Romans 15:4). We don't have to look very far to see:"),
+      {
+        type: "scripture",
+        reference: "Deuteronomy 7:9",
+        verses: [
+          "That the Lord your God is God; he is the faithful God, keeping his covenant of love to a thousand generations of those who love him and keep his commandments.",
+        ],
+      },
+      p("God's love is faithful; it's constant. It endures through the generations. In a world where love is often conditional and transactional, given and withdrawn based on our actions, God's love stands apart. It's not tethered to the ups and downs of our circumstances. It doesn't waver with our feelings. And it certainly doesn't hinge on our performance."),
+      p("God's love is firmly rooted in His unchanging character."),
+      p("So even if you're on the highest mountaintop of success or in the deepest valley of despair, His love remains constant—an ever-present source of strength for those who love Him."),
+      p("Today, let the words of Deuteronomy 7:9 sink deep into your soul and remember: Our God is not distant or indifferent. He is near, and His love is faithful—enduring through a thousand generations."),
+      {
+        type: "prayer",
+        text: "God, thank You for Your faithful love! I can't lose it. I can't earn more of it. Your love is more limitless and abounding than I could ever imagine. Thank You for freely giving it to me, and teaching me how to freely love others. In Jesus' name, Amen.",
+      },
+    ],
+  },
+  {
+    id: 58,
+    title: "The Depth of His Love",
+    author: "Jonny Ardavanis",
+    date: "September 21, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "The deepest ocean trench on Earth is 36,000 feet down. There is a depth in John 15:9 that can't be plumbed at all. Just as the Father has loved Jesus, Jesus has loved you.",
+    blocks: [
+      p("The Mariana Trench is the deepest point on Earth—36,000 feet into the heart of the Pacific Ocean. The Veryovkina Cave goes 7,000 feet into the heart of the earth. The Dead Sea sits 1,400 feet below sea level. These are plumbable depths. They can be measured."),
+      p("But there is a depth in John 15:9 that cannot be plumbed."),
+      {
+        type: "quote",
+        text: "Just as the Father has loved Me, I have also loved you. Abide in My love.",
+        attribution: "Jesus Christ",
+      },
+      {
+        type: "scripture",
+        reference: "John 15:9; John 13:1; 1 John 4:7-11",
+        verses: [
+          "Just as the Father has loved Me, I have also loved you; abide in My love.",
+          "Having loved His own who were in the world, He loved them to the end.",
+          "Beloved, let us love one another, for love is from God; and everyone who loves is born of God and knows God.",
+        ],
+      },
+      p('Jesus says in John 15:9, "Just as the Father has loved Me, I have also loved you."'),
+      p("Think about that. How much does God the Father love God the Son? Well, that's the God who is love—from everlasting to everlasting, He is love before there was anyone else to love but God. The Father loves the Son infinitely, perfectly, boundlessly."),
+      p('And Jesus says, "Just as the Father has loved Me—I have also loved you."'),
+      p("That is not a depth we can plumb. And your strength and vitality as a Christian is inevitably going to be anemic if you have a shallow understanding of God's love for you."),
+      p('This whole section of Scripture since John 13:1 is saturated and marinated with this reality. It says Jesus, "having loved His own who were in the world, loved them to the end"— meaning, "to the max", eis telos, no more love to offer. He wasn\'t rationing off His love. He was extending it to the max.'),
+      p("And He demonstrates that love as He stoops down—think about this—the Creator of the universe taking off His outer robe, girding Himself with a towel, on His knees before His disciples, scrubbing the grime between their toes. This is a task not even required of a servant. This was the work of a slave."),
+      p('And then from that posture He gives them a command: "A new commandment I give to you, that you love one another, even as I have loved you."'),
+      p("Love is all over this section. John 14:21, 14:23, 14:28, 14:31, 15:9, 15:12. Over and over. Because no matter how many times we are told to love one another, we are prone to live in disobedience to the simplicity of that command."),
+      p('Here is how First John 4:11 puts it: "Beloved, if God so loved us, we also ought to love one another." It\'s logical. It makes sense. It\'s reasonable.'),
+      p('You\'ve been loved like the Father loves the Son. And Jesus says, "Abide in My love." Don\'t go far from this. Don\'t go a day without this. The love of God for Christians becomes the love of God between Christians.'),
+      {
+        type: "reflection",
+        items: [
+          "Do you genuinely believe that God loves you the way the Father loves the Son—infinitely, completely, with no more love left to give?",
+          "Is your Christian life anemic? Could a shallow understanding of God's love for you be the reason?",
+          "What would it look like today to abide in His love—to marinate in it rather than just acknowledge it?",
+        ],
+      },
+      { type: "heart", text: "Just as the Father has loved Jesus—He has loved me. Bottomless. Boundless. Immeasurable. Abide there." },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
