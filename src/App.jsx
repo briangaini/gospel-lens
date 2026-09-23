@@ -2324,17 +2324,19 @@ const POSTS = [
 // ---------------------------------------------------------------------------
 
 const POST_TAGS = {
-  "The Gospel Explained": [1, 9, 12, 19],
-  "Grace & Assurance": [3, 14, 7, 31],
-  "Sin & Repentance": [8, 17],
+  "The Gospel Explained": [1, 9, 12, 19, 28, 57],
+  "Grace & Assurance": [3, 14, 7, 31, 53],
+  "Sin & Repentance": [8, 17, 47],
   "Grief & Comfort": [6, 21, 22, 30],
-  "Purpose & Calling": [5, 13, 23, 26],
+  "Purpose & Calling": [5, 13, 23, 26, 29, 50],
   "Prayer": [2, 18],
-  "Worship": [4, 38],
-  "Friendship": [20],
-  "Discipline & Growth": [10, 11, 24, 25, 39],
-  "Identity in Christ": [16],
-  "Peace": [36, 41],
+  "Worship": [4, 38, 43],
+  "Friendship": [20, 34, 49],
+  "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52],
+  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56],
+  "Peace": [36, 41, 15, 43, 51, 54],
+  "God's Love & Faithfulness": [32, 57, 58],
+  "Heaven & Eternity": [27, 44],
 };
 
 // A short, real description per topic (added 2026-09-08, per Brian's
@@ -2354,6 +2356,8 @@ const TOPIC_DESCRIPTIONS = {
   "Discipline & Growth": "The slow, ordinary work of becoming more like Christ — habits, discipline, and real spiritual growth.",
   "Identity in Christ": "Who you actually are if you belong to Jesus, and why that matters more than anything else you've been told about yourself.",
   "Peace": "Real peace — not the absence of trouble, but the presence of God in the middle of it.",
+  "God's Love & Faithfulness": "How wide, how deep, how unshakably constant God's love actually is — and why it was never something you had to earn.",
+  "Heaven & Eternity": "What's actually waiting on the other side, and why setting your mind there changes how you live on this one.",
 };
 
 // ---------------------------------------------------------------------------
