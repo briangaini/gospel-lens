@@ -2309,6 +2309,46 @@ const POSTS = [
       { type: "heart", text: "Just as the Father has loved Jesus—He has loved me. Bottomless. Boundless. Immeasurable. Abide there." },
     ],
   },
+  {
+    id: 59,
+    title: "Plant Generously",
+    author: null,
+    date: "September 24, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Whoever sows sparingly will also reap sparingly, and whoever sows generously will also reap generously. What Paul actually meant by that, and what it looks like to plant with the right heart.",
+    blocks: [
+      p("In his second letter to the believers in Corinth, Greece, the apostle Paul expressed his gratefulness for their commitment to generosity before challenging them with this statement:"),
+      {
+        type: "scripture",
+        reference: "2 Corinthians 9:6, NIV",
+        verses: [
+          "Remember this: Whoever sows sparingly will also reap sparingly, and whoever sows generously will also reap generously.",
+        ],
+      },
+      p("Paul knew that God had established some common-sense principles when it came to generosity. All throughout Scripture, we see both natural and spiritual implications of this cycle."),
+      p("Natural: If you plant a few seeds in the ground, you will reap a small harvest. If you plant hundreds or thousands of seeds in the ground, you will reap a large harvest."),
+      p("Spiritual: If you spend your time, money, talents, or energy investing in a friend, a stranger, a ministry, or the next generation, God can certainly multiply those efforts."),
+      p("But Paul also makes it clear in the surrounding verses that you shouldn't just give to get. If you do give, you should do so willingly and cheerfully—not begrudgingly."),
+      p("What we sow with the right heart, God will surely multiply."),
+      p('Proverbs 11:18 says, "…the one who sows righteousness reaps a sure reward." Hosea 10:13 says, "You have planted wickedness, you have reaped evil, you have eaten the fruit of deception..."'),
+      p("Instead of seeds of selfishness, anger, or pride, let's plant seeds of selflessness, peace, and humility."),
+      {
+        type: "reflection",
+        items: [
+          "How am I investing my life?",
+          "What types of seeds am I planting?",
+          "Am I trusting that God will multiply my efforts when invested with the right heart?",
+        ],
+      },
+      p("Take some time to reflect on what you're planting and reaping today, and ask God to direct your steps."),
+      {
+        type: "prayer",
+        text: "God, You are my great provider—the One who provides me with opportunities to plant generously. Thank You! Please give me eyes to see, ears to hear, and the courage to trust You with every opportunity to live a generous life. I want to wisely manage the money, time, energy, and talents You've given me. Help me to steward them well. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -2328,7 +2368,7 @@ const POST_TAGS = {
   "Grace & Assurance": [3, 14, 7, 31, 53],
   "Sin & Repentance": [8, 17, 47],
   "Grief & Comfort": [6, 21, 22, 30],
-  "Purpose & Calling": [5, 13, 23, 26, 29, 50],
+  "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59],
   "Prayer": [2, 18],
   "Worship": [4, 38, 43],
   "Friendship": [20, 34, 49],
