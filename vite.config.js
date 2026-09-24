@@ -44,6 +44,42 @@ export default defineConfig({
         // still fetched (and then cached by the browser normally) the
         // moment someone actually clicks "Sign in with Google."
         globIgnores: ["**/assets/firebase-*.js"],
+        // Found live 2026-09-25: a shared link (e.g. a brand-new post) could
+        // flash the client-side "Page Not Found" view for a split second on
+        // any *returning* visitor's device before correcting itself.
+        // vite-plugin-pwa's generateSW mode silently registers a default
+        // Workbox NavigationRoute pointing every single navigation --
+        // literally any path -- at the *cached* index.html shell first,
+        // confirmed directly by reading the actual generated dist/sw.js
+        // (`registerRoute(new NavigationRoute(createHandlerBoundToURL(
+        // "index.html")))`, with no allowlist/denylist limiting it). That
+        // cached shell references whatever JS bundle was current the last
+        // time that visitor's service worker updated -- if they'd visited
+        // before a new post was added, their cached bundle's POSTS array
+        // genuinely doesn't contain it yet, so the client router correctly
+        // (from that stale bundle's own point of view) renders "not found"
+        // -- until the site's own update-detection (src/main.jsx) finds the
+        // newer service worker a moment later and reloads, this time
+        // getting the current bundle and the real post.
+        //
+        // This fallback route was never actually needed here: every real
+        // route (every post, every topic/collection page, /blog, /about,
+        // /saved, /liked, /start-here, /verses, home) already has its own
+        // accurate, always-fresh static file served directly by Vercel, and
+        // a genuinely unknown/mistyped path is already served a real,
+        // correct dist/404.html by Vercel itself (see "Custom 404 page")
+        // *before* any service worker gets a say -- so routing every
+        // navigation through a possibly-stale cached shell first was pure
+        // downside with no real upside for this site. Denying the fallback
+        // for every path disables it outright: every navigation now goes
+        // straight to the network and gets Vercel's live, current file,
+        // every time, eliminating this whole class of stale-shell bug (not
+        // just for this one post -- for any future one too), at the cost of
+        // the app no longer being able to launch itself while the device is
+        // fully offline on that very first navigation (client-side
+        // navigation *within* an already-loaded session is unaffected and
+        // still works offline, same as before).
+        navigateFallbackDenylist: [/.*/],
       },
     }),
   ],
