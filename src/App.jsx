@@ -2442,6 +2442,97 @@ const POSTS = [
       },
     ],
   },
+  // NOTE: this post is placed BEFORE id 62 in the array on purpose, even
+  // though its id is higher -- both share the exact date "September 28,
+  // 2026", and Brian explicitly asked for this one to display as the more
+  // recent of the two. Every post list sorts by date descending via a
+  // STABLE sort ([...POSTS].sort((a,b) => new Date(b.date) - new
+  // Date(a.date))), so for two genuinely tied dates, whichever one sits
+  // EARLIER in this array wins the tie and shows first/newer. Array
+  // position doesn't matter for posts with distinct dates (see "Display
+  // order" in CLAUDE.md) -- it only matters here because these two
+  // specifically tie.
+  {
+    id: 63,
+    title: "You Did Not Choose Me—I Chose You",
+    author: "Jonny Ardavanis",
+    date: "September 28, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "Before you say anything else about your Christian life, you need to hear this: you did not choose Him. He chose you — not after you cleaned up, but while you were still His enemy.",
+    blocks: [
+      {
+        type: "quote",
+        text: "You did not choose Me, but I chose you, and appointed you that you would go and bear fruit, and that your fruit would remain.",
+        attribution: "John 15:16",
+      },
+      p("Before you say anything else about your Christian life—before you talk about your faith, your obedience, your love—you need to hear this. You did not choose Him. He chose you."),
+      {
+        type: "quote",
+        text: "So long as you think you are worthy of God's love, you will never understand the depth of it.",
+        attribution: "Jonny Ardavanis",
+      },
+      {
+        type: "scripture",
+        reference: "John 15:16; Ephesians 2:1, 10; Romans 5:6",
+        verses: ["You did not choose Me, but I chose you, and appointed you that you would go and bear fruit."],
+      },
+      p('In the ancient world, disciples would go out and seek a rabbi. They would attach themselves to him and plead, "Let us learn from you." They initiated the relationship. But as it relates to our relationship with Jesus, it is He that approached us. He\'s the one who went to the twelve—and to all of us today—and said, "Follow Me."'),
+      p("You did not choose Me. I chose you."),
+      p("Lest you get some inflated view of yourself—why are you friends with Jesus? Not because you kept tapping Him on the shoulder. Not because you were particularly impressive. He chose you."),
+      p("If we think we initiated this relationship, we do not understand the depth of our depravity. We don't understand what we looked at previously—that by nature we were in Adam. Dead in sin. Helpless. Foolish and enslaved. Unrighteous. God loved you before you did anything for God."),
+      p("And this reality eviscerates any vestige of human pride."),
+      p("So long as you think you are worthy of God's love, you will never understand the depth of it. This love was extended to you while you were dead, helpless, foolish, and enslaved. Not after you cleaned up. Not after you improved. While you were still his enemy."),
+      p("And He chose you. And appointed you to bear fruit."),
+      p('That word more keeps coming up. Every branch that bears fruit, He prunes it so that it may bear more fruit. Andrew Murray notes that "more" is a searching word. There\'s a holy discontentment in every godly Christian. Laodicea was the church in Revelation that thought, "We have good doctrine. We\'ve served. We\'ve done our time." And they were content to observe their fruit on the shelf and never bear more of it.'),
+      p('Jesus says, "I chose you—and appointed you to go and bear fruit." There is no retirement from fruit-bearing.'),
+      p('Now when Jesus says bear fruit, nearly every commentator agrees—He is particularly talking about new converts. This is why He says in John 4, "The fields are ripe for harvest." This is why He says, "The harvest is plentiful but the workers are few." You have been chosen not just to be rescued but to be sent.'),
+      p("You are not saved so that you can holy huddle and thank God you're not among the unredeemed. You are to go. You are to love other people practically and tangibly by telling them about the God who died for their sin."),
+      p("The Christian has the opportunity to live a life of unrivaled, eternal significance. He chose you for that."),
+      {
+        type: "reflection",
+        items: [
+          "Have you ever genuinely grappled with the fact that you did not choose God—He chose you? What does that do to your pride?",
+          "Are you content with the fruit you've already borne, or is there a holy discontentment in you to bear more?",
+          "Who in your life needs to hear about the God who chose you—who loved you while you were still His enemy?",
+        ],
+      },
+      { type: "heart", text: 'I did not choose Him. He chose me. He appointed me to go and bear fruit. There is no retirement. There is only "more."' },
+    ],
+  },
+  {
+    id: 62,
+    title: "The Truth About Death",
+    author: null,
+    date: "September 28, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "No matter where you live or how well you take care of yourself, there's no escaping death. But for those who belong to Christ, that's not the end of the story — really, really good news.",
+    blocks: [
+      p("No matter what part of this planet you live on, how well you take care of your body, or how much money is in your bank account, there is no escaping death."),
+      p("Sound a little depressing? Sure. But there's still good news! Really, really good news."),
+      p("For those who belong to Christ, we have a hope that's beyond this world…"),
+      {
+        type: "scripture",
+        reference: "Romans 8:11, NLT",
+        verses: [
+          "The Spirit of God, who raised Jesus from the dead, lives in you. And just as God raised Christ Jesus from the dead, he will give life to your mortal bodies by this same Spirit living within you.",
+        ],
+      },
+      p("Death is the greatest tool of our enemy, which is why Jesus came to defeat it. That's why He became human, took the ultimate punishment, and put death in its rightful place—under the authority and dominion of God."),
+      p("For the believer, death is only temporary. And the Spirit of God can do what no human can—give life to the lifeless and redeem what has been lost."),
+      p("The truth about death is that it's not the end of the story."),
+      p("Soon, God will wipe away every tear and make all things new. Just as a baby is given the miraculous and mysterious breath of life, His Spirit will revive the seemingly perished and bring the dead back to life."),
+      p("And that is the really, really good news."),
+      p("We can know the One who made everything—who brings dead things back to life. Take a moment to thank God for who He is!"),
+      {
+        type: "prayer",
+        text: "God, thank You for laying down Your life—for the world and for me. I don't deserve the grace, forgiveness, and salvation You've given me, but I'm so thankful. I want to live, now and forever, fully alive in You! Help me to tell others about Your resurrection power, and about the greatest story on earth. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -2458,7 +2549,7 @@ const POSTS = [
 
 const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19, 28, 57],
-  "Grace & Assurance": [3, 14, 7, 31, 53],
+  "Grace & Assurance": [3, 14, 7, 31, 53, 63],
   "Sin & Repentance": [8, 17, 47],
   "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59],
@@ -2469,7 +2560,7 @@ const POST_TAGS = {
   "Identity in Christ": [16, 37, 40, 46, 47, 55, 56],
   "Peace": [36, 41, 15, 43, 51, 54, 60],
   "God's Love & Faithfulness": [32, 57, 58],
-  "Heaven & Eternity": [27, 44],
+  "Heaven & Eternity": [27, 44, 62],
 };
 
 // A short, real description per topic (added 2026-09-08, per Brian's
