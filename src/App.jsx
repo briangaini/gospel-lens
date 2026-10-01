@@ -2533,6 +2533,106 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 64,
+    title: "What's Inside of You?",
+    author: null,
+    date: "September 29, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "What goes into your soul and mind determines what comes out of your mouth, your actions, and your decisions. What it actually looks like to guard your heart — not by trying harder, but by giving it to God.",
+    blocks: [
+      p('Have you ever made a poor decision and thought, "Why did I do that?"'),
+      p("In the Old Testament, the heart was considered the center of inner life, and people believed it dictated thoughts, emotions, and actions. It was essentially a combination of someone's soul and mind."),
+      p('When Proverbs 4:23 tells us to "guard our hearts," what it\'s essentially saying is "pay careful attention to how you fill your inner life."'),
+      p("What goes into your soul and mind determines what comes out of your mouth. And what you say influences your actions and decisions. While you might not notice the effect your choices have on you today—over time, they will impact the direction of your life."),
+      p("So how do we intentionally take care of our inner lives?"),
+      p("Our bodies were made by God, which means the thing they need most is God. He is the One who sustains us. Some of the best things we can do for ourselves is to intentionally seek God through prayer, studying Scripture, reflecting on His blessings, and inviting the Holy Spirit to speak to us throughout our day."),
+      p("The best way to guard our hearts is by giving our hearts to God. When we make Him the center of our lives and the source of our strength, what we do will flow out from Him."),
+      p("So instead of fitting God into our daily routines, let's create our daily routines around our relationship with God. Let's create space for God to speak to us and restore us. Let's allow God to heal the parts of our lives that are broken—so that what comes out of us is good, encouraging, and leads to an abundant life."),
+      {
+        type: "prayer",
+        text: "God, You know my heart better than anyone else—the joys and the sorrows. Thank You for knowing me intimately and still loving me unconditionally. You are worthy, so I give my heart to You! Please show me what influences are good for my heart and soul, and which aren't. I want my life to reflect Your love. Amen.",
+      },
+    ],
+  },
+  {
+    id: 65,
+    title: "Limitless Riches",
+    author: null,
+    date: "September 30, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "Paul wrote this from prison, with his needs met not because his circumstances had changed, but because of who God is. Just how limitless, bottomless, and inexhaustible are God's riches — and what it means that He's granted you access.",
+    blocks: [
+      p("Writing from prison to the believers in Philippi, the apostle Paul divulged that he'd learned the secret to being content no matter the situation."),
+      p("Because of the faithfulness of God and the generosity of the Philippians, Paul's needs had been met—even while in jail. He went on to say:"),
+      {
+        type: "scripture",
+        reference: "Philippians 4:19, NLT",
+        verses: [
+          "And this same God who takes care of me will supply all your needs from his glorious riches, which have been given to us in Christ Jesus.",
+        ],
+      },
+      p("What an incredible perspective from captivity—where Paul was placed for spreading the truth about Jesus."),
+      p("God had given Paul peace, his friends had sent supplies, and Paul's joy was unapologetically obvious—despite his imperfect circumstances."),
+      p("Paul knew that the same God who was taking care of him would also take care of his friends. He knew that—because Jesus had already made a way—they could access the storehouses of heaven. He knew that—because of God's generous character—they were covered in His grace."),
+      p("Have you ever considered what a treasure trove of riches God has? And it's not just what He has, but also who He is. God's glorious riches, never-ending resources, and both visible and invisible qualities are limitless, bottomless, boundless, and inexhaustible."),
+      p("Think about that for a moment. The amazing thing is: He's granted us access."),
+      p("In His kindness, God fashioned raspberries and puppies. In His brilliance, He crafted the human eye and hung the earth on nothing. By His creativity, He made hammerhead sharks and sparkling fireflies. By His power, He designed galaxies that even the smartest of scientists are just now discovering."),
+      p("The same God who cares for His creation will also provide for you."),
+      p("When we become His children, we are given the key to eternal riches, to incorruptible goods, and to traits of His Spirit—love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control."),
+      p("Do you need peace? You have a God who brings peace. Do you need provision? You have a God who offers provision. Do you need rest? You have a God who extends rest."),
+      p("The ways in which God shows up are literally countless, and it's all because of His gloriously limitless riches."),
+      {
+        type: "prayer",
+        text: "Father God, You met my greatest need when You sent Your Son to rescue me from eternal separation from You. Thank You! I never want to take Your kindness for granted. So today, please teach me to come honestly before You and to trust You with what I need. In Jesus' name, Amen.",
+      },
+    ],
+  },
+  {
+    id: 66,
+    title: "Take Thoughts Captive",
+    author: null,
+    date: "October 1, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt:
+      "Satan isn't creative — he just keeps throwing the same lies at you, over and over, hoping you'll agree with them. What it actually looks like to take a thought captive instead of just trying to think it away.",
+    blocks: [
+      p("One of the most common ways we experience spiritual warfare is in the mind. The enemy is constantly hurling lies at us and trying to get us to agree with the discouraging, destructive, and dangerous things he says."),
+      p("But Satan isn't creative. Creation belongs to God. So the best he can do is figure out which lies hurt us the most and torment us with them over and over again. The attacks impacting us most today are probably the same attacks he's been throwing at us our whole lives. But his lies only have power when we choose to agree with them."),
+      p("When we agree with a lie, we give it credibility. We internalize it and let it become a part of who we believe we are. You'll know you've made an agreement with a lie because it will sound like the voice in your head. If we heard an evil, hissing voice like something out of a movie, we'd never listen to it. But because it's in our own voice, we're so much more willing to believe it as truth."),
+      p("When our thoughts are aligned with God's word, the devil can't lie to us. The apostle Paul encourages us to take our thoughts captive. That means not letting our thoughts run wild, but checking our thoughts against the truth of God's word. He also urges us to think on whatever is true, noble, lovely, and praiseworthy. He understood the mind is a battlefield, and he wanted us to cast out everything that doesn't line up with God."),
+      p('Again, taking thoughts captive and casting out lies is active. We can\'t simply think "go away." Satan can\'t read our minds. Sometimes we allow him to influence our thoughts when we pick up the lies he hurls at us, but only God is all-knowing and able to hear our thoughts. When Jesus was in the desert being tempted by Satan, Jesus spoke Scripture and told him to go away. In the same way, we have the authority to command him to flee in the name of Jesus.'),
+      p("With practice, it gets easier to spot the inconsistencies between what you're hearing and what God promises. You'll get faster at taking thoughts captive, speaking against lies, and realigning with truth. Ask God to help you spot the lies and remind you of the truth so you can more easily fight back!"),
+      {
+        type: "reflection",
+        items: [
+          "Take a moment to think about what you're thinking about.",
+          "What lies are you believing?",
+          "What thoughts do you need to surrender to God?",
+        ],
+      },
+      {
+        type: "scripture",
+        reference: "2 Corinthians 10:5, ESV",
+        verses: [
+          "We destroy arguments and every lofty opinion raised against the knowledge of God, and take every thought captive to obey Christ.",
+        ],
+      },
+      {
+        type: "share",
+        items: ["When someone you care about is believing a lie, you can lovingly point them to the truth in God's Word."],
+      },
+      {
+        type: "prayer",
+        text: "God, You already know everything about me. You know what I'm going to say before I speak it. You know my thoughts, desires, and intentions. All that I am, I surrender to You. I want to point others to Your goodness and grace. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -2556,10 +2656,10 @@ const POST_TAGS = {
   "Prayer": [2, 18],
   "Worship": [4, 38, 43],
   "Friendship": [20, 34, 49],
-  "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61],
-  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56],
+  "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64],
+  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66],
   "Peace": [36, 41, 15, 43, 51, 54, 60],
-  "God's Love & Faithfulness": [32, 57, 58],
+  "God's Love & Faithfulness": [32, 57, 58, 65],
   "Heaven & Eternity": [27, 44, 62],
 };
 
