@@ -5012,7 +5012,34 @@ function FromArchiveCard({ openPost }) {
   );
 }
 
-function HomeView({ setView, openPost, openReadingPlan }) {
+// A teaser card linking out to the full Scripture Index (/verses) rather
+// than embedding the whole list -- every reference across 66+ posts,
+// grouped by book, is too long to drop into a homepage scroll. Dashed gold
+// border deliberately distinguishes it from every other solid-bordered card
+// on Home, the same way From the Archive's dark fill sets it apart.
+function ScriptureIndexTeaserCard({ openScriptureIndex }) {
+  return (
+    <section className="max-w-3xl mx-auto px-6 sm:px-8 pb-24">
+      <button
+        onClick={openScriptureIndex}
+        className="w-full text-left flex items-center gap-4 bg-white dark:bg-[#1E2128] border border-dashed border-[#B08D57]/60 dark:border-[#D9B77C]/50 rounded-sm px-6 py-5 hover:border-[#B08D57] dark:hover:border-[#D9B77C] transition-colors duration-200"
+      >
+        <BookOpen size={20} strokeWidth={1.75} className="text-[#B08D57] shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Every verse cited on the site, in one place
+          </div>
+          <p className="text-[12px] text-[#5B5F6B] dark:text-[#A9ADB6] mt-1">
+            Every Scripture Focus reference across all your posts, grouped by Bible book.
+          </p>
+        </div>
+        <ArrowRight size={16} strokeWidth={2} className="shrink-0 text-[#B08D57]" />
+      </button>
+    </section>
+  );
+}
+
+function HomeView({ setView, openPost, openReadingPlan, openTopic, openScriptureIndex }) {
   return (
     <>
       <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-20 pb-24 text-center">
@@ -5113,7 +5140,25 @@ function HomeView({ setView, openPost, openReadingPlan }) {
         </div>
       </section>
 
+      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
+        <Eyebrow>Explore by Topic</Eyebrow>
+        <div className="flex flex-wrap gap-2.5 mt-6">
+          {Object.keys(POST_TAGS).map((tag) => (
+            <button
+              key={tag}
+              onClick={() => openTopic(tag)}
+              className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/14 dark:border-[#F2F1EC]/16 rounded-full px-3.5 py-1.5 hover:border-[#4A5D4E] hover:text-[#4A5D4E] dark:hover:border-[#6E9077] dark:hover:text-[#6E9077] transition-colors duration-200"
+            >
+              {tag}
+              <span className="text-[10.5px] font-semibold text-[#B08D57]">{POST_TAGS[tag].length}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <FromArchiveCard openPost={openPost} />
+
+      <ScriptureIndexTeaserCard openScriptureIndex={openScriptureIndex} />
     </>
   );
 }
@@ -6097,9 +6142,11 @@ export default function GospelLensApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Called from the small button inside a post's own Scripture Focus box
-  // (see PostBody) -- the only entry point to this page, deliberately, per
-  // Brian's explicit ask that it not live on the nav or homepage.
+  // Originally reachable only from the small button inside a post's own
+  // Scripture Focus box (see PostBody), per Brian's explicit ask that it not
+  // live on the nav or homepage. A homepage teaser card was added 2026-10-01
+  // (ScriptureIndexTeaserCard, also at his explicit request) -- the post-page
+  // button is unchanged, this is just a second entry point.
   const openScriptureIndex = () => {
     setView("verses");
     pushHistoryState("/verses");
@@ -6178,7 +6225,15 @@ export default function GospelLensApp() {
       />
 
       <main className="flex-1">
-        {view === "home" && <HomeView setView={changeView} openPost={openPost} openReadingPlan={openReadingPlan} />}
+        {view === "home" && (
+          <HomeView
+            setView={changeView}
+            openPost={openPost}
+            openReadingPlan={openReadingPlan}
+            openTopic={openTopic}
+            openScriptureIndex={openScriptureIndex}
+          />
+        )}
         {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} openTopic={openTopic} />}
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} goBack={goBack} />}
