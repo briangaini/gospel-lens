@@ -2633,6 +2633,41 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 67,
+    title: "Love One Another",
+    author: null,
+    date: "October 2, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Jesus said the world would know Him by how His followers love each other. What it actually looks like to let that be true of us, in a world full of anger, strife, and conflict.",
+    blocks: [
+      p("Jesus said two important things about our love for each other. First, that all people will know we are His disciples if we love one another (John 13:34). Second, our unity in Him will let the world know that God had sent Him into the world (John 17:23)."),
+      p("Jesus said the world will know He has come by how His followers love each other. We should love one another in such a way that those who do not believe in Jesus would be astounded and curious to learn more about Him."),
+      p("Jesus knew this world would be full of anger, strife, and conflict. This is all the more reason it should be a priority to love other people with the same love God has for us. Loving others unveils to the world the great and loving God who loved us first."),
+      p('Years after Jesus\' resurrection, the apostle John wrote three short letters to followers of Jesus. And in his first letter, he takes the time to talk to them about how to love, and why it matters. John wrote: "...love is from God … if God so loved us, we also ought to love one another … we love because He first loved us." (1 John 4:7, 11, 19)'),
+      p('He even goes as far as to say, "If anyone says, \'I love God,\' and hates his brother, he is a liar, for he who does not love his brother whom he has seen cannot love God whom he has not seen." (1 John 4:20, ESV)'),
+      p("There's no way around this. John makes it clear that our love for one another is proof that God's love is in us. So if we say that we love God, then we should be committed to showing love to each other."),
+      {
+        type: "reflection",
+        items: [
+          "Is there anyone in my life that I need to show love to today?",
+          "Is there anyone I need to forgive?",
+          "In what ways can I love my brothers and sisters in Jesus?",
+        ],
+      },
+      {
+        type: "scripture",
+        reference: "1 John 4:19, ESV",
+        verses: ["We love because he first loved us."],
+      },
+      {
+        type: "prayer",
+        text: "God, thank You for showing every generation throughout history the same unconditional love. You are constantly inviting us to experience intimacy with You. What a beautiful gift that is! Today, no matter what I face, help me to love others like You have loved me. Let my life be evidence of Your love at work in the world. In Jesus' name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -2655,7 +2690,7 @@ const POST_TAGS = {
   "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59],
   "Prayer": [2, 18],
   "Worship": [4, 38, 43],
-  "Friendship": [20, 34, 49],
+  "Friendship": [20, 34, 49, 67],
   "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64],
   "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66],
   "Peace": [36, 41, 15, 43, 51, 54, 60],
