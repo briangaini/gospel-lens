@@ -242,6 +242,8 @@ A private "write your answer" box under each post's Reflection Questions, plus a
 
 All five route through one new `openJournal(tab)` navigation function in `GospelLensApp` (mirrors `openScriptureIndex`), threaded down through `HomeView` and `SinglePostView`/`PostBody` the same way `openScriptureIndex` already was. Verified live locally: the icon, the per-answer link, and the homepage card all land on `/journal`; the prayer-block nudge lands on `/journal#prayer` with the Prayer List tab already active and its context line showing; both tabs' context lines swap correctly; console showed only the known benign dev-mode messages.
 
+**No "Back" button on `/journal` (2026-10-02), fixed same day Brian reported it.** Unlike `/saved`/`/liked`, which deliberately never got one (reached directly from the hamburger, not something navigated "into" the way a post or the Scripture Index is), `/journal` now has several real forward-navigation entry points of its own (the Reflection Questions icon, the per-answer link, the prayer-block nudge) — so it needed the same `goBack("blog")` pattern `ScriptureIndexView`/`TopicView`/`CollectionView`/`SinglePostView` already use. `JournalView` now takes a `goBack` prop and renders the identical "Back" button (`ArrowLeft` + `goBack("blog")`) at the top, in the same position. Verified the exact chain Brian would hit: opened a post, clicked the Reflection Questions box's Journal icon, clicked Back — landed back on the exact post, not Blogs; separately confirmed landing on `/journal` directly by URL (no prior in-app history) still falls back to `/blog` correctly, matching every other page with this pattern.
+
 ## Content model: the `blocks` system
 
 Every blog post is an object in the `POSTS` array (`src/App.jsx`). Shape:

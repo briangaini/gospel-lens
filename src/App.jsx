@@ -4982,7 +4982,7 @@ function buildJournalExportText(groups) {
 // separate, free-form prayer list with an Answered toggle. Neither needs a
 // Back button, same as Saved/Liked -- reached directly from the hamburger
 // menu, not something navigated "into" from deep inside another flow.
-function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, onToggleAnswered, onDeletePrayer, openPost, setView, user, onSignIn, signedIn }) {
+function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, onToggleAnswered, onDeletePrayer, openPost, setView, user, onSignIn, signedIn, goBack }) {
   // Deep-linked from a post's own prayer-block nudge via openJournal("prayer")
   // (pushes "/journal#prayer") -- read once on mount, same pattern as
   // READING a path elsewhere in this app, so landing here from that specific
@@ -5025,6 +5025,14 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
 
   return (
     <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
+      <button
+        onClick={() => goBack("blog")}
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+      >
+        <ArrowLeft size={15} strokeWidth={2} />
+        Back
+      </button>
+
       <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
         <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
           Your Reflections
@@ -7038,6 +7046,7 @@ export default function GospelLensApp() {
             user={user}
             onSignIn={handleSignIn}
             signedIn={Boolean(user)}
+            goBack={goBack}
           />
         )}
         {view === "verses" && <ScriptureIndexView openPost={openPost} setView={changeView} goBack={goBack} />}
