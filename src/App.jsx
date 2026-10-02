@@ -4145,11 +4145,25 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
   const [draft, setDraft] = useState(savedText);
   const [status, setStatus] = useState(savedText ? "saved" : "idle");
   const timerRef = useRef(null);
+  // Tracks whether this box currently has focus -- see the effect below.
+  const focusedRef = useRef(false);
 
   // Keep the box in sync if its saved value changes from elsewhere (e.g. a
-  // cross-device sync landing while this box is on screen but not being
-  // actively typed into).
+  // cross-device sync landing while this box is on screen) -- but ONLY
+  // while it's not actively focused. Found and fixed 2026-10-02: applying
+  // this unconditionally was a real bug, not a hypothetical one.
+  // saveJournalAnswer() trims the stored text, so the instant the 700ms
+  // debounced autosave landed right after a trailing space -- a completely
+  // normal place to pause mid-sentence -- the trimmed value flowed back
+  // down through this prop and this effect clobbered `draft` back to the
+  // untrimmed version, erasing the space the person had just typed, right
+  // as they continued typing the next word ("just like how " + "jesus"
+  // became "just like howjesus"). Gating on focus fixes it: a save this
+  // box's own typing triggered never clobbers itself while still focused,
+  // and an external change (e.g. another device) still applies correctly
+  // once this box isn't the one being typed into.
   useEffect(() => {
+    if (focusedRef.current) return;
     setDraft(savedText);
     setStatus(savedText ? "saved" : "idle");
   }, [savedText]);
@@ -4175,7 +4189,11 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
       <textarea
         value={draft}
         onChange={handleChange}
-        onBlur={() => commit(draft)}
+        onFocus={() => { focusedRef.current = true; }}
+        onBlur={() => {
+          focusedRef.current = false;
+          commit(draft);
+        }}
         rows={draft ? Math.min(6, Math.max(1, Math.ceil(draft.length / 60))) : 1}
         placeholder="Write your answer — only you can see this."
         className="w-full bg-[#F8F7F3] dark:bg-[#14161B] border border-dashed border-[#1C1F26]/18 dark:border-[#F2F1EC]/20 rounded-sm px-3 py-2 text-[13.5px] text-[#2E323B] dark:text-[#D9D9D9] placeholder:text-[#8A8D96] resize-y focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] transition-colors duration-150"
