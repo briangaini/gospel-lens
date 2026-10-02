@@ -7,12 +7,11 @@
 // is the one place in the app that genuinely needs a backend, so it's the
 // one place that has one now.
 //
-// Scope, as of 2026-09-11: Saved Posts, Liked Posts, read history
-// ("Continue Reading" + the read-count stat), and the dark-mode preference
-// all sync to an account now -- Brian's explicit ask, to cover "all those
-// which normally would be synced when someone logs in their account," not
-// just the two he originally requested. Nothing else does -- there's no
-// other meaningful per-visitor state on this site to sync.
+// Scope, as of 2026-10-02: Saved Posts, Liked Posts, read history
+// ("Continue Reading" + the read-count stat), the dark-mode preference, and
+// now the Reflection Journal (answers to each post's Reflection Questions,
+// plus a separate prayer list) all sync to an account. Nothing else does --
+// there's no other meaningful per-visitor state on this site to sync.
 //
 // `firebaseConfig` below is NOT a secret, unlike the Buttondown API key
 // incident earlier in this project's history -- it's safe to be visible in
@@ -59,12 +58,21 @@ export function onAuthChange(callback) {
 }
 
 // One document per signed-in user: users/{uid} -> { savedPostIds: [...],
-// likedPostIds: [...], readHistory: [{id, readAt}...], theme: "dark"|"light" }.
+// likedPostIds: [...], readHistory: [{id, readAt}...], theme: "dark"|"light",
+// journalEntries: [{id, postId, qIndex, text, updatedAt, deleted}...],
+// prayerList: [{id, text, createdAt, answeredAt, updatedAt, deleted}...] }.
 // Mirrors the exact shapes already used in localStorage -- this is a sync
 // target, not a redesign of the data model. `readHistory` carries a real
 // timestamp per entry (not just an id) specifically so two devices' histories
 // can be merged by *when* something was actually read, not just by which
 // device happened to write last -- see the merge logic in App.jsx.
+// `journalEntries`/`prayerList` carry their own `updatedAt` plus a `deleted`
+// tombstone instead of ever actually removing a record, so a deletion made
+// on one device is itself a piece of data another device can compare
+// timestamps against and correctly propagate -- the same two-phase "union
+// once, then trust the cloud" dance Saved/Liked needed isn't required here,
+// since a plain per-record "latest updatedAt wins" merge is safe to run
+// unconditionally, every time (see mergeByUpdatedAt in App.jsx).
 function userDocRef(uid) {
   return doc(db, "users", uid);
 }
@@ -81,7 +89,7 @@ function userDocRef(uid) {
 export function subscribeToCloudLists(uid, callback) {
   return onSnapshot(userDocRef(uid), (snap) => {
     if (!snap.exists()) {
-      callback({ savedPostIds: [], likedPostIds: [], readHistory: [], theme: null });
+      callback({ savedPostIds: [], likedPostIds: [], readHistory: [], theme: null, journalEntries: [], prayerList: [] });
       return;
     }
     const data = snap.data();
@@ -90,6 +98,8 @@ export function subscribeToCloudLists(uid, callback) {
       likedPostIds: Array.isArray(data.likedPostIds) ? data.likedPostIds : [],
       readHistory: Array.isArray(data.readHistory) ? data.readHistory : [],
       theme: typeof data.theme === "string" ? data.theme : null,
+      journalEntries: Array.isArray(data.journalEntries) ? data.journalEntries : [],
+      prayerList: Array.isArray(data.prayerList) ? data.prayerList : [],
     });
   });
 }
@@ -110,5 +120,7 @@ export async function writeCloudLists(uid, fields) {
   if (fields.likedPostIds !== undefined) payload.likedPostIds = fields.likedPostIds;
   if (fields.readHistory !== undefined) payload.readHistory = fields.readHistory;
   if (fields.theme !== undefined) payload.theme = fields.theme;
+  if (fields.journalEntries !== undefined) payload.journalEntries = fields.journalEntries;
+  if (fields.prayerList !== undefined) payload.prayerList = fields.prayerList;
   await setDoc(userDocRef(uid), payload, { merge: true });
 }

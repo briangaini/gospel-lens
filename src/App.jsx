@@ -24,6 +24,10 @@ import {
   LogIn,
   LogOut,
   List,
+  Lock,
+  Trash2,
+  Download,
+  NotebookPen,
 } from "lucide-react";
 
 // Firebase (Google sign-in + Saved/Liked sync, see src/firebase.js) is
@@ -3158,6 +3162,188 @@ function syncThemeToCloudIfSignedIn(theme) {
 }
 
 // ---------------------------------------------------------------------------
+// REFLECTION JOURNAL -- a private "write your answer" box under each post's
+// Reflection Questions, plus a separate, free-form prayer list. Added
+// 2026-10-02, demoed and approved first. Local-first, same as everything
+// else (localStorage, nothing sent anywhere until signed in), syncing to the
+// same per-user Firestore doc Saved/Liked/read-history/theme already use --
+// no new backend, no new account system.
+//
+// Unlike those earlier synced lists, a journal entry or prayer request can
+// be genuinely edited and deleted by the person who wrote it, not just
+// added -- a plain id-list union (Saved/Liked's original design) can only
+// ever ADD, so it would silently resurrect a deletion made on another
+// device, exactly the bug that had to be fixed there. Instead, every record
+// here carries its own `updatedAt` timestamp, and deleting one sets
+// `deleted: true` on it rather than removing it -- a tombstone, not an
+// absence. That makes a plain "whichever device touched this record most
+// recently wins" merge (mergeByUpdatedAt, below) safe to run
+// unconditionally, every time, for both edits AND deletions -- no separate
+// one-time "first contact" merge phase needed the way Saved/Liked required.
+//
+// This also means journal/prayer state never needs a page reload to stay
+// correct across devices, unlike Saved/Liked (which still does, see the
+// reconciliation effect in GospelLensApp): PostBody and JournalView read
+// this data from props lifted into GospelLensApp's own state, not from a
+// mount-once useState initializer the way a bookmark/heart icon does, so an
+// incoming cloud update can just update that state directly and have every
+// open view pick it up immediately.
+// ---------------------------------------------------------------------------
+
+const JOURNAL_KEY = "gospel-lens-journal-entries";
+const PRAYER_KEY = "gospel-lens-prayer-list";
+
+function getJournalEntriesRaw() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(JOURNAL_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+// A post's reflection answer is keyed by post id + question index, one
+// answer per question -- saving over an existing one replaces it rather
+// than appending a duplicate. Passing an empty/whitespace-only string
+// deletes the entry (sets its tombstone) rather than storing a blank
+// answer, so clearing the box in the UI and deleting it are the same action.
+function saveJournalAnswer(postId, qIndex, text) {
+  if (typeof window === "undefined") return getJournalEntriesRaw();
+  try {
+    const id = `${postId}-${qIndex}`;
+    const trimmed = text.trim();
+    const entries = getJournalEntriesRaw().filter((e) => e.id !== id);
+    entries.push({ id, postId, qIndex, text: trimmed, updatedAt: Date.now(), deleted: !trimmed });
+    window.localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+    syncJournalToCloudIfSignedIn();
+    return entries;
+  } catch {
+    return getJournalEntriesRaw();
+  }
+}
+
+// Looks up the saved (non-deleted) answer text for one question, or "" if
+// there isn't one -- entries is the raw array (tombstones included), as
+// held in GospelLensApp's lifted state.
+function getJournalAnswerText(entries, postId, qIndex) {
+  const entry = entries.find((e) => e.postId === postId && e.qIndex === qIndex && !e.deleted);
+  return entry ? entry.text : "";
+}
+
+// Every post's content model only ever carries one `reflection` block (true
+// for all posts as of this writing) -- qIndex indexes directly into that
+// block's items, not across multiple reflection blocks.
+function getReflectionQuestionText(postId, qIndex) {
+  const post = POSTS.find((p) => p.id === postId);
+  const block = post?.blocks.find((b) => b.type === "reflection");
+  return block?.items?.[qIndex] ?? null;
+}
+
+function getPrayerListRaw() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PRAYER_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function addPrayerRequest(text) {
+  if (typeof window === "undefined") return getPrayerListRaw();
+  try {
+    const trimmed = text.trim();
+    if (!trimmed) return getPrayerListRaw();
+    const id = `p-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const list = getPrayerListRaw();
+    list.push({ id, text: trimmed, createdAt: Date.now(), answeredAt: null, updatedAt: Date.now(), deleted: false });
+    window.localStorage.setItem(PRAYER_KEY, JSON.stringify(list));
+    syncPrayerToCloudIfSignedIn();
+    return list;
+  } catch {
+    return getPrayerListRaw();
+  }
+}
+
+function togglePrayerAnswered(id) {
+  if (typeof window === "undefined") return getPrayerListRaw();
+  try {
+    const list = getPrayerListRaw();
+    const idx = list.findIndex((p) => p.id === id);
+    if (idx === -1) return list;
+    const entry = list[idx];
+    list[idx] = { ...entry, answeredAt: entry.answeredAt ? null : Date.now(), updatedAt: Date.now() };
+    window.localStorage.setItem(PRAYER_KEY, JSON.stringify(list));
+    syncPrayerToCloudIfSignedIn();
+    return list;
+  } catch {
+    return getPrayerListRaw();
+  }
+}
+
+function deletePrayerRequest(id) {
+  if (typeof window === "undefined") return getPrayerListRaw();
+  try {
+    const list = getPrayerListRaw();
+    const idx = list.findIndex((p) => p.id === id);
+    if (idx === -1) return list;
+    list[idx] = { ...list[idx], deleted: true, updatedAt: Date.now() };
+    window.localStorage.setItem(PRAYER_KEY, JSON.stringify(list));
+    syncPrayerToCloudIfSignedIn();
+    return list;
+  } catch {
+    return getPrayerListRaw();
+  }
+}
+
+// Generic per-record "latest updatedAt wins" merge -- shared by both
+// journalEntries and prayerList, since both use the same {id, updatedAt,
+// deleted} shape. See the section comment above for why this is safe to run
+// unconditionally, unlike Saved/Liked's old plain-id-list union.
+function mergeByUpdatedAt(cloudList, localList) {
+  const byId = new Map();
+  for (const entry of cloudList) byId.set(entry.id, entry);
+  for (const entry of localList) {
+    const existing = byId.get(entry.id);
+    if (!existing || entry.updatedAt > existing.updatedAt) byId.set(entry.id, entry);
+  }
+  return Array.from(byId.values());
+}
+
+// Order-independent equality for two record lists, comparing id + updatedAt
+// per record (mirrors sameReadHistory's role) -- any real change to a
+// record's text/deleted/answeredAt necessarily bumps its own updatedAt, so
+// this is a valid full-equality check without comparing every field.
+function sameRecordSet(a, b) {
+  if (a.length !== b.length) return false;
+  const mapA = new Map(a.map((e) => [e.id, e.updatedAt]));
+  return b.every((e) => mapA.get(e.id) === e.updatedAt);
+}
+
+function syncJournalToCloudIfSignedIn() {
+  getFirebase()
+    .then((fb) => {
+      const uid = fb.auth.currentUser?.uid;
+      if (!uid) return;
+      return fb.writeCloudLists(uid, { journalEntries: getJournalEntriesRaw() });
+    })
+    .catch(() => {});
+}
+
+function syncPrayerToCloudIfSignedIn() {
+  getFirebase()
+    .then((fb) => {
+      const uid = fb.auth.currentUser?.uid;
+      if (!uid) return;
+      return fb.writeCloudLists(uid, { prayerList: getPrayerListRaw() });
+    })
+    .catch(() => {});
+}
+
+// ---------------------------------------------------------------------------
 // READING TIME — calculated from actual word count (~200 wpm) instead of
 // a hand-typed estimate, so it stays accurate as posts get edited.
 // ---------------------------------------------------------------------------
@@ -3616,13 +3802,24 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
             <button onClick={() => { setView("liked"); setMenuOpen(false); }} className={`text-left ${linkClass("liked")}`}>
               Liked Posts
             </button>
+            {/* Reflection Journal (added 2026-10-02) gets the same treatment
+                as Saved/Liked -- dropdown-only, no persistent header icon.
+                A real 375px phone only comfortably fits about 3 icons plus
+                the wordmark (see the mobile header overflow saga a few
+                lines below), and a 3rd synced-list icon would reopen
+                exactly that problem for no real benefit over one more tap
+                into this already-open menu. */}
+            <button onClick={() => { setView("journal"); setMenuOpen(false); }} className={`text-left ${linkClass("journal")}`}>
+              Reflection Journal
+            </button>
 
             {/* Sign-in lives here, in the dropdown, rather than as another
                 persistent header icon -- deliberately, after the mobile
                 header overflow saga a few days earlier taught the same
                 lesson twice: the top bar has no room left, and everything
-                (Saved Posts, Liked Posts) that isn't search/dark-mode/menu
-                already lives in this dropdown for exactly that reason. */}
+                (Saved Posts, Liked Posts, Reflection Journal) that isn't
+                search/dark-mode/menu already lives in this dropdown for
+                exactly that reason. */}
             <div className="pt-3 mt-1 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
               {user ? (
                 <div className="flex items-center justify-between gap-3">
@@ -3643,7 +3840,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
                   className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] hover:underline"
                 >
                   <LogIn size={15} strokeWidth={2} />
-                  Sign in with Google to sync Saved &amp; Liked posts
+                  Sign in with Google to sync Saved &amp; Liked posts and your Reflection Journal
                 </button>
               )}
             </div>
@@ -3937,7 +4134,84 @@ function ScriptureShareButton({ post, reference, verses }) {
   );
 }
 
-function PostBody({ blocks, post, openScriptureIndex }) {
+// A single private "write your answer" box -- used both inline, under a
+// Reflection Question on its own post (no `onDelete`, since clearing the
+// text already deletes the entry via saveJournalAnswer), and on the /journal
+// page's Reflections tab (with `onDelete`, for an explicit Delete action
+// next to an entry someone isn't actively editing). Autosaves 700ms after
+// typing stops, or immediately on blur, so there's never an unsaved draft
+// sitting in the box.
+function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedIn }) {
+  const [draft, setDraft] = useState(savedText);
+  const [status, setStatus] = useState(savedText ? "saved" : "idle");
+  const timerRef = useRef(null);
+
+  // Keep the box in sync if its saved value changes from elsewhere (e.g. a
+  // cross-device sync landing while this box is on screen but not being
+  // actively typed into).
+  useEffect(() => {
+    setDraft(savedText);
+    setStatus(savedText ? "saved" : "idle");
+  }, [savedText]);
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  const commit = (value) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    onSave(postId, qIndex, value);
+    setStatus("saved");
+  };
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setDraft(value);
+    setStatus("editing");
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => commit(value), 700);
+  };
+
+  return (
+    <div className="no-print">
+      <textarea
+        value={draft}
+        onChange={handleChange}
+        onBlur={() => commit(draft)}
+        rows={draft ? Math.min(6, Math.max(1, Math.ceil(draft.length / 60))) : 1}
+        placeholder="Write your answer — only you can see this."
+        className="w-full bg-[#F8F7F3] dark:bg-[#14161B] border border-dashed border-[#1C1F26]/18 dark:border-[#F2F1EC]/20 rounded-sm px-3 py-2 text-[13.5px] text-[#2E323B] dark:text-[#D9D9D9] placeholder:text-[#8A8D96] resize-y focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] transition-colors duration-150"
+      />
+      <div className="flex items-center justify-between mt-1.5">
+        <span className="text-[10px] text-[#8A8D96] dark:text-[#7C808A] inline-flex items-center gap-1">
+          <Lock size={10} strokeWidth={2} />
+          {signedIn ? "Private — synced to your account" : "Private — stored on this device only"}
+        </span>
+        <div className="flex items-center gap-3">
+          {status === "saved" && draft.trim() && (
+            <span className="text-[10px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Saved</span>
+          )}
+          {onDelete && draft.trim() && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Delete this reflection? This can't be undone.")) {
+                  setDraft("");
+                  setStatus("idle");
+                  onDelete();
+                }
+              }}
+              className="inline-flex items-center gap-1 text-[10px] text-[#8A8D96] dark:text-[#7C808A] hover:text-[#C1584A] transition-colors duration-150"
+            >
+              <Trash2 size={11} strokeWidth={2} />
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnswer, signedIn }) {
   let paragraphIndex = -1;
 
   return (
@@ -4071,13 +4345,26 @@ function PostBody({ blocks, post, openScriptureIndex }) {
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4">
                 Reflection Questions
               </p>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {block.items.map((q, qi) => (
-                  <li key={qi} className="flex gap-3 text-[16px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9]">
-                    <span className="text-[#B08D57] font-semibold shrink-0" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      {qi + 1}.
-                    </span>
-                    {q}
+                  <li key={qi} className="space-y-2">
+                    <div className="flex gap-3 text-[16px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9]">
+                      <span className="text-[#B08D57] font-semibold shrink-0" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        {qi + 1}.
+                      </span>
+                      <span>{q}</span>
+                    </div>
+                    {post && onSaveAnswer && (
+                      <div className="pl-7">
+                        <JournalAnswerBox
+                          postId={post.id}
+                          qIndex={qi}
+                          savedText={getJournalAnswerText(journalEntries || [], post.id, qi)}
+                          onSave={onSaveAnswer}
+                          signedIn={signedIn}
+                        />
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -4581,6 +4868,263 @@ function LikedPostsView({ openPost, setView, user, onSignIn }) {
         </div>
       )}
     </section>
+  );
+}
+
+// Groups the raw journal entries (tombstones included) into one row per
+// post, newest-activity-first -- the /journal page's Reflections tab reads
+// directly from GospelLensApp's lifted state, so this recomputes on every
+// render rather than being cached in its own local state (see the section
+// comment above JOURNAL_KEY for why that's deliberate: it's what lets a
+// cross-device sync update this view with no reload).
+function groupJournalEntries(entries) {
+  const byPost = new Map();
+  for (const entry of entries) {
+    if (entry.deleted) continue;
+    if (!byPost.has(entry.postId)) byPost.set(entry.postId, []);
+    byPost.get(entry.postId).push(entry);
+  }
+  const groups = [];
+  for (const [postId, items] of byPost) {
+    const post = POSTS.find((p) => p.id === postId);
+    if (!post) continue;
+    const sorted = [...items].sort((a, b) => a.qIndex - b.qIndex);
+    const mostRecent = Math.max(...items.map((e) => e.updatedAt));
+    groups.push({ postId, post, items: sorted, mostRecent });
+  }
+  groups.sort((a, b) => b.mostRecent - a.mostRecent);
+  return groups;
+}
+
+function buildJournalExportText(groups) {
+  const lines = ["Your Reflections — The Gospel Lens", `Exported ${new Date().toLocaleDateString()}`, ""];
+  for (const group of groups) {
+    lines.push(group.post.title, group.post.date, "");
+    for (const entry of group.items) {
+      const question = getReflectionQuestionText(group.postId, entry.qIndex) || `Question ${entry.qIndex + 1}`;
+      lines.push(`Q: ${question}`, `A: ${entry.text}`, `(${new Date(entry.updatedAt).toLocaleDateString()})`, "");
+    }
+  }
+  return lines.join("\n");
+}
+
+// A private place for both halves of the Reflection Journal idea -- answers
+// to each post's Reflection Questions (grouped by post, below) and a
+// separate, free-form prayer list with an Answered toggle. Neither needs a
+// Back button, same as Saved/Liked -- reached directly from the hamburger
+// menu, not something navigated "into" from deep inside another flow.
+function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, onToggleAnswered, onDeletePrayer, openPost, setView, user, onSignIn, signedIn }) {
+  const [tab, setTab] = useState("reflections");
+  const [prayerDraft, setPrayerDraft] = useState("");
+
+  const groups = groupJournalEntries(journalEntries);
+  const activePrayers = prayerList.filter((p) => !p.deleted);
+  const unanswered = activePrayers.filter((p) => !p.answeredAt).sort((a, b) => b.createdAt - a.createdAt);
+  const answered = activePrayers.filter((p) => p.answeredAt).sort((a, b) => b.answeredAt - a.answeredAt);
+
+  const handleExport = () => {
+    const text = buildJournalExportText(groups);
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "gospel-lens-reflections.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAddPrayer = (e) => {
+    e.preventDefault();
+    if (!prayerDraft.trim()) return;
+    onAddPrayer(prayerDraft);
+    setPrayerDraft("");
+  };
+
+  const tabClass = (t) =>
+    `text-sm font-semibold pb-2.5 border-b-2 transition-colors duration-200 ${
+      tab === t
+        ? "text-[#1C1F26] dark:text-[#F2F1EC] border-[#B08D57]"
+        : "text-[#8A8D96] dark:text-[#7C808A] border-transparent hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+    }`;
+
+  return (
+    <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
+        <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          Your Reflections
+        </h1>
+        {tab === "reflections" && groups.length > 0 && (
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center gap-1.5 border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 text-[#1C1F26] dark:text-[#F2F1EC] px-4 py-2 text-xs font-medium hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-200 rounded-sm"
+          >
+            <Download size={13} strokeWidth={2} />
+            Export as Text
+          </button>
+        )}
+      </div>
+
+      {user ? (
+        <div className="flex gap-3 bg-[#FBF8F1] dark:bg-[#1E1A14] border border-[#E6DCC6] dark:border-[#3A3022] rounded-sm px-5 py-4 mb-8 text-[13px] leading-relaxed text-[#5B5F6B] dark:text-[#A9ADB6]">
+          <Lock size={15} strokeWidth={2} className="text-[#B08D57] shrink-0 mt-0.5" />
+          <p>
+            <span className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium">Synced as {user.email}.</span> Your reflections are
+            stored in your own account and aren't visible to other visitors. As the site owner, Brian technically has
+            database-level access to this project — but entries are never read, reviewed, or used for anything.
+          </p>
+        </div>
+      ) : (
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
+          Private answers to each post's Reflection Questions, plus your own prayer list — stored on this device only.{" "}
+          <button onClick={onSignIn} className="text-[#4A5D4E] font-medium hover:underline">
+            Sign in with Google
+          </button>{" "}
+          to sync these across your devices instead.
+        </p>
+      )}
+
+      <div className="flex gap-7 border-b border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 mb-8">
+        <button onClick={() => setTab("reflections")} className={tabClass("reflections")}>
+          Reflections
+        </button>
+        <button onClick={() => setTab("prayer")} className={tabClass("prayer")}>
+          Prayer List
+        </button>
+      </div>
+
+      {tab === "reflections" ? (
+        groups.length === 0 ? (
+          <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
+            <NotebookPen size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
+            <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-6">
+              Nothing in your journal yet — answer a Reflection Question on any post to start one.
+            </p>
+            <button
+              onClick={() => setView("blog")}
+              className="inline-flex items-center gap-2 border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 text-[#1C1F26] dark:text-[#F2F1EC] px-6 py-2.5 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
+            >
+              Browse the Blogs
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-10">
+            {groups.map((group) => (
+              <div key={group.postId}>
+                <button
+                  onClick={() => openPost(group.post)}
+                  className="text-left mb-3 hover:text-[#4A5D4E] dark:hover:text-[#6E9077] transition-colors duration-200"
+                >
+                  <p className="text-[15.5px] text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                    {group.post.title}
+                  </p>
+                  <span className="text-[11px] text-[#8A8D96] dark:text-[#7C808A]">{group.post.date}</span>
+                </button>
+                <div className="space-y-4">
+                  {group.items.map((entry) => (
+                    <div key={entry.id} className="bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-5 py-4">
+                      <p className="text-[12px] italic text-[#8A8D96] dark:text-[#7C808A] mb-2">
+                        {getReflectionQuestionText(group.postId, entry.qIndex)}
+                      </p>
+                      <JournalAnswerBox
+                        postId={entry.postId}
+                        qIndex={entry.qIndex}
+                        savedText={entry.text}
+                        onSave={onSaveAnswer}
+                        onDelete={() => onSaveAnswer(entry.postId, entry.qIndex, "")}
+                        signedIn={signedIn}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        <div>
+          <form onSubmit={handleAddPrayer} className="flex gap-2 mb-6">
+            <input
+              type="text"
+              value={prayerDraft}
+              onChange={(e) => setPrayerDraft(e.target.value)}
+              placeholder="Add a prayer request…"
+              className="flex-1 min-w-0 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 rounded-sm px-3.5 py-2.5 text-[13.5px] text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E]"
+            />
+            <button
+              type="submit"
+              className="shrink-0 bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] px-5 py-2.5 text-[13px] font-medium rounded-sm hover:bg-[#4A5D4E] dark:hover:bg-[#6E9077] dark:hover:text-[#F8F7F3] transition-colors duration-200"
+            >
+              Add
+            </button>
+          </form>
+
+          {activePrayers.length === 0 ? (
+            <div className="text-center py-16 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
+              <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px]">Nothing here yet — add a prayer request above.</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2.5">
+                {unanswered.map((prayer) => (
+                  <PrayerRow key={prayer.id} prayer={prayer} onToggleAnswered={onToggleAnswered} onDelete={onDeletePrayer} />
+                ))}
+              </div>
+              {answered.length > 0 && (
+                <>
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mt-8 mb-3">
+                    Answered
+                  </p>
+                  <div className="space-y-2.5">
+                    {answered.map((prayer) => (
+                      <PrayerRow key={prayer.id} prayer={prayer} onToggleAnswered={onToggleAnswered} onDelete={onDeletePrayer} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PrayerRow({ prayer, onToggleAnswered, onDelete }) {
+  const isAnswered = Boolean(prayer.answeredAt);
+  return (
+    <div className="flex gap-3 items-start bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-4 py-3.5">
+      <button
+        onClick={() => onToggleAnswered(prayer.id)}
+        aria-label={isAnswered ? "Mark as unanswered" : "Mark as answered"}
+        className={`shrink-0 mt-0.5 w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-colors duration-200 ${
+          isAnswered
+            ? "bg-[#3D7A5C] border-[#3D7A5C] text-white dark:bg-[#6FB391] dark:border-[#6FB391] dark:text-[#14161B]"
+            : "border-[#1C1F26]/25 dark:border-[#F2F1EC]/25 hover:border-[#4A5D4E]"
+        }`}
+      >
+        {isAnswered && <Check size={11} strokeWidth={3} />}
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className={`text-[13.5px] leading-relaxed ${isAnswered ? "text-[#8A8D96] dark:text-[#7C808A] line-through decoration-[#8A8D96]/50" : "text-[#2E323B] dark:text-[#D9D9D9]"}`}>
+          {prayer.text}
+        </p>
+        <span className="text-[10.5px] text-[#8A8D96] dark:text-[#7C808A]">
+          Added {new Date(prayer.createdAt).toLocaleDateString()}
+          {isAnswered && ` · Answered ${new Date(prayer.answeredAt).toLocaleDateString()}`}
+        </span>
+      </div>
+      <button
+        onClick={() => {
+          if (window.confirm("Delete this prayer request?")) onDelete(prayer.id);
+        }}
+        aria-label="Delete prayer request"
+        className="shrink-0 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#C1584A] transition-colors duration-200"
+      >
+        <Trash2 size={14} strokeWidth={2} />
+      </button>
+    </div>
   );
 }
 
@@ -5473,7 +6017,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex }) {
+function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex, journalEntries, onSaveAnswer, signedIn }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
@@ -5588,7 +6132,14 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
           </button>
         </div>
 
-        <PostBody blocks={post.blocks} post={post} openScriptureIndex={openScriptureIndex} />
+        <PostBody
+          blocks={post.blocks}
+          post={post}
+          openScriptureIndex={openScriptureIndex}
+          journalEntries={journalEntries}
+          onSaveAnswer={onSaveAnswer}
+          signedIn={signedIn}
+        />
 
         <div className="no-print flex flex-wrap gap-3 mb-6">
           <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
@@ -5776,6 +6327,20 @@ export default function GospelLensApp() {
     }
   });
 
+  // Reflection Journal + prayer list, lifted up here (rather than read via a
+  // mount-once useState initializer the way Saved/Liked's isPostSaved/
+  // isPostLiked are) so both PostBody's inline answer boxes and JournalView
+  // read the same live state -- a cross-device sync landing in the
+  // reconciliation effect below can update this directly and have every
+  // open view reflect it immediately, with no page reload needed at all.
+  const [journalEntries, setJournalEntries] = useState(() => getJournalEntriesRaw());
+  const [prayerList, setPrayerList] = useState(() => getPrayerListRaw());
+
+  const handleSaveAnswer = (postId, qIndex, text) => setJournalEntries(saveJournalAnswer(postId, qIndex, text));
+  const handleAddPrayer = (text) => setPrayerList(addPrayerRequest(text));
+  const handleTogglePrayerAnswered = (id) => setPrayerList(togglePrayerAnswered(id));
+  const handleDeletePrayer = (id) => setPrayerList(deletePrayerRequest(id));
+
   useEffect(() => {
     let unsubscribeAuth = () => {};
     let unsubscribeSnapshot = () => {};
@@ -5866,6 +6431,8 @@ export default function GospelLensApp() {
           const localLiked = getLikedPostIds();
           const localHistory = getReadHistory();
           const localTheme = window.localStorage.getItem("gospel-lens-theme");
+          const localJournal = getJournalEntriesRaw();
+          const localPrayer = getPrayerListRaw();
 
           let nextSaved = cloud.savedPostIds;
           let nextLiked = cloud.likedPostIds;
@@ -5881,6 +6448,18 @@ export default function GospelLensApp() {
 
           const nextHistory = mergeReadHistory(cloud.readHistory, localHistory);
           if (!sameReadHistory(nextHistory, cloud.readHistory)) cloudFieldsNeedingUpdate.readHistory = nextHistory;
+
+          // Journal entries and the prayer list merge unconditionally too,
+          // same as read history, but for a different reason: a record here
+          // carries its own deletion as data (the `deleted` tombstone), not
+          // as an absence, so a plain "latest updatedAt per id wins" merge
+          // is safe every time -- it can't resurrect a deletion the way
+          // Saved/Liked's old plain-id-list union could, so there's no
+          // first-contact/hasMergedUid gate needed here either.
+          const nextJournal = mergeByUpdatedAt(cloud.journalEntries, localJournal);
+          if (!sameRecordSet(nextJournal, cloud.journalEntries)) cloudFieldsNeedingUpdate.journalEntries = nextJournal;
+          const nextPrayer = mergeByUpdatedAt(cloud.prayerList, localPrayer);
+          if (!sameRecordSet(nextPrayer, cloud.prayerList)) cloudFieldsNeedingUpdate.prayerList = nextPrayer;
 
           let nextTheme = localTheme;
           if (cloud.theme === null) {
@@ -5927,6 +6506,21 @@ export default function GospelLensApp() {
             window.localStorage.setItem("gospel-lens-theme", nextTheme);
             document.documentElement.classList.toggle("dark", nextTheme === "dark");
             setDark(nextTheme === "dark");
+          }
+
+          // Journal/prayer updates are also applied quietly, with no reload
+          // -- unlike Saved/Liked below, PostBody and JournalView read this
+          // state via the `journalEntries`/`prayerList` props lifted into
+          // this component (see their useState declarations above), not a
+          // mount-once initializer, so updating that state here is enough
+          // for every open view to pick it up immediately.
+          if (!sameRecordSet(nextJournal, localJournal)) {
+            window.localStorage.setItem(JOURNAL_KEY, JSON.stringify(nextJournal));
+            setJournalEntries(nextJournal);
+          }
+          if (!sameRecordSet(nextPrayer, localPrayer)) {
+            window.localStorage.setItem(PRAYER_KEY, JSON.stringify(nextPrayer));
+            setPrayerList(nextPrayer);
           }
 
           // Saved/Liked are the one thing that genuinely still needs a
@@ -6079,6 +6673,10 @@ export default function GospelLensApp() {
         setView("liked");
         return;
       }
+      if (path === "/journal") {
+        setView("journal");
+        return;
+      }
       if (path === "/start-here") {
         setView("readingplan");
         return;
@@ -6123,6 +6721,8 @@ export default function GospelLensApp() {
       document.title = "Saved Posts — The Gospel Lens";
     } else if (view === "liked") {
       document.title = "Liked Posts — The Gospel Lens";
+    } else if (view === "journal") {
+      document.title = "Your Reflections — The Gospel Lens";
     } else if (view === "verses") {
       document.title = "Scripture Index — The Gospel Lens";
     } else if (view === "readingplan") {
@@ -6284,10 +6884,28 @@ export default function GospelLensApp() {
             openReadingPlan={openReadingPlan}
             cameFromPlan={cameFromPlan}
             openScriptureIndex={openScriptureIndex}
+            journalEntries={journalEntries}
+            onSaveAnswer={handleSaveAnswer}
+            signedIn={Boolean(user)}
           />
         )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
         {view === "liked" && <LikedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
+        {view === "journal" && (
+          <JournalView
+            journalEntries={journalEntries}
+            prayerList={prayerList}
+            onSaveAnswer={handleSaveAnswer}
+            onAddPrayer={handleAddPrayer}
+            onToggleAnswered={handleTogglePrayerAnswered}
+            onDeletePrayer={handleDeletePrayer}
+            openPost={openPost}
+            setView={changeView}
+            user={user}
+            onSignIn={handleSignIn}
+            signedIn={Boolean(user)}
+          />
+        )}
         {view === "verses" && <ScriptureIndexView openPost={openPost} setView={changeView} goBack={goBack} />}
         {view === "readingplan" && <ReadingPlanView openPlanPost={openPlanPost} />}
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}

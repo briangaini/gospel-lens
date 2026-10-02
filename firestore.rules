@@ -7,12 +7,16 @@
 // -> Publish. Keep this file in sync with whatever's actually pasted there,
 // the same way dist/404.html and NotFoundView are kept in sync manually.
 //
-// One document per signed-in user, at users/{uid} -- holds just
-// savedPostIds and likedPostIds (see src/firebase.js). A user can only ever
-// read or write their OWN document (request.auth.uid must match the
-// document's id) -- nobody can read or overwrite another visitor's saved/
-// liked list, signed in or not. Everything else in this database (there is
-// nothing else) is denied by default.
+// One document per signed-in user, at users/{uid} -- holds savedPostIds,
+// likedPostIds, readHistory, theme, journalEntries, and prayerList (see
+// src/firebase.js for the exact shapes). A user can only ever read or write
+// their OWN document (request.auth.uid must match the document's id) --
+// nobody can read or overwrite another visitor's data, signed in or not.
+// This rule already covers the whole per-uid document regardless of which
+// fields it holds, so adding a new synced field to the app (most recently
+// the Reflection Journal, 2026-10-02) has never required a rules change or
+// a re-paste into the Firebase console. Everything else in this database
+// (there is nothing else) is denied by default.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
