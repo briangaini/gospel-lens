@@ -4141,7 +4141,7 @@ function ScriptureShareButton({ post, reference, verses }) {
 // next to an entry someone isn't actively editing). Autosaves 700ms after
 // typing stops, or immediately on blur, so there's never an unsaved draft
 // sitting in the box.
-function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedIn }) {
+function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedIn, onViewJournal }) {
   const [draft, setDraft] = useState(savedText);
   const [status, setStatus] = useState(savedText ? "saved" : "idle");
   const timerRef = useRef(null);
@@ -4198,10 +4198,19 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
         placeholder="Write your answer — only you can see this."
         className="w-full bg-[#F8F7F3] dark:bg-[#14161B] border border-dashed border-[#1C1F26]/18 dark:border-[#F2F1EC]/20 rounded-sm px-3 py-2 text-[13.5px] text-[#2E323B] dark:text-[#D9D9D9] placeholder:text-[#8A8D96] resize-y focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] transition-colors duration-150"
       />
-      <div className="flex items-center justify-between mt-1.5">
-        <span className="text-[10px] text-[#8A8D96] dark:text-[#7C808A] inline-flex items-center gap-1">
+      <div className="flex items-center justify-between mt-1.5 flex-wrap gap-y-1">
+        <span className="text-[10px] text-[#8A8D96] dark:text-[#7C808A] inline-flex items-center gap-1 flex-wrap">
           <Lock size={10} strokeWidth={2} />
           {signedIn ? "Private — synced to your account" : "Private — stored on this device only"}
+          {onViewJournal && (
+            <button
+              type="button"
+              onClick={() => onViewJournal()}
+              className="text-[#B08D57] font-semibold hover:underline ml-0.5"
+            >
+              · View your full Journal
+            </button>
+          )}
         </span>
         <div className="flex items-center gap-3">
           {status === "saved" && draft.trim() && (
@@ -4229,7 +4238,7 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
   );
 }
 
-function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnswer, signedIn }) {
+function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal }) {
   let paragraphIndex = -1;
 
   return (
@@ -4360,8 +4369,35 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
         if (block.type === "reflection") {
           return (
             <div key={i} className="not-prose bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-7 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4">
-                Reflection Questions
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold">
+                  Reflection Questions
+                </p>
+                {/* Entry point to the Reflection Journal (/journal) -- same
+                    icon-only, hand-built-tooltip treatment as the Scripture
+                    Index button on the Scripture Focus box above, for the
+                    same reason: consistent, small, in the corner opposite
+                    the label. */}
+                {openJournal && (
+                  <div className="relative shrink-0 -mt-0.5">
+                    <button
+                      onClick={() => openJournal()}
+                      aria-label="View Your Journal"
+                      className="group/tooltip no-print relative w-6 h-6 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
+                    >
+                      <NotebookPen size={13} strokeWidth={2} />
+                      <span
+                        role="tooltip"
+                        className="no-print pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded-sm bg-[#1C1F26] dark:bg-[#F2F1EC] px-2 py-1 text-[11px] font-medium text-[#F8F7F3] dark:text-[#1C1F26] opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100 transition-opacity duration-150 z-10"
+                      >
+                        Your Journal
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              <p className="text-[12.5px] text-[#5B5F6B] dark:text-[#A9ADB6] leading-relaxed mb-4 max-w-[48ch]">
+                Answer in your own words, below — it's saved privately to your Journal as you write, so you can look back on it later.
               </p>
               <ul className="space-y-4">
                 {block.items.map((q, qi) => (
@@ -4380,6 +4416,7 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
                           savedText={getJournalAnswerText(journalEntries || [], post.id, qi)}
                           onSave={onSaveAnswer}
                           signedIn={signedIn}
+                          onViewJournal={openJournal}
                         />
                       </div>
                     )}
@@ -4440,13 +4477,27 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
 
         if (block.type === "prayer") {
           return (
-            <div key={i} className="not-prose bg-[#1C1F26]/4 border-l-4 border-[#1C1F26]/20 dark:border-[#F2F1EC]/20 rounded-r-sm px-7 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#5B5F6B] dark:text-[#A9ADB6] font-semibold mb-3">
-                A Prayer
-              </p>
-              <p className="text-[17px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9] italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {block.text}
-              </p>
+            <div key={i} className="not-prose my-8">
+              <div className="bg-[#1C1F26]/4 border-l-4 border-[#1C1F26]/20 dark:border-[#F2F1EC]/20 rounded-r-sm px-7 py-6 mb-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-[#5B5F6B] dark:text-[#A9ADB6] font-semibold mb-3">
+                  A Prayer
+                </p>
+                <p className="text-[17px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9] italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  {block.text}
+                </p>
+              </div>
+              {/* Points at the Journal's Prayer tab specifically, not just
+                  /journal generally -- openJournal("prayer") deep-links via
+                  the #prayer hash, so the moment someone finishes reading a
+                  prayer and wants to write their own lands exactly there. */}
+              {openJournal && (
+                <p className="no-print text-[13px] text-[#5B5F6B] dark:text-[#A9ADB6]">
+                  Want to keep praying this?{" "}
+                  <button onClick={() => openJournal("prayer")} className="text-[#B08D57] font-semibold hover:underline">
+                    Add it to your own Prayer List →
+                  </button>
+                </p>
+              )}
             </div>
           );
         }
@@ -4932,7 +4983,12 @@ function buildJournalExportText(groups) {
 // Back button, same as Saved/Liked -- reached directly from the hamburger
 // menu, not something navigated "into" from deep inside another flow.
 function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, onToggleAnswered, onDeletePrayer, openPost, setView, user, onSignIn, signedIn }) {
-  const [tab, setTab] = useState("reflections");
+  // Deep-linked from a post's own prayer-block nudge via openJournal("prayer")
+  // (pushes "/journal#prayer") -- read once on mount, same pattern as
+  // READING a path elsewhere in this app, so landing here from that specific
+  // link opens straight to the Prayer List instead of always defaulting to
+  // Reflections.
+  const [tab, setTab] = useState(() => (typeof window !== "undefined" && window.location.hash === "#prayer" ? "prayer" : "reflections"));
   const [prayerDraft, setPrayerDraft] = useState("");
 
   const groups = groupJournalEntries(journalEntries);
@@ -5003,13 +5059,19 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
         </p>
       )}
 
-      <div className="flex gap-7 border-b border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 mb-8">
+      <div className="flex gap-7 border-b border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 mb-5">
         <button onClick={() => setTab("reflections")} className={tabClass("reflections")}>
           Reflections
         </button>
         <button onClick={() => setTab("prayer")} className={tabClass("prayer")}>
           Prayer List
         </button>
+      </div>
+
+      <div className="bg-[#FBF8F1] dark:bg-[#1E1A14] border border-[#E6DCC6] dark:border-[#3A3022] rounded-sm px-4 py-3 mb-6 text-[12.5px] text-[#5B5F6B] dark:text-[#A9ADB6] leading-relaxed">
+        {tab === "reflections"
+          ? "Answer each post's Reflection Questions in your own words, then come back anytime to see how your thinking — or your heart — has grown."
+          : "A place to actually write your prayers down, not just think them. Add a request, then mark it Answered when God moves — a quiet record of what you brought to Him."}
       </div>
 
       {tab === "reflections" ? (
@@ -5636,7 +5698,40 @@ function ScriptureIndexTeaserCard({ openScriptureIndex }) {
   );
 }
 
-function HomeView({ setView, openPost, openReadingPlan, openTopic, openScriptureIndex }) {
+// A second teaser card, same family as ScriptureIndexTeaserCard just above
+// (dashed border, link-out rather than embedded content) but in sage
+// instead of gold specifically so the two stay visually distinguishable
+// sitting back to back. Added 2026-10-02 at Brian's explicit request --
+// names both halves of the Reflection Journal (answering a post's
+// Reflection Questions, and the separate Prayer List) rather than folding
+// "and prayers too" into one sentence where it's easy to skim past.
+function JournalTeaserCard({ openJournal }) {
+  return (
+    <section className="max-w-3xl mx-auto px-6 sm:px-8 pb-24">
+      <button
+        onClick={() => openJournal()}
+        className="w-full text-left flex items-start gap-4 bg-white dark:bg-[#1E2128] border border-dashed border-[#4A5D4E]/50 dark:border-[#6E9077]/50 rounded-sm px-6 py-5 hover:border-[#4A5D4E] dark:hover:border-[#6E9077] transition-colors duration-200"
+      >
+        <NotebookPen size={20} strokeWidth={1.75} className="text-[#4A5D4E] dark:text-[#6E9077] shrink-0 mt-0.5" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium" style={{ fontFamily: "'Playfair Display', serif" }}>
+            A private place to write — reflections and prayers
+          </div>
+          <p className="text-[12px] text-[#5B5F6B] dark:text-[#A9ADB6] mt-1">
+            Answer what each post asks you to reflect on, and keep a running prayer list. Private to you, synced wherever you sign in.
+          </p>
+          <div className="flex gap-4 mt-2.5">
+            <span className="text-[11px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Reflections</span>
+            <span className="text-[11px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Prayer List</span>
+          </div>
+        </div>
+        <ArrowRight size={16} strokeWidth={2} className="shrink-0 text-[#4A5D4E] dark:text-[#6E9077] mt-0.5" />
+      </button>
+    </section>
+  );
+}
+
+function HomeView({ setView, openPost, openReadingPlan, openTopic, openScriptureIndex, openJournal }) {
   return (
     <>
       <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-20 pb-24 text-center">
@@ -5756,6 +5851,8 @@ function HomeView({ setView, openPost, openReadingPlan, openTopic, openScripture
       <FromArchiveCard openPost={openPost} />
 
       <ScriptureIndexTeaserCard openScriptureIndex={openScriptureIndex} />
+
+      <JournalTeaserCard openJournal={openJournal} />
     </>
   );
 }
@@ -6035,7 +6132,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex, journalEntries, onSaveAnswer, signedIn }) {
+function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
@@ -6157,6 +6254,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
           journalEntries={journalEntries}
           onSaveAnswer={onSaveAnswer}
           signedIn={signedIn}
+          openJournal={openJournal}
         />
 
         <div className="no-print flex flex-wrap gap-3 mb-6">
@@ -6806,6 +6904,22 @@ export default function GospelLensApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Entry point to the Reflection Journal from anywhere other than the
+  // hamburger dropdown (which already calls changeView("journal") plainly)
+  // -- the Reflection Questions box icon, the per-answer "View your full
+  // Journal" link, the homepage teaser card, and a post's own prayer-block
+  // nudge all go through this. Passing "prayer" deep-links straight to the
+  // Prayer List tab via a #prayer hash (JournalView reads it once on mount
+  // to pick its initial tab) -- the one real improvement over a plain link
+  // to /journal: the moment someone finishes reading a post's prayer and
+  // wants to write their own, the click lands exactly on that tab, not
+  // whichever one happened to be open last.
+  const openJournal = (tab) => {
+    setView("journal");
+    pushHistoryState(tab === "prayer" ? "/journal#prayer" : "/journal");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const changeView = (v) => {
     setView(v);
     setMenuOpen(false);
@@ -6885,6 +6999,7 @@ export default function GospelLensApp() {
             openReadingPlan={openReadingPlan}
             openTopic={openTopic}
             openScriptureIndex={openScriptureIndex}
+            openJournal={openJournal}
           />
         )}
         {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} openTopic={openTopic} />}
@@ -6905,6 +7020,7 @@ export default function GospelLensApp() {
             journalEntries={journalEntries}
             onSaveAnswer={handleSaveAnswer}
             signedIn={Boolean(user)}
+            openJournal={openJournal}
           />
         )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
