@@ -2672,6 +2672,56 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 68,
+    title: "Mercy in Doubt",
+    author: null,
+    date: "October 4, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "Doubt doesn't intimidate Jesus, and it doesn't need to intimidate us either. What it looks like to be merciful to those who doubt, and to yourself.",
+    blocks: [
+      p('In the book of Jude, we come across a simple yet profound instruction: "Be merciful to those who doubt" (Jude 1:22). These words remind us of the importance of extending God\'s mercy and compassion to those who may be struggling in their faith. This includes ourselves!'),
+      p("Doubt is a common experience in the journey of faith. It can arise from various sources, such as intellectual questions, personal struggles, or the influence of the world around us. When we encounter people who are wrestling with doubt, it is crucial that we respond with mercy and understanding."),
+      p("Being merciful means showing kindness, compassion, and patience towards others. It involves listening without judgment, offering support, and providing a safe space for honest conversations. When we extend mercy to those who doubt, we create an environment where they can openly express their questions and concerns, without fear of rejection or condemnation."),
+      p("As followers of Christ, we are called to imitate His example. Jesus was always compassionate towards those who were struggling in their faith. He met people where they were, offering understanding and guidance. He never turned away those who sought Him, even if they had doubts or uncertainties."),
+      p("When we extend mercy to those who doubt, we not only help them on their journey but also reflect the heart of our loving Savior. We can even be merciful to ourselves when we experience doubt."),
+      p("There's room for the questions. There's room for the uncertainties. Doubt doesn't intimidate Jesus, and it doesn't need to intimidate us either."),
+      {
+        type: "prayer",
+        text: "God, help me to have a heart of mercy towards those who doubt. Help me to create safe spaces for honest conversations, offering support and understanding. And most of all, thank You for staying unchanging, even when I doubt You. I want to be more like You. In Jesus' name, Amen.",
+      },
+    ],
+  },
+  {
+    id: 69,
+    title: "Want a Clean Heart?",
+    author: null,
+    date: "October 5, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "David made some terrible decisions, and still prayed \"Create in me a clean heart.\" Why your past isn't too messed up for God to make you new.",
+    blocks: [
+      p("King David made some great decisions, but he also made some terrible ones."),
+      p('During his reign, David chose to abuse his power by sleeping with the wife of one of his military leaders, and then arranging for him to be pushed to the front lines of battle—where he was killed. For someone who was considered "a man after God\'s own heart," David really messed up.'),
+      p("In 2 Samuel 12:13, we see David confess his sin against the Lord and in Psalm 51, we see his prayer to be made new:"),
+      {
+        type: "scripture",
+        reference: "Psalm 51:10, ESV",
+        verses: ["Create in me a clean heart, O God, and renew a right spirit within me."],
+      },
+      p("David failed, but God redeems. God restores. David still had to face the consequences of his decisions, but in that journey, God met him there."),
+      p('If you want to be made new by God but believe that your past is too messed up, you can follow the path David showed us—confess, repent, and ask God to make you new. You can even use David\'s exact words as you pray: "Create in me a clean heart, O God, and renew a right spirit within me."'),
+      p("When we seek God, we realize that He's already been seeking us."),
+      p("God is faithful. He loves you. He can make your heart clean. In Him, you can become a new creation."),
+      {
+        type: "prayer",
+        text: "God, forgive me when I sin and mess up. Create in me a clean heart and pure mind. I want to run into Your open arms instead of toward sin. Thank You for always being faithful to forgive me. You remain perfect when I am far from it. Help me to seek You daily. In Jesus's name, Amen.",
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -2688,8 +2738,8 @@ const POSTS = [
 
 const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19, 28, 57],
-  "Grace & Assurance": [3, 14, 7, 31, 53, 63],
-  "Sin & Repentance": [8, 17, 47],
+  "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68],
+  "Sin & Repentance": [8, 17, 47, 69],
   "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59],
   "Prayer": [2, 18],
