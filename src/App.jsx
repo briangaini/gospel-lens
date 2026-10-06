@@ -2722,6 +2722,40 @@ const POSTS = [
       },
     ],
   },
+  // Same date as the post below it (id 70) on purpose -- both are dated
+  // today, and display order breaks a date tie by array position (the
+  // earlier entry sorts as newer), so this sits ahead of id 70 to be the
+  // latest. Same technique used for ids 62/63.
+  {
+    id: 71,
+    title: "Cast Away",
+    author: null,
+    date: "October 6, 2026",
+    category: "Devotional",
+    readTime: "2 min read",
+    excerpt:
+      "God wants to carry your burdens, but you have to cast them off. What the Hebrew word for cast says about how to hand them over.",
+    blocks: [
+      p("Are you overwhelmed by the weight of a burden you were never meant to carry?"),
+      p("Let the timeless words of King David, inspired by the Holy Spirit, sink deep into your soul…"),
+      {
+        type: "scripture",
+        reference: "Psalm 55:22, ESV",
+        verses: ["Cast your burden on the Lord, and he will sustain you; he will never permit the righteous to be moved."],
+      },
+      p("The word cast in Hebrew means to throw, hurl, shed, or fling. To propel something as far as possible. To sling something out of your sight."),
+      p("We know that the author, King David, had plenty of burdens to cast off. Not only did he carry the weight and responsibility of being King of Israel, but he also had an explicitly muddy record."),
+      p("Yet and still, even with David's downfalls and heartaches, he knew where to cast his burdens. He knew who to turn to for help. He knew how to humble himself, repent of his sins, and cling to God's mercy and grace."),
+      p("So, what about you? What burdens are you carrying? The big ones, the little ones, and everything in between. The everyday worries, the soul-crushing fears, the agonizing shame."),
+      p("Did you know that you can surrender all of them to the Lord—rather than crumbling under their pressure?"),
+      p("God wants to carry your burdens, but you have to cast them off."),
+      p("So don't just half-heartedly set down your burdens or passively give them to God; cast them at His feet. You can trust that He will sustain you and know that He will make you stand."),
+      {
+        type: "prayer",
+        text: "Lord, thank You for carrying my burdens. You know all my troubles, and the weight that can feel overwhelming. Please help me to continue to look to You when I am burdened and trust that nothing is too heavy for You. In Jesus' name, Amen.",
+      },
+    ],
+  },
   {
     id: 70,
     title: "The Letter Uriah Carried",
@@ -2804,7 +2838,7 @@ const POST_TAGS = {
   "Friendship": [20, 34, 49, 67],
   "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64],
   "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66],
-  "Peace": [36, 41, 15, 43, 51, 54, 60],
+  "Peace": [36, 41, 15, 43, 51, 54, 60, 71],
   "God's Love & Faithfulness": [32, 57, 58, 65],
   "Heaven & Eternity": [27, 44, 62],
 };
