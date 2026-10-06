@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   BookOpen,
   ArrowLeft,
@@ -3697,7 +3697,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search the blog…"
-              className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-3 py-2 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] rounded-sm focus:outline-none focus:border-[#4A5D4E]"
+              className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-3 py-2 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] rounded-sm focus:outline-none focus:border-[#4A5D4E]"
             />
             <button type="button" onClick={() => setSearchOpen(false)} className="text-[#8A8D96] dark:text-[#7C808A] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]" aria-label="Close search">
               <X size={18} />
@@ -3837,9 +3837,9 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
               ) : (
                 <button
                   onClick={() => { onSignIn(); setMenuOpen(false); }}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] hover:underline"
+                  className="inline-flex items-start gap-2 text-left text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] hover:underline"
                 >
-                  <LogIn size={15} strokeWidth={2} />
+                  <LogIn size={15} strokeWidth={2} className="shrink-0 mt-0.5" />
                   Sign in with Google to sync Saved &amp; Liked posts and your Reflection Journal
                 </button>
               )}
@@ -3915,7 +3915,7 @@ function Footer() {
                   required
                   name="email"
                   placeholder="you@example.com"
-                  className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+                  className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
                 />
                 <button
                   type="submit"
@@ -3939,7 +3939,7 @@ function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+                className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
               />
               <button
                 type="submit"
@@ -4145,8 +4145,22 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
   const [draft, setDraft] = useState(savedText);
   const [status, setStatus] = useState(savedText ? "saved" : "idle");
   const timerRef = useRef(null);
+  const textareaRef = useRef(null);
   // Tracks whether this box currently has focus -- see the effect below.
   const focusedRef = useRef(false);
+  // The last value this box either loaded or saved. commit() skips saving
+  // when nothing actually changed -- before this, simply tapping into an
+  // empty box and tapping out wrote a deleted-entry tombstone, and tapping
+  // in and out of an existing answer re-stamped it with a fresh updatedAt,
+  // which let a stale open copy overwrite a newer edit made on another
+  // device (same unchanged text, newer timestamp wins the merge).
+  const lastCommittedRef = useRef(savedText);
+  // Latest draft/props for the unmount flush below, which can't see fresh
+  // render values from inside a cleanup closure.
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
 
   // Keep the box in sync if its saved value changes from elsewhere (e.g. a
   // cross-device sync landing while this box is on screen) -- but ONLY
@@ -4166,14 +4180,47 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
     if (focusedRef.current) return;
     setDraft(savedText);
     setStatus(savedText ? "saved" : "idle");
+    lastCommittedRef.current = savedText;
   }, [savedText]);
 
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  // Leaving the page (a Back tap, the Journal icon, the browser's own back
+  // button) inside the 700ms autosave window used to throw away whatever
+  // was typed in that last moment -- this cleanup only cleared the timer.
+  // Flush it instead, so nothing typed is ever lost on the way out.
+  useEffect(
+    () => () => {
+      if (!timerRef.current) return;
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+      const pending = draftRef.current;
+      if (pending.trim() !== (lastCommittedRef.current || "").trim()) {
+        onSaveRef.current(postId, qIndex, pending);
+      }
+    },
+    [postId, qIndex]
+  );
+
+  // Grow to fit the text instead of guessing a row count -- the old
+  // `rows` estimate assumed ~60 characters per line, which is wrong on a
+  // phone (~28 fit), so a 3-line-estimated answer that really needed 6
+  // lines was clipped and had to be scrolled inside the box.
+  useLayoutEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [draft]);
 
   const commit = (value) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    onSave(postId, qIndex, value);
-    setStatus("saved");
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (value.trim() !== (lastCommittedRef.current || "").trim()) {
+      onSave(postId, qIndex, value);
+      lastCommittedRef.current = value.trim();
+    }
+    setStatus(value.trim() ? "saved" : "idle");
   };
 
   const handleChange = (e) => {
@@ -4187,6 +4234,7 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
   return (
     <div className="no-print">
       <textarea
+        ref={textareaRef}
         value={draft}
         onChange={handleChange}
         onFocus={() => { focusedRef.current = true; }}
@@ -4194,25 +4242,28 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
           focusedRef.current = false;
           commit(draft);
         }}
-        rows={draft ? Math.min(6, Math.max(1, Math.ceil(draft.length / 60))) : 1}
-        placeholder="Write your answer — only you can see this."
-        className="w-full bg-[#F8F7F3] dark:bg-[#14161B] border border-dashed border-[#1C1F26]/18 dark:border-[#F2F1EC]/20 rounded-sm px-3 py-2 text-[13.5px] text-[#2E323B] dark:text-[#D9D9D9] placeholder:text-[#8A8D96] resize-y focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] transition-colors duration-150"
+        rows={1}
+        placeholder="Write your answer…"
+        aria-label="Your private answer"
+        // 16px on phones on purpose: iOS Safari zooms the whole page in
+        // when a text field under 16px gets focus, and never zooms back out.
+        className="block w-full min-h-[44px] overflow-hidden bg-[#F8F7F3] dark:bg-[#14161B] border border-dashed border-[#1C1F26]/18 dark:border-[#F2F1EC]/20 rounded-sm px-3 py-2.5 text-base sm:text-[13.5px] leading-snug text-[#2E323B] dark:text-[#D9D9D9] placeholder:text-[#8A8D96] resize-none focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] transition-colors duration-150"
       />
-      <div className="flex items-center justify-between mt-1.5 flex-wrap gap-y-1">
-        <span className="text-[10px] text-[#8A8D96] dark:text-[#7C808A] inline-flex items-center gap-1 flex-wrap">
+      <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1.5">
+        <span className="text-[10px] text-[#8A8D96] dark:text-[#7C808A] inline-flex items-center gap-1">
           <Lock size={10} strokeWidth={2} />
           {signedIn ? "Private — synced to your account" : "Private — stored on this device only"}
-          {onViewJournal && (
-            <button
-              type="button"
-              onClick={() => onViewJournal()}
-              className="text-[#B08D57] font-semibold hover:underline ml-0.5"
-            >
-              · View your full Journal
-            </button>
-          )}
         </span>
-        <div className="flex items-center gap-3">
+        {onViewJournal && (
+          <button
+            type="button"
+            onClick={() => onViewJournal()}
+            className="text-[10px] text-[#B08D57] font-semibold hover:underline"
+          >
+            View your full Journal
+          </button>
+        )}
+        <div className="flex items-center gap-3 ml-auto">
           {status === "saved" && draft.trim() && (
             <span className="text-[10px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Saved</span>
           )}
@@ -4396,7 +4447,7 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
                   </div>
                 )}
               </div>
-              <p className="text-[12.5px] text-[#5B5F6B] dark:text-[#A9ADB6] leading-relaxed mb-4 max-w-[48ch]">
+              <p className="no-print text-[12.5px] text-[#5B5F6B] dark:text-[#A9ADB6] leading-relaxed mb-4 max-w-[48ch]">
                 Answer in your own words, below — it's saved privately to your Journal as you write, so you can look back on it later.
               </p>
               <ul className="space-y-4">
@@ -4411,6 +4462,7 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
                     {post && onSaveAnswer && (
                       <div className="pl-7">
                         <JournalAnswerBox
+                          key={`${post.id}-${qi}`}
                           postId={post.id}
                           qIndex={qi}
                           savedText={getJournalAnswerText(journalEntries || [], post.id, qi)}
@@ -4853,7 +4905,7 @@ function SavedPostsView({ openPost, setView, user, onSignIn }) {
       ) : (
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
           Posts you've deliberately set aside to come back to — stored privately in this browser only, never sent anywhere.{" "}
-          <button onClick={onSignIn} className="text-[#4A5D4E] font-medium hover:underline">
+          <button onClick={onSignIn} className="text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
             Sign in with Google
           </button>{" "}
           to sync these across your devices instead.
@@ -4909,7 +4961,7 @@ function LikedPostsView({ openPost, setView, user, onSignIn }) {
       ) : (
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
           Posts that meant something to you — stored privately in this browser only, never sent anywhere.{" "}
-          <button onClick={onSignIn} className="text-[#4A5D4E] font-medium hover:underline">
+          <button onClick={onSignIn} className="text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
             Sign in with Google
           </button>{" "}
           to sync these across your devices instead.
@@ -5027,7 +5079,7 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
     <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
@@ -5060,7 +5112,7 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
       ) : (
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
           Private answers to each post's Reflection Questions, plus your own prayer list — stored on this device only.{" "}
-          <button onClick={onSignIn} className="text-[#4A5D4E] font-medium hover:underline">
+          <button onClick={onSignIn} className="text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
             Sign in with Google
           </button>{" "}
           to sync these across your devices instead.
@@ -5138,7 +5190,7 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
               value={prayerDraft}
               onChange={(e) => setPrayerDraft(e.target.value)}
               placeholder="Add a prayer request…"
-              className="flex-1 min-w-0 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 rounded-sm px-3.5 py-2.5 text-[13.5px] text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E]"
+              className="flex-1 min-w-0 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 rounded-sm px-3.5 py-2.5 text-base sm:text-[13.5px] text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E]"
             />
             <button
               type="submit"
@@ -5186,7 +5238,7 @@ function PrayerRow({ prayer, onToggleAnswered, onDelete }) {
       <button
         onClick={() => onToggleAnswered(prayer.id)}
         aria-label={isAnswered ? "Mark as unanswered" : "Mark as answered"}
-        className={`shrink-0 mt-0.5 w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-colors duration-200 ${
+        className={`shrink-0 mt-0.5 w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-colors duration-200 relative before:content-[''] before:absolute before:-inset-3 ${
           isAnswered
             ? "bg-[#3D7A5C] border-[#3D7A5C] text-white dark:bg-[#6FB391] dark:border-[#6FB391] dark:text-[#14161B]"
             : "border-[#1C1F26]/25 dark:border-[#F2F1EC]/25 hover:border-[#4A5D4E]"
@@ -5208,7 +5260,7 @@ function PrayerRow({ prayer, onToggleAnswered, onDelete }) {
           if (window.confirm("Delete this prayer request?")) onDelete(prayer.id);
         }}
         aria-label="Delete prayer request"
-        className="shrink-0 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#C1584A] transition-colors duration-200"
+        className="shrink-0 p-2 -m-2 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#C1584A] transition-colors duration-200"
       >
         <Trash2 size={14} strokeWidth={2} />
       </button>
@@ -5363,7 +5415,7 @@ function CollectionView({ authorName, openPost, setView, goBack }) {
     <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
@@ -5504,7 +5556,7 @@ function ScriptureIndexView({ openPost, setView, goBack }) {
     <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
@@ -5546,7 +5598,7 @@ function ScriptureIndexView({ openPost, setView, goBack }) {
                   <span className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[13.5px] italic leading-snug line-clamp-2">
                     "{entry.verseText}"
                   </span>
-                  <span className="text-[#B08D57] text-[12.5px] font-medium whitespace-nowrap group-hover:underline underline-offset-2">
+                  <span className="text-[#B08D57] text-[12.5px] font-medium sm:whitespace-nowrap group-hover:underline underline-offset-2">
                     {entry.post.title} →
                   </span>
                 </button>
@@ -5576,7 +5628,7 @@ function TopicView({ topicName, openPost, setView, openTopic, goBack }) {
     <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
@@ -5936,7 +5988,7 @@ function BlogListView({ openPost, initialSearch = "", openTopic }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search titles, topics, verses…"
-            className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 pl-9 pr-9 py-2.5 text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
+            className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 pl-9 pr-9 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
           />
           {search && (
             <button
@@ -6198,7 +6250,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
       <div className="max-w-2xl mx-auto px-6 sm:px-8">
         <button
           onClick={() => goBack("blog")}
-          className="no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mb-10 hover:gap-3 transition-all duration-300"
+          className="no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
         >
           <ArrowLeft size={15} strokeWidth={2} />
           Back
