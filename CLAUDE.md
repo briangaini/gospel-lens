@@ -33,6 +33,8 @@ scripts/
 .github/workflows/
   newsletter-draft.yml  — runs notify-buttondown.js on every push to main
 .buttondown-notified.json — state file for the above, committed back by the bot
+backup/
+  homepage-classic.jsx  — plain, never-bundled copy of the pre-2026-10-06 homepage code, see "Homepage restore"
 index.html
 vercel.json     — cleanUrls + SPA rewrite fallback
 tailwind.config.js
@@ -159,7 +161,9 @@ Dedicated, shareable pages per `POST_TAGS` entry (added 2026-09-04, "Idea 1") �
 
 ## From the Archive
 
-A homepage widget (added 2026-09-04, "Idea 2", replacing an earlier "On this day" idea) that resurfaces one older post per week, right after the homepage's "Recent Posts" section. An actual "on this day" (same calendar date, one year ago) turned out to be impossible for now — every post on the site is currently dated 2026, so there's no "one year ago" post to find yet; that idea can be revisited once the blog has a second full year of posts (2027+). Instead, `getFromArchivePost()` deterministically picks one post per week (`Math.floor(Date.now() / (7 days in ms))` mod the count of eligible posts, sorted by `id` for stability), excluding the 3 most recent posts so it never surfaces something already visible in Recent Posts. Same post shows to every visitor all week, changes automatically the next week — no `localStorage`, no per-visitor state, nothing to track.
+**Updated 2026-10-06:** it now sits near the bottom of the redesigned homepage and takes `excludeIds` so it never repeats a post already shown above it (see "Homepage (redesigned 2026-10-06)"). The rest below is still accurate.
+
+A homepage widget (added 2026-09-04, "Idea 2", replacing an earlier "On this day" idea) that resurfaces one older post per week, right after the homepage's "Recent Posts" section (at the time). An actual "on this day" (same calendar date, one year ago) turned out to be impossible for now — every post on the site is currently dated 2026, so there's no "one year ago" post to find yet; that idea can be revisited once the blog has a second full year of posts (2027+). Instead, `getFromArchivePost()` deterministically picks one post per week (`Math.floor(Date.now() / (7 days in ms))` mod the count of eligible posts, sorted by `id` for stability), excluding the 3 most recent posts so it never surfaces something already visible in Recent Posts. Same post shows to every visitor all week, changes automatically the next week — no `localStorage`, no per-visitor state, nothing to track.
 
 **Added a line explaining why a post shows here (2026-09-08).** Brian asked for some explanation of why that particular post was surfaced — `FromArchiveCard` now shows "A post worth another look — resurfaced from the archive here each week" between the eyebrow and the title. Deliberately describes the *feature* (a weekly rotating pick) rather than inventing a personalized reason for that specific post — the actual mechanism has no notion of relevance to anything happening right now, so claiming more than that would be dishonest.
 
@@ -203,7 +207,45 @@ A public, browsable index at `/verses` (added 2026-09-11, "Idea 1" from a brains
 
   Verified the exact multi-hop chain Brian described, end to end, in a live local browser: opened a post, clicked into the Scripture Index, opened a *different* post from a verse row, clicked "Back" (landed on the Scripture Index, not Blogs), clicked "Back" again (landed on the original first post) — then separately re-verified the same pattern through Topic pages (Blog → Topic → Post → Back → Back correctly unwound to Topic, then Blog) and confirmed the ordinary case (Blog → Post → Back) still lands on Blogs exactly as before, and that landing on a post directly via URL with no prior in-app navigation still falls back to Blogs rather than erroneously calling `history.back()` and leaving the site.
 
+## Homepage (redesigned 2026-10-06)
+
+Brian asked for a complete makeover with full creative freedom, saw a full-size demo first (a Claude Artifact, https://claude.ai/artifact/Q2yX3Lew6zD1MeJ9AWYi1j) after an inline preview, chose to keep every part, and said to implement it **as long as the old homepage can be restored on request.** The brand (tokens, Playfair + Inter, the gold-ring mark) is unchanged; the structure is new. One organizing idea: the page is built around **what a person is carrying today**, matching the tagline.
+
+**Section order** (all in `HomeView`, `src/App.jsx`, each its own small component right above it): `HomeHero` (headline, a plain "New here? Start with the 4-day path" button, "You don't have to believe anything to read. No ads, no account needed.", the newest post as a lead card, and the compact `VerseOfDay`) → `ContinueStrip` (only with read history; shows "N new posts since your last visit") → `MomentsChooser` ("What are you carrying today?") → `FourDayPath` → `LatestWriting` → `TopicBento` → `BeliefBand` → `ToolsPair` → `FromArchiveCard` → `NewsletterBand`. **Order depends on the visitor:** a brand-new visitor (no read history) gets `FourDayPath` *before* `LatestWriting`; a returning reader gets Latest first and the path after it.
+
+**How each piece works**
+- **Chooser:** `MOMENTS` (beside `POST_TAGS`) is seven first-person feelings, each with a primary post id, two secondary ids, and a topic name. All seven are real buttons always on the page (`aria-pressed`), not a hidden quiz. **`scripts/prerender.js` fails the build if any id or topic in `MOMENTS` no longer exists**, so a removed post or renamed topic can't leave a dead link. These are editorial picks, not an algorithm; change them freely, one entry per line in the existing format (the build check reads that format).
+- **4-day path:** Start Here and the 4-Day Plan are now one thing, using `READING_PLAN_POST_IDS`. The logo ring (`ProgressRing`) fills one gold segment per day read, from local read history. Days open via `openPlanPost`, so the "Day X of 4" banner appears exactly as it does from `/start-here`. Nothing is locked.
+- **Topics:** `TopicBento` shows all topics with their real `TOPIC_DESCRIPTIONS` and counts; the three biggest topics get a wider tile (derived, not hardcoded). Each tile calls `openTopic`.
+- **From the Archive** no longer repeats a post already on the page: `getFromArchivePost(excludeIds)` takes every post shown above it (hero lead, latest lead and rows, the four plan posts) and still skips the 3 newest. Still deterministic per week.
+- **Newsletter:** the form was extracted from `Footer` into `NewsletterForm`; the homepage has its own band and `Footer` takes `showNewsletter={view !== "home"}` so there is never a second identical form stacked directly under it. Every other page's footer is unchanged. The button and field now also have dark-mode colors (the old button was dark-on-dark).
+- **"New posts since your last visit":** counts posts dated after the day of the previous visit. The previous visit's time is held in `sessionStorage` for the whole browsing session (so a refresh doesn't make the count vanish) while `localStorage` (`gospel-lens-last-visit`) moves to "now" for the next session. Local only, like read history; not synced.
+- **Real read times:** the new cards show `estimateReadTime()` (live word count), not the cosmetic `readTime` field.
+- **SEO:** `prerender.js` adds `WebSite` JSON-LD to `dist/index.html` only. Deliberately did **not** inject static body text into the empty `#root` (it would flash unstyled before React mounts, and the SPA is already crawled by rendering); `createRoot` is kept, no `hydrateRoot`, since verse/archive/continue-reading depend on date and `localStorage`.
+- **Motion:** `.g-swap` (answer-panel fade) lives in `src/index.css` and is switched off by `prefers-reduced-motion`; hover lifts use `motion-reduce:` variants.
+- **Small gold text** uses `#8A6F42` (light) / `#D9B77C` (dark) because light gold on cream is only ~3:1.
+- Honest copy: no "no tracking" claim anywhere (the site runs Vercel Analytics).
+
+**What it replaced:** `ContinueReadingCard`, the old full-width `VerseOfDay` block, the 3-paragraph "What is the Gospel?" essay (now one paragraph in `BeliefBand` linking to About), the "Start Here" card grid, the "Recent Posts" card grid + "See More", the topic-chip row, `ScriptureIndexTeaserCard`, and `JournalTeaserCard`. The Scripture Index and Journal links now live in `ToolsPair`, which explains both.
+
+### Homepage restore (how to put the OLD homepage back)
+
+Brian wants to be able to go back, so the classic homepage is saved three ways. **When he asks to restore it, do option A.**
+
+1. **Git tag `homepage-classic-2026-10-06`** (pushed to GitHub) marks the exact commit that had the classic homepage. Use it to *look*, not to overwrite: `git diff homepage-classic-2026-10-06 -- src/App.jsx` shows every difference. **Do not `git checkout` that tag over `src/App.jsx`** — that would also throw away every post and fix added since.
+2. **`backup/homepage-classic.jsx`** is a plain copy (outside `src/`, never bundled, never imported) of the original `getFromArchivePost`, `VerseOfDay`, `ContinueReadingCard`, `FromArchiveCard`, `ScriptureIndexTeaserCard`, `JournalTeaserCard`, and `HomeView`, in their original order.
+3. **The demo Artifact** (URL above) shows the classic page's order under its "Current homepage" tab.
+
+**Option A, the clean restore (est. a few minutes):**
+- In `src/App.jsx`, delete the new homepage block: everything from the `HOMEPAGE -- redesigned 2026-10-06` comment through the end of the new `HomeView` (this includes `LAST_VISIT_KEY`, the `Home*` helpers, `MoreLink`, the new `VerseOfDay`, `HomeHero`, `ContinueStrip`, `MomentsChooser`, `LatestWriting`, `ProgressRing`, `FourDayPath`, `TopicBento`, `BeliefBand`, `ToolsPair`, `FromArchiveCard`, `NewsletterBand`, `HomeView`).
+- Paste in `VerseOfDay`, `ContinueReadingCard`, `FromArchiveCard`, `ScriptureIndexTeaserCard`, `JournalTeaserCard`, and `HomeView` from `backup/homepage-classic.jsx`. Keep the **current** `getFromArchivePost` (it's backward-compatible: no argument = old behavior) rather than pasting the old one.
+- In `GospelLensApp`'s render: `<Footer showNewsletter={view !== "home"} />` → `<Footer />`. (The `openPlanPost` prop passed to `HomeView` is harmless to leave.)
+- Leave `NewsletterForm`/`Footer` as they are (the refactor is safe on its own and its dark-mode button fix is a real improvement). `MOMENTS`, the `prerender.js` check for it, the `WebSite` JSON-LD, and the `.g-swap` CSS can stay or go; they don't affect the classic page.
+- Run `npm run build`, check the homepage locally at 375px and 360px in light and dark, push, confirm live, then update this section and the Fixed list.
+
 ## Homepage: Explore by Topic + Scripture Index teaser
+
+**Superseded 2026-10-06 by the full homepage makeover above** (the topic chips became `TopicBento`; the two teaser cards became `ToolsPair`; the originals are in `backup/homepage-classic.jsx`). Kept for history.
 
 Two additions to `HomeView` (added 2026-10-01), both demoed first and approved before implementation, per Brian's explicit "give me a demo... dont implement anything, only demo" ask that round. He was also explicit the rest of the homepage must stay untouched — no reordering, no redesign of Hero/Continue Reading/Verse of the Day/Our Mission/Start Here/Recent Posts/From the Archive, only these two new blocks dropped in at two exact spots.
 
@@ -383,6 +425,7 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~The site glitched for a split second every 5 seconds, getting more frequent over time~~ — fixed 2026-09-17, see "A real, serious bug in that same reconciliation effect..." under "Google sign-in" above. A first investigation pass genuinely couldn't reproduce it and said so honestly rather than guessing; the real cause only surfaced once Brian gave four more specific details (every page, only while signed in on both devices, started on phone then spread to Mac, got more frequent as more posts were read). Root cause: every single post read synced to the cloud, and that echoed back through the live subscription on every signed-in device — including one just sitting open in the background — and the reconciliation effect was reloading the WHOLE page for a mismatch in any of four synced fields, not just the one (Saved/Liked) that actually needs a reload to take effect.
 - ~~A shared post link briefly flashed the "Page Not Found" page for other people before showing the real post~~ — fixed 2026-09-25, see "A real bug hiding in the PWA's service worker..." under "Custom 404 page" above. Root cause: `vite-plugin-pwa` silently routed every navigation through a possibly-stale cached shell before the network, confirmed by reading the actual compiled `dist/sw.js`, not guessed — a returning visitor's old cached bundle genuinely didn't know about a post added since their last visit, briefly rendering the client-side 404 for real reasons before the site's own update-detection caught up and reloaded onto the current bundle. Fixed by disabling that fallback route entirely (`navigateFallbackDenylist: [/.*/]`) — every real route here already has its own accurate static file served straight from Vercel, so the fallback was never actually needed.
 - ~~Topics and the Scripture Index had no presence on the homepage~~ — fixed 2026-10-01, see "Homepage: Explore by Topic + Scripture Index teaser" above. Demoed first (twice — once as part of a full homepage redesign pitch Brian didn't take, once as a narrowly-scoped two-block demo he did approve), then implemented exactly as approved with the one requested trim (no heading/subcopy on the Topics section). Rest of the homepage deliberately untouched.
+- ~~Homepage buried the writing, repeated itself, and gave a visitor no way in~~ — fixed 2026-10-06 with the full makeover, see "Homepage (redesigned 2026-10-06)" above. Also fixed along the way: the archive pick could repeat a post already on the page, the email signup was only in the footer, and the footer signup button was dark-on-dark in dark mode. **The old homepage can be restored on request** — steps are in "Homepage restore" in that same section, backed by git tag `homepage-classic-2026-10-06` and `backup/homepage-classic.jsx`.
 - ~~No private place to answer a post's Reflection Questions or keep a prayer list~~ — fixed 2026-10-02, see "Reflection Journal" above. Demoed first, including how the deletion-sync bug and the Firebase-console-access catch would be solved, not just the UI — approved ("go ahead, build it") before implementation.
 
 **Proposed "next level" ideas (not yet greenlit):**

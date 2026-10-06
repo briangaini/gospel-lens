@@ -2864,6 +2864,23 @@ const TOPIC_DESCRIPTIONS = {
   "Heaven & Eternity": "What's actually waiting on the other side, and why setting your mind there changes how you live on this one.",
 };
 
+// The homepage's "What are you carrying today?" chooser (added 2026-10-06
+// with the homepage makeover). Each moment is a first-person feeling that
+// leads to one hand-picked primary post, two secondary posts, and a topic
+// page. `primary`/`secondary` are post ids and `topic` must be a POST_TAGS
+// key -- scripts/prerender.js checks all of them at build time, so renaming
+// or removing a post can't silently leave a dead link on the homepage.
+// These picks are editorial judgment, not an algorithm: change them freely.
+const MOMENTS = [
+  { label: "I can't stop worrying", topic: "Peace", primary: 43, secondary: [54, 36] },
+  { label: "I'm grieving", topic: "Grief & Comfort", primary: 6, secondary: [22, 30] },
+  { label: "I'm full of doubt", topic: "Grace & Assurance", primary: 68, secondary: [31, 53] },
+  { label: "I feel ashamed", topic: "Sin & Repentance", primary: 69, secondary: [8, 70] },
+  { label: "I'm worn out", topic: "Peace", primary: 71, secondary: [60, 41] },
+  { label: "I feel alone", topic: "Friendship", primary: 49, secondary: [20, 67] },
+  { label: "I'm new here", topic: "The Gospel Explained", primary: 1, secondary: [12, 19] },
+];
+
 // ---------------------------------------------------------------------------
 // AUTHORS — bio info for contributors whose byline should link somewhere.
 // A post's author only becomes clickable if their name has an entry here.
@@ -2996,10 +3013,16 @@ const FOUNDATIONAL_POST_IDS = [1, 12, 19];
 // version works immediately instead, and everyone sees the same pick
 // during the same week (not a different one per page load) so it reads as
 // a deliberate choice rather than a random shuffle.
-function getFromArchivePost() {
+//
+// `excludeIds` (added with the 2026-10-06 homepage makeover): ids of posts
+// already shown elsewhere on the homepage, so this pick can never repeat
+// one of them (it used to be able to duplicate a Start Here post). Still
+// deterministic for a given week and a given set of excluded ids.
+function getFromArchivePost(excludeIds = []) {
   const recentIds = new Set(
     [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3).map((p) => p.id)
   );
+  for (const id of excludeIds) recentIds.add(id);
   // Sorted by id (not array position) so the cycling order stays stable
   // even if posts are edited or reordered in the array later.
   const eligible = [...POSTS].filter((p) => !recentIds.has(p.id)).sort((a, b) => a.id - b.id);
@@ -3992,7 +4015,11 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
   );
 }
 
-function Footer() {
+// The email signup form itself -- extracted from Footer on 2026-10-06 so the
+// homepage's newsletter band and the footer share one implementation (and
+// one Buttondown integration) instead of two copies. Callers supply the
+// heading/copy around it.
+function NewsletterForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | saving | done
   const buttondownFormRef = useRef(null);
@@ -4027,72 +4054,79 @@ function Footer() {
     setTimeout(() => setStatus("idle"), 6000);
   };
 
+  const inputClass =
+    "flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] rounded-sm";
+  const buttonClass =
+    "whitespace-nowrap bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] dark:hover:bg-[#6E9077] dark:hover:text-[#F8F7F3] transition-colors duration-300 rounded-sm";
+
+  if (BUTTONDOWN_USERNAME) {
+    return (
+      <div className="w-full sm:w-auto">
+        <form
+          ref={buttondownFormRef}
+          action={`https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN_USERNAME}`}
+          method="post"
+          target="_blank"
+          onSubmit={handleButtondownSubmit}
+          className="flex w-full sm:w-auto gap-2"
+        >
+          <input type="hidden" name="embed" value="1" />
+          <input type="email" required name="email" placeholder="you@example.com" aria-label="Email address" className={inputClass} />
+          <button type="submit" className={buttonClass}>
+            Subscribe
+          </button>
+        </form>
+        {status === "done" && (
+          <p className="flex items-center gap-1.5 text-xs text-[#4A5D4E] dark:text-[#6E9077] mt-2">
+            <Check size={13} strokeWidth={2.5} />
+            Check your email to confirm your subscription.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubscribe} className="flex w-full sm:w-auto gap-2">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
+        aria-label="Email address"
+        className={inputClass}
+      />
+      <button type="submit" className={buttonClass}>
+        {status === "done" ? "Subscribed ✓" : "Subscribe"}
+      </button>
+    </form>
+  );
+}
+
+// showNewsletter is false on the homepage, which has its own newsletter band
+// directly above the footer -- two identical signup forms stacked on top of
+// each other would just be noise.
+function Footer({ showNewsletter = true }) {
   return (
     <footer className="border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 mt-24">
       <div className="max-w-5xl mx-auto px-6 sm:px-8 py-14">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10 border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
-          <div>
-            <h3
-              className="text-lg text-[#1C1F26] dark:text-[#F2F1EC] mb-1"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-            >
-              Get new posts by email
-            </h3>
-            <p className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6]">One email, whenever something new is published. No spam.</p>
-          </div>
-          {BUTTONDOWN_USERNAME ? (
-            <div className="w-full sm:w-auto">
-              <form
-                ref={buttondownFormRef}
-                action={`https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN_USERNAME}`}
-                method="post"
-                target="_blank"
-                onSubmit={handleButtondownSubmit}
-                className="flex w-full sm:w-auto gap-2"
+        {showNewsletter && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10 border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
+            <div>
+              <h3
+                className="text-lg text-[#1C1F26] dark:text-[#F2F1EC] mb-1"
+                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
               >
-                <input type="hidden" name="embed" value="1" />
-                <input
-                  type="email"
-                  required
-                  name="email"
-                  placeholder="you@example.com"
-                  className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
-                />
-                <button
-                  type="submit"
-                  className="whitespace-nowrap bg-[#1C1F26] text-[#F8F7F3] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] transition-colors duration-300 rounded-sm"
-                >
-                  Subscribe
-                </button>
-              </form>
-              {status === "done" && (
-                <p className="flex items-center gap-1.5 text-xs text-[#4A5D4E] mt-2">
-                  <Check size={13} strokeWidth={2.5} />
-                  Check your email to confirm your subscription.
-                </p>
-              )}
+                Get new posts by email
+              </h3>
+              <p className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6]">One email, whenever something new is published. No spam.</p>
             </div>
-          ) : (
-            <form onSubmit={handleSubscribe} className="flex w-full sm:w-auto gap-2">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="flex-1 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
-              />
-              <button
-                type="submit"
-                className="whitespace-nowrap bg-[#1C1F26] text-[#F8F7F3] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] transition-colors duration-300 rounded-sm"
-              >
-                {status === "done" ? "Subscribed ✓" : "Subscribe"}
-              </button>
-            </form>
-          )}
-        </div>
+            <NewsletterForm />
+          </div>
+        )}
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${showNewsletter ? "pt-8" : ""}`}>
           <div className="flex items-center gap-2 text-[#5B5F6B] dark:text-[#A9ADB6]">
             <BookOpen size={14} strokeWidth={1.75} className="text-[#B08D57]" />
             <span className="text-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -4931,61 +4965,6 @@ async function shareVerseCard({ text, attribution, eyebrow, title, url, filename
   }
 }
 
-function VerseOfDay() {
-  const verse = useMemo(() => getVerseOfDay(), []);
-  const [status, setStatus] = useState("idle"); // idle | working | done | fallback
-
-  const handleShare = async () => {
-    setStatus("working");
-    const result = await shareVerseCard({
-      text: verse.text,
-      attribution: `${verse.reference}, ESV`,
-      title: "Verse of the Day — The Gospel Lens",
-      url: window.location.href.split("#")[0],
-      filename: "verse-of-the-day.png",
-    });
-    if (result === "shared" || result === "cancelled") {
-      setStatus("idle");
-      return;
-    }
-    setStatus(result === "copied-image" ? "done" : "fallback");
-    setTimeout(() => setStatus("idle"), 2500);
-  };
-
-  const labels = {
-    idle: "Share this verse",
-    working: "Preparing image…",
-    done: "Verse card copied — paste anywhere",
-    fallback: "Text + link copied",
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto px-6 sm:px-8 -mt-6 mb-6">
-      <div className="bg-[#1C1F26] rounded-sm px-7 py-7 sm:px-9 sm:py-8 text-center">
-        <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-4">
-          <Sunrise size={13} strokeWidth={2} />
-          Verse of the Day
-        </div>
-        <p
-          className="text-[#F8F7F3] text-lg sm:text-xl leading-relaxed italic"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          "{verse.text}"
-        </p>
-        <p className="text-[#B0B4BD] text-sm mt-4 tracking-wide">— {verse.reference}, ESV</p>
-        <button
-          onClick={handleShare}
-          disabled={status === "working"}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#B0B4BD] hover:text-[#B08D57] mt-5 transition-colors duration-200 disabled:opacity-60"
-        >
-          {status === "done" || status === "fallback" ? <Check size={13} strokeWidth={2} /> : <Share2 size={13} strokeWidth={2} />}
-          {labels[status]}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function AboutView() {
   return (
     <section className="max-w-2xl mx-auto px-6 sm:px-8 pt-20 pb-28">
@@ -5811,249 +5790,637 @@ function TopicView({ topicName, openPost, setView, openTopic, goBack }) {
   );
 }
 
-// Quiet "pick up where you left off" nudge — only appears once a visitor
-// has actually opened a post before (see READ HISTORY above), pointing at
-// the most recent one. Reads localStorage once per mount, which is enough
-// since HomeView remounts fresh whenever the view switches back to Home.
-function ContinueReadingCard({ openPost }) {
-  const [lastPost] = useState(() => {
-    const history = getReadHistory();
-    if (!history.length) return null;
-    return POSTS.find((p) => p.id === history[history.length - 1].id) || null;
-  });
+// ---------------------------------------------------------------------------
+// HOMEPAGE -- redesigned 2026-10-06 at Brian's request, after he approved a
+// full-size demo. The classic homepage is NOT gone: it is saved as the git
+// tag `homepage-classic-2026-10-06` and as a plain copy in
+// backup/homepage-classic.jsx. "Homepage restore" in CLAUDE.md has the exact
+// steps to put it back.
+//
+// The idea: the page is organized around what a person is carrying today,
+// because the brand promise is "ordinary life, seen through an eternal
+// lens." Real writing is on the first screen, a chooser routes a visitor to
+// a post by what they're going through, and the 4-day path, topics,
+// Scripture Index, and Journal each get a real home instead of being
+// afterthoughts at the bottom. Section order for a first-time visitor
+// (no read history) puts the 4-day path ahead of Latest writing; a
+// returning reader gets Latest first plus a Continue Reading strip.
+// ---------------------------------------------------------------------------
 
-  if (!lastPost) return null;
+const LAST_VISIT_KEY = "gospel-lens-last-visit";
+const LAST_VISIT_BASELINE_KEY = "gospel-lens-visit-baseline";
+const HOME_SERIF = { fontFamily: "'Playfair Display', serif", fontWeight: 700 };
+const HOME_GOLD_TEXT = "text-[#8A6F42] dark:text-[#D9B77C]";
+const HOME_CARD = "bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm";
+const HOME_LIFT =
+  "transition-all duration-300 motion-reduce:transition-none hover:border-[#B08D57]/60 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0";
+const HOME_MUTED = "text-[#5B5F6B] dark:text-[#A9ADB6]";
+const HOME_FAINT = "text-[#7A7E89] dark:text-[#8A8E98]";
 
+function shortPostDate(post) {
+  const d = new Date(post.date);
+  if (Number.isNaN(d.getTime())) return post.date;
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleDateString("en-US", sameYear ? { month: "short", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" });
+}
+
+function HomeLabel({ children, center = false }) {
   return (
-    <div className="max-w-3xl mx-auto px-6 sm:px-8 -mt-8 mb-4">
-      <button
-        onClick={() => openPost(lastPost)}
-        className="w-full text-left flex items-center justify-between gap-4 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-5 py-4 hover:border-[#4A5D4E]/50 transition-colors duration-200"
-      >
-        <div className="min-w-0">
-          <span className="text-[10px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold">
-            Continue Reading
-          </span>
-          <div className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium mt-0.5 truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {lastPost.title}
-          </div>
-        </div>
-        <ArrowRight size={16} strokeWidth={2} className="shrink-0 text-[#4A5D4E]" />
-      </button>
+    <div className={`flex items-center gap-2.5 text-[11px] uppercase tracking-[0.2em] font-semibold mb-3.5 ${HOME_GOLD_TEXT} ${center ? "justify-center" : ""}`}>
+      {!center && <span className="w-7 h-px bg-[#B08D57]" />}
+      {children}
     </div>
   );
 }
 
-// Dark solid card, deliberately distinct from the lighter Continue Reading
-// card just above it, matching the treatment approved in the mockup —
-// makes it read as a separate "worth a second look" moment rather than
-// blending into ordinary post cards.
-function FromArchiveCard({ openPost }) {
-  const [post] = useState(() => getFromArchivePost());
-  if (!post) return null;
-
+function HomeHeading({ children, className = "" }) {
   return (
-    <section className="max-w-3xl mx-auto px-6 sm:px-8 pb-4">
-      <button
-        onClick={() => openPost(post)}
-        className="w-full text-left flex items-center gap-4 bg-[#1C1F26] rounded-sm px-6 py-5 hover:bg-[#252932] transition-colors duration-200"
-      >
-        <Archive size={20} strokeWidth={1.75} className="text-[#B08D57] shrink-0" />
-        <div className="min-w-0">
-          <span className="text-[10px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold">From the Archive</span>
-          <p className="text-[12px] text-[#8A8D96] mt-0.5 mb-1.5">A post worth another look — resurfaced from the archive here each week.</p>
-          <div className="text-[#F8F7F3] font-medium truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {post.title}
-          </div>
-          <span className="text-[11px] text-[#8A8D96]">Originally published {post.date}</span>
-        </div>
-      </button>
+    <h2 className={`text-[#1C1F26] dark:text-[#F2F1EC] text-[26px] sm:text-4xl leading-[1.15] mb-3 ${className}`} style={HOME_SERIF}>
+      {children}
+    </h2>
+  );
+}
+
+function HomeSection({ children, className = "", innerClassName = "" }) {
+  return (
+    <section className={`border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 ${className}`}>
+      <div className={`max-w-5xl mx-auto px-6 sm:px-8 py-16 sm:py-20 ${innerClassName}`}>{children}</div>
     </section>
   );
 }
 
-// A teaser card linking out to the full Scripture Index (/verses) rather
-// than embedding the whole list -- every reference across 66+ posts,
-// grouped by book, is too long to drop into a homepage scroll. Dashed gold
-// border deliberately distinguishes it from every other solid-bordered card
-// on Home, the same way From the Archive's dark fill sets it apart.
-function ScriptureIndexTeaserCard({ openScriptureIndex }) {
+function MoreLink({ onClick, children, className = "" }) {
   return (
-    <section className="max-w-3xl mx-auto px-6 sm:px-8 pb-24">
-      <button
-        onClick={openScriptureIndex}
-        className="w-full text-left flex items-center gap-4 bg-white dark:bg-[#1E2128] border border-dashed border-[#B08D57]/60 dark:border-[#D9B77C]/50 rounded-sm px-6 py-5 hover:border-[#B08D57] dark:hover:border-[#D9B77C] transition-colors duration-200"
-      >
-        <BookOpen size={20} strokeWidth={1.75} className="text-[#B08D57] shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Every verse cited on the site, in one place
-          </div>
-          <p className="text-[12px] text-[#5B5F6B] dark:text-[#A9ADB6] mt-1">
-            Every Scripture Focus reference across all your posts, grouped by Bible book.
-          </p>
-        </div>
-        <ArrowRight size={16} strokeWidth={2} className="shrink-0 text-[#B08D57]" />
-      </button>
-    </section>
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none ${className}`}
+    >
+      {children}
+      <ArrowRight size={14} strokeWidth={2} />
+    </button>
   );
 }
 
-// A second teaser card, same family as ScriptureIndexTeaserCard just above
-// (dashed border, link-out rather than embedded content) but in sage
-// instead of gold specifically so the two stay visually distinguishable
-// sitting back to back. Added 2026-10-02 at Brian's explicit request --
-// names both halves of the Reflection Journal (answering a post's
-// Reflection Questions, and the separate Prayer List) rather than folding
-// "and prayers too" into one sentence where it's easy to skim past.
-function JournalTeaserCard({ openJournal }) {
-  return (
-    <section className="max-w-3xl mx-auto px-6 sm:px-8 pb-24">
-      <button
-        onClick={() => openJournal()}
-        className="w-full text-left flex items-start gap-4 bg-white dark:bg-[#1E2128] border border-dashed border-[#4A5D4E]/50 dark:border-[#6E9077]/50 rounded-sm px-6 py-5 hover:border-[#4A5D4E] dark:hover:border-[#6E9077] transition-colors duration-200"
-      >
-        <NotebookPen size={20} strokeWidth={1.75} className="text-[#4A5D4E] dark:text-[#6E9077] shrink-0 mt-0.5" />
-        <div className="min-w-0 flex-1">
-          <div className="text-[#1C1F26] dark:text-[#F2F1EC] font-medium" style={{ fontFamily: "'Playfair Display', serif" }}>
-            A private place to write — reflections and prayers
-          </div>
-          <p className="text-[12px] text-[#5B5F6B] dark:text-[#A9ADB6] mt-1">
-            Answer what each post asks you to reflect on, and keep a running prayer list. Private to you, synced wherever you sign in.
-          </p>
-          <div className="flex gap-4 mt-2.5">
-            <span className="text-[11px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Reflections</span>
-            <span className="text-[11px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Prayer List</span>
-          </div>
-        </div>
-        <ArrowRight size={16} strokeWidth={2} className="shrink-0 text-[#4A5D4E] dark:text-[#6E9077] mt-0.5" />
-      </button>
-    </section>
-  );
-}
+// Verse of the Day, now a compact card inside the hero (it used to be its
+// own full-width block under the hero). Same rotation and the same
+// share-as-image behavior as before.
+function VerseOfDay() {
+  const verse = useMemo(() => getVerseOfDay(), []);
+  const [status, setStatus] = useState("idle"); // idle | working | done | fallback
 
-function HomeView({ setView, openPost, openReadingPlan, openTopic, openScriptureIndex, openJournal }) {
+  const handleShare = async () => {
+    setStatus("working");
+    const result = await shareVerseCard({
+      text: verse.text,
+      attribution: `${verse.reference}, ESV`,
+      title: "Verse of the Day — The Gospel Lens",
+      url: window.location.href.split("#")[0],
+      filename: "verse-of-the-day.png",
+    });
+    if (result === "shared" || result === "cancelled") {
+      setStatus("idle");
+      return;
+    }
+    setStatus(result === "copied-image" ? "done" : "fallback");
+    setTimeout(() => setStatus("idle"), 2500);
+  };
+
+  const labels = {
+    idle: "Share this verse",
+    working: "Preparing image…",
+    done: "Verse card copied — paste anywhere",
+    fallback: "Text + link copied",
+  };
+
   return (
-    <>
-      <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-20 pb-24 text-center">
-        <Eyebrow center>
-          <span className="mx-auto">A Christian Editorial Journal</span>
-        </Eyebrow>
-        <h1
-          className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-6xl leading-[1.1] max-w-3xl mx-auto"
-          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-        >
-          Ordinary life, seen through an eternal lens.
-        </h1>
-        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-lg mt-6 max-w-xl mx-auto leading-relaxed">
-          Reflections on the gospel of Jesus Christ — for the doubting, the weary, and the curious alike.
+    <div className="relative overflow-hidden bg-[#1C1F26] dark:bg-[#0B0D10] rounded-sm px-6 py-7 sm:px-8 sm:py-8 text-center">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 28%, rgba(217,183,124,0.17), rgba(217,183,124,0) 62%)" }}
+      />
+      <div className="relative">
+        <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#D9B77C] font-semibold mb-3">
+          <Sunrise size={13} strokeWidth={2} />
+          Verse of the Day
+        </div>
+        <p className="text-[#F8F7F3] text-lg sm:text-xl leading-relaxed italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+          "{verse.text}"
         </p>
+        <p className="text-[#B7BBC4] text-[13px] mt-3 tracking-wide">— {verse.reference}, ESV</p>
         <button
-          onClick={() => setView("blog")}
-          className="mt-10 inline-flex items-center gap-2 bg-[#1C1F26] text-[#F8F7F3] px-7 py-3 text-sm tracking-wide hover:bg-[#4A5D4E] transition-colors duration-300"
+          onClick={handleShare}
+          disabled={status === "working"}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#B7BBC4] hover:text-[#D9B77C] mt-4 transition-colors duration-200 disabled:opacity-60"
         >
-          Read the Blogs
-          <ArrowRight size={15} strokeWidth={2} />
+          {status === "done" || status === "fallback" ? <Check size={13} strokeWidth={2} /> : <Share2 size={13} strokeWidth={2} />}
+          {labels[status]}
         </button>
-      </section>
+      </div>
+    </div>
+  );
+}
 
-      <ContinueReadingCard openPost={openPost} />
-
-      <VerseOfDay />
-
-      <section className="bg-white dark:bg-[#1E2128] border-y border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
-        <div className="max-w-3xl mx-auto px-6 sm:px-8 py-20">
-          <Eyebrow>Our Mission</Eyebrow>
-          <h2 className="text-3xl text-[#1C1F26] dark:text-[#F2F1EC] mb-6" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-            What is the Gospel?
-          </h2>
-          <div className="space-y-5 text-[#3A3E47] dark:text-[#D9D9D9] text-[17px] leading-[1.85]">
-            <p>
-              <span
-                className="float-left text-6xl leading-[0.8] pr-3 pt-1 text-[#4A5D4E]"
-                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-              >
-                T
-              </span>
-              he gospel is simply this: God loved a broken world enough to enter it. In Jesus Christ, he lived the life we could not live, died the death we deserved, and rose again so that all who trust in him might be forgiven, made new, and brought home to God — not by our effort, but by his grace.
-            </p>
-            <p>
-              It is not a to-do list. It is not a religion of rule-keeping. It is news of something already accomplished, received simply by faith. That distinction changes everything about how we live, love, fail, and hope.
-            </p>
-            <p>
-              The Gospel Lens exists to hold ordinary life up to that light — our work, our relationships, our doubts, our grief — and to write about what becomes visible when we do.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
-        <Eyebrow>Start Here</Eyebrow>
-        <h2 className="text-3xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-          New here? Start with these.
-        </h2>
-        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
-          If you want to understand what the gospel actually is before anything else, these three posts are the clearest place to begin.
-        </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FOUNDATIONAL_POST_IDS.map((id) => {
-            const post = POSTS.find((pp) => pp.id === id);
-            return post ? <PostCard key={post.id} post={post} onOpen={openPost} featured /> : null;
-          })}
-        </div>
-        <button
-          onClick={openReadingPlan}
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] mt-8 hover:gap-3 transition-all duration-300"
-        >
-          Prefer a guided path? Follow the 4-Day Plan
-          <ArrowRight size={14} strokeWidth={2} />
-        </button>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
-        <h2 className="text-3xl text-[#1C1F26] dark:text-[#F2F1EC] mb-10" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-          Recent Posts
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...POSTS]
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .slice(0, 3)
-            .map((post) => (
-              <PostCard key={post.id} post={post} onOpen={openPost} />
-            ))}
-        </div>
-        <div className="flex justify-center mt-12">
-          <button
-            onClick={() => setView("blog")}
-            className="inline-flex items-center gap-2 border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 text-[#1C1F26] dark:text-[#F2F1EC] px-7 py-3 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
+function HomeHero({ latest, openPost, openReadingPlan }) {
+  return (
+    <section>
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-10 sm:pt-14 pb-16 sm:pb-20 grid lg:grid-cols-[1.08fr_0.92fr] gap-10 lg:gap-14 items-start">
+        <div>
+          <HomeLabel>A Christian Editorial Journal</HomeLabel>
+          <h1
+            className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl lg:text-[56px] leading-[1.06] tracking-tight"
+            style={HOME_SERIF}
           >
-            See More
-            <ArrowRight size={14} strokeWidth={2} />
-          </button>
-        </div>
-      </section>
-
-      <section className="max-w-5xl mx-auto px-6 sm:px-8 py-20">
-        <Eyebrow>Explore by Topic</Eyebrow>
-        <div className="flex flex-wrap gap-2.5 mt-6">
-          {Object.keys(POST_TAGS).map((tag) => (
+            Ordinary life, seen through an eternal lens.
+          </h1>
+          <p className={`${HOME_MUTED} text-base sm:text-lg leading-relaxed mt-5 max-w-[46ch]`}>
+            God loved a broken world enough to enter it. Reflections on the gospel of Jesus Christ — for the doubting, the weary, and the curious alike.
+          </p>
+          <div className="flex flex-wrap gap-2.5 mt-7">
             <button
-              key={tag}
-              onClick={() => openTopic(tag)}
-              className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/14 dark:border-[#F2F1EC]/16 rounded-full px-3.5 py-1.5 hover:border-[#4A5D4E] hover:text-[#4A5D4E] dark:hover:border-[#6E9077] dark:hover:text-[#6E9077] transition-colors duration-200"
+              onClick={openReadingPlan}
+              className="inline-flex items-center gap-2 bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] px-5 sm:px-6 py-3 text-sm font-medium hover:bg-[#4A5D4E] dark:hover:bg-[#6E9077] dark:hover:text-[#F8F7F3] transition-colors duration-300 rounded-sm"
             >
-              {tag}
-              <span className="text-[10.5px] font-semibold text-[#B08D57]">{POST_TAGS[tag].length}</span>
+              New here? Start with the 4-day path
+              <ArrowRight size={15} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => openPost(latest)}
+              className="inline-flex items-center gap-2 border border-[#1C1F26]/25 dark:border-[#F2F1EC]/35 text-[#1C1F26] dark:text-[#F2F1EC] px-5 sm:px-6 py-3 text-sm font-medium hover:border-[#4A5D4E] dark:hover:border-[#6E9077] transition-colors duration-300 rounded-sm"
+            >
+              Read the latest
+            </button>
+          </div>
+          <p className={`${HOME_FAINT} text-[13px] mt-4`}>You don't have to believe anything to read. No ads, no account needed.</p>
+        </div>
+
+        <div className="space-y-4">
+          <button onClick={() => openPost(latest)} className={`${HOME_CARD} ${HOME_LIFT} group w-full text-left p-6 sm:p-8 block`}>
+            <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+              Newest post · {shortPostDate(latest)} · {latest.category} · {estimateReadTime(latest)}
+            </span>
+            <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-2xl sm:text-[30px] leading-[1.2] mt-2 mb-3" style={HOME_SERIF}>
+              {latest.title}
+            </span>
+            <span className={`block ${HOME_MUTED} text-[15px] leading-relaxed mb-5`}>{latest.excerpt}</span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] group-hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
+              Read more
+              <ArrowRight size={14} strokeWidth={2} />
+            </span>
+          </button>
+          <VerseOfDay />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Only shown once someone has actually read something (same condition the
+// old Continue Reading card used). Also notes how many posts are dated after
+// the day of their last visit -- kept entirely in this browser, never sent
+// anywhere, like the rest of the read-history features.
+function ContinueStrip({ post, newCount, openPost }) {
+  return (
+    <div className="border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 bg-white dark:bg-[#1E2128]">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-1.5 text-sm">
+        <button onClick={() => openPost(post)} className={`inline-flex items-center gap-2 text-left ${HOME_MUTED} hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200`}>
+          <Bookmark size={15} strokeWidth={2} className={`shrink-0 ${HOME_GOLD_TEXT}`} />
+          <span>
+            Continue reading:{" "}
+            <span className="text-[#1C1F26] dark:text-[#F2F1EC] text-[15px]" style={HOME_SERIF}>
+              {post.title}
+            </span>
+          </span>
+        </button>
+        {newCount > 0 && (
+          <span className={`${HOME_FAINT} text-[13px] inline-flex items-center gap-1.5`}>
+            <span className="w-2 h-2 rounded-full bg-[#B08D57]" />
+            {newCount} new {newCount === 1 ? "post" : "posts"} since your last visit
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// "What are you carrying today?" -- every moment is a real button that is
+// always on the page (no hidden quiz). Picking one swaps in a primary post
+// with its excerpt, two related posts, and a link to the topic page.
+function MomentsChooser({ openPost, openTopic }) {
+  const moments = useMemo(
+    () =>
+      MOMENTS.map((m) => ({
+        ...m,
+        primaryPost: POSTS.find((p) => p.id === m.primary),
+        secondaryPosts: m.secondary.map((id) => POSTS.find((p) => p.id === id)).filter(Boolean),
+      })).filter((m) => m.primaryPost),
+    []
+  );
+  const [cur, setCur] = useState(0);
+  const m = moments[cur];
+  if (!m) return null;
+
+  return (
+    <HomeSection>
+      <HomeLabel>What are you carrying today?</HomeLabel>
+      <HomeHeading>Start with where you are.</HomeHeading>
+      <p className={`${HOME_MUTED} text-base mb-7 max-w-[58ch]`}>Pick whatever is closest. Each one leads to real writing, not a quiz.</p>
+
+      <div className="flex gap-2.5 overflow-x-auto sm:flex-wrap -mx-6 px-6 sm:mx-0 sm:px-0 pb-2 mb-5 snap-x" role="group" aria-label="What are you carrying today">
+        {moments.map((x, i) => (
+          <button
+            key={x.label}
+            onClick={() => setCur(i)}
+            aria-pressed={i === cur}
+            className={`snap-start whitespace-nowrap min-h-[44px] px-[18px] rounded-full border text-[14.5px] font-medium transition-colors duration-200 motion-reduce:transition-none ${
+              i === cur
+                ? "bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] border-[#1C1F26] dark:border-[#F2F1EC]"
+                : `bg-white dark:bg-[#1E2128] ${HOME_MUTED} border-[#1C1F26]/20 dark:border-[#F2F1EC]/22 hover:border-[#4A5D4E] dark:hover:border-[#6E9077] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]`
+            }`}
+          >
+            {x.label}
+          </button>
+        ))}
+      </div>
+
+      <div key={cur} className="g-swap grid md:grid-cols-[1.3fr_1fr] gap-5" aria-live="polite">
+        <button onClick={() => openPost(m.primaryPost)} className={`${HOME_CARD} ${HOME_LIFT} group text-left p-6 sm:p-8 flex flex-col justify-start`}>
+          <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+            {m.primaryPost.category} · {shortPostDate(m.primaryPost)} · {estimateReadTime(m.primaryPost)}
+          </span>
+          <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-2xl sm:text-[28px] leading-[1.22] mt-2 mb-3" style={HOME_SERIF}>
+            {m.primaryPost.title}
+          </span>
+          <span className={`block ${HOME_MUTED} text-[15px] leading-relaxed mb-5`}>{m.primaryPost.excerpt}</span>
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] group-hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
+            Read this one
+            <ArrowRight size={14} strokeWidth={2} />
+          </span>
+        </button>
+
+        <div>
+          <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">Also helpful</span>
+          <div className="mt-1">
+            {m.secondaryPosts.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => openPost(p)}
+                className="w-full text-left flex items-baseline justify-between gap-4 py-4 border-t border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 first:border-t-0 group"
+              >
+                <span>
+                  <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-lg leading-snug group-hover:text-[#4A5D4E] dark:group-hover:text-[#6E9077] transition-colors duration-200" style={HOME_SERIF}>
+                    {p.title}
+                  </span>
+                  <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">{p.category}</span>
+                </span>
+                <span className={`${HOME_FAINT} text-[12.5px] shrink-0`}>{shortPostDate(p)}</span>
+              </button>
+            ))}
+          </div>
+          <MoreLink onClick={() => openTopic(m.topic)} className="mt-3 text-left">
+            More on {m.topic} ({POST_TAGS[m.topic].length} posts)
+          </MoreLink>
+        </div>
+      </div>
+    </HomeSection>
+  );
+}
+
+function LatestWriting({ lead, rows, openPost, setView }) {
+  return (
+    <HomeSection>
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <div>
+          <HomeLabel>Latest writing</HomeLabel>
+          <HomeHeading className="!mb-0">Fresh this week</HomeHeading>
+        </div>
+        <MoreLink onClick={() => setView("blog")}>See all {POSTS.length} posts</MoreLink>
+      </div>
+      <div className="grid md:grid-cols-[1.15fr_1fr] gap-7 items-stretch">
+        <button onClick={() => openPost(lead)} className={`${HOME_CARD} ${HOME_LIFT} group text-left p-6 sm:p-8 flex flex-col`}>
+          <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+            {lead.category} · {shortPostDate(lead)} · {estimateReadTime(lead)}
+          </span>
+          <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-2xl sm:text-[30px] leading-[1.2] mt-2 mb-3" style={HOME_SERIF}>
+            {lead.title}
+          </span>
+          <span className={`block ${HOME_MUTED} text-[15px] leading-relaxed mb-5 flex-1`}>{lead.excerpt}</span>
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] group-hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
+            Read more
+            <ArrowRight size={14} strokeWidth={2} />
+          </span>
+        </button>
+        <div>
+          {rows.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => openPost(p)}
+              className="w-full text-left flex items-baseline justify-between gap-4 py-4 border-t border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 first:border-t-0 group"
+            >
+              <span>
+                <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-lg leading-snug group-hover:text-[#4A5D4E] dark:group-hover:text-[#6E9077] transition-colors duration-200" style={HOME_SERIF}>
+                  {p.title}
+                </span>
+                <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+                  {p.category} · {estimateReadTime(p)}
+                </span>
+              </span>
+              <span className={`${HOME_FAINT} text-[12.5px] shrink-0`}>{shortPostDate(p)}</span>
             </button>
           ))}
         </div>
-      </section>
+      </div>
+    </HomeSection>
+  );
+}
 
-      <FromArchiveCard openPost={openPost} />
+// The logo ring as a progress device: one gold segment per plan day read.
+function ProgressRing({ flags }) {
+  const r = 76;
+  const c = 2 * Math.PI * r;
+  const seg = c / 4 - 14;
+  const done = flags.filter(Boolean).length;
+  return (
+    <svg width="190" height="190" viewBox="0 0 190 190" role="img" aria-label={`${done} of ${flags.length} days read`} className="shrink-0 max-w-full">
+      {flags.map((isDone, i) => (
+        <circle
+          key={i}
+          cx="95"
+          cy="95"
+          r={r}
+          fill="none"
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={`${seg} ${c - seg}`}
+          transform={`rotate(${-90 + i * 90 + 5} 95 95)`}
+          className={isDone ? "stroke-[#B08D57]" : "stroke-[#1C1F26]/15 dark:stroke-[#F2F1EC]/20"}
+        />
+      ))}
+      <text x="95" y="93" textAnchor="middle" fontSize="34" className="fill-[#1C1F26] dark:fill-[#F2F1EC]" style={HOME_SERIF}>
+        {done} of {flags.length}
+      </text>
+      <text x="95" y="115" textAnchor="middle" fontSize="13" className="fill-[#7A7E89] dark:fill-[#8A8E98]" style={{ fontFamily: "Inter, sans-serif" }}>
+        days read
+      </text>
+    </svg>
+  );
+}
 
-      <ScriptureIndexTeaserCard openScriptureIndex={openScriptureIndex} />
+// Start Here and the 4-Day Plan used to be two separate things (a 3-card
+// grid on the homepage, and a /start-here page). They're one path now --
+// numbering is honest here because this really is a sequence. Nothing is
+// locked; the ring just reflects which days have been read in this browser.
+function FourDayPath({ planPosts, readIds, openPlanPost, openReadingPlan }) {
+  const flags = planPosts.map((p) => readIds.has(p.id));
+  const nextIndex = flags.findIndex((f) => !f);
+  return (
+    <HomeSection>
+      <div className={`${HOME_CARD} p-6 sm:p-10 grid md:grid-cols-[190px_1fr] gap-8 md:gap-11 items-center`}>
+        <div className="justify-self-start md:justify-self-center">
+          <ProgressRing flags={flags} />
+        </div>
+        <div>
+          <HomeLabel>New here? Start with these four</HomeLabel>
+          <HomeHeading className="!text-[24px] sm:!text-[30px]">Four days to understand the gospel</HomeHeading>
+          <p className={`${HOME_MUTED} text-[15px] mb-4 max-w-[52ch]`}>
+            One post a day, in order, since each one builds on the last. Nothing is locked — the ring fills in as you read.
+          </p>
+          <div>
+            {planPosts.map((p, i) => (
+              <button
+                key={p.id}
+                onClick={() => openPlanPost(p)}
+                className="w-full text-left flex items-baseline gap-4 sm:gap-5 py-3.5 border-t border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 group"
+              >
+                <span className={`${HOME_GOLD_TEXT} text-sm w-12 shrink-0`} style={HOME_SERIF}>
+                  Day {i + 1}
+                </span>
+                <span className="text-[#1C1F26] dark:text-[#F2F1EC] text-base sm:text-lg leading-snug group-hover:text-[#4A5D4E] dark:group-hover:text-[#6E9077] transition-colors duration-200" style={HOME_SERIF}>
+                  {p.title}
+                </span>
+                <span className="ml-auto text-[12.5px] font-semibold text-[#4A5D4E] dark:text-[#6E9077] whitespace-nowrap">
+                  {flags[i] ? "Read" : i === nextIndex ? "Up next" : ""}
+                </span>
+              </button>
+            ))}
+          </div>
+          <MoreLink onClick={openReadingPlan} className="mt-3">
+            Open the full plan
+          </MoreLink>
+        </div>
+      </div>
+    </HomeSection>
+  );
+}
 
-      <JournalTeaserCard openJournal={openJournal} />
+function TopicBento({ openTopic }) {
+  const topics = Object.keys(POST_TAGS).map((name) => ({ name, count: POST_TAGS[name].length, desc: TOPIC_DESCRIPTIONS[name] }));
+  // The three biggest topics get a wider tile (ties keep POST_TAGS order),
+  // so the grid has a little rhythm instead of 13 identical boxes.
+  const bigNames = new Set([...topics].sort((a, b) => b.count - a.count).slice(0, 3).map((t) => t.name));
+  return (
+    <HomeSection>
+      <HomeLabel>Explore by topic</HomeLabel>
+      <HomeHeading>{topics.length === 13 ? "Thirteen" : topics.length} topics, each with its own page.</HomeHeading>
+      <p className={`${HOME_MUTED} text-base mb-7 max-w-[58ch]`}>Every post is tagged, so you can follow one thread as far as it goes.</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 [grid-auto-flow:dense]">
+        {topics.map((t) => (
+          <button key={t.name} onClick={() => openTopic(t.name)} className={`${HOME_CARD} ${HOME_LIFT} text-left p-5 sm:p-[22px] flex flex-col justify-start min-w-0 ${bigNames.has(t.name) ? "col-span-2" : ""}`}>
+            <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-[17px] sm:text-[19px] leading-[1.2] mb-1.5 break-words" style={HOME_SERIF}>
+              {t.name}
+            </span>
+            <span className={`block text-xs font-semibold ${HOME_GOLD_TEXT}`}>
+              {t.count} {t.count === 1 ? "post" : "posts"}
+            </span>
+            {t.desc && <span className={`block ${HOME_MUTED} text-[13px] sm:text-[13.5px] leading-relaxed mt-3`}>{t.desc}</span>}
+          </button>
+        ))}
+      </div>
+    </HomeSection>
+  );
+}
+
+function BeliefBand({ setView }) {
+  return (
+    <section className="relative overflow-hidden bg-[#1C1F26] dark:bg-[#0B0D10] text-[#F8F7F3]">
+      <svg
+        aria-hidden="true"
+        className="absolute -right-24 top-1/2 -translate-y-1/2 w-[260px] h-[260px] sm:w-[420px] sm:h-[420px] text-[#D9B77C] opacity-[0.12] pointer-events-none"
+        viewBox="0 0 400 400"
+      >
+        <circle cx="200" cy="200" r="170" fill="none" stroke="currentColor" strokeWidth="5" />
+        <path d="M200 120v160M140 175h120" stroke="currentColor" strokeWidth="22" fill="none" />
+      </svg>
+      <div className="relative max-w-5xl mx-auto px-6 sm:px-8 py-16 sm:py-20">
+        <div className="flex items-center gap-2.5 text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D9B77C] mb-4">
+          <span className="w-7 h-px bg-[#B08D57]" />
+          What we believe
+        </div>
+        <p className="text-[19px] sm:text-[25px] leading-[1.55] max-w-[30em] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
+          The gospel is simply this: God loved a broken world enough to enter it. In Jesus Christ, he lived the life we could not live, died the death we deserved, and rose again so that all who trust in him might be forgiven, made new, and brought home to God — not by our effort, but by his grace.
+        </p>
+        <button onClick={() => setView("about")} className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#D9B77C] hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
+          Read the full story
+          <ArrowRight size={14} strokeWidth={2} />
+        </button>
+      </div>
+    </section>
+  );
+}
+
+// The Scripture Index and the Reflection Journal used to be two small
+// teaser cards at the very bottom of the page; they're the two things only
+// this site does, so they get a heading and a side-by-side spot.
+function ToolsPair({ openScriptureIndex, openJournal }) {
+  return (
+    <HomeSection>
+      <HomeLabel>Your tools</HomeLabel>
+      <HomeHeading className="!mb-6">Two things only this site does.</HomeHeading>
+      <div className="grid md:grid-cols-2 gap-5">
+        <button
+          onClick={openScriptureIndex}
+          className="group text-left bg-white dark:bg-[#1E2128] border border-dashed border-[#B08D57]/70 dark:border-[#D9B77C]/55 hover:border-[#B08D57] dark:hover:border-[#D9B77C] rounded-sm p-6 sm:p-[30px] transition-colors duration-200 flex flex-col justify-start"
+        >
+          <BookOpen size={24} strokeWidth={1.75} className={HOME_GOLD_TEXT} />
+          <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-xl sm:text-[21px] leading-[1.25] mt-3 mb-2" style={HOME_SERIF}>
+            Every verse cited on the site, in one place
+          </span>
+          <span className={`block ${HOME_MUTED} text-[14.5px] leading-relaxed mb-4`}>
+            Every Scripture Focus reference across all posts, grouped by Bible book from Genesis to Revelation. Open any one to read it in context.
+          </span>
+          <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${HOME_GOLD_TEXT} group-hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none`}>
+            Open the Scripture Index
+            <ArrowRight size={14} strokeWidth={2} />
+          </span>
+        </button>
+        <button
+          onClick={() => openJournal()}
+          className="group text-left bg-white dark:bg-[#1E2128] border border-dashed border-[#4A5D4E]/60 dark:border-[#6E9077]/55 hover:border-[#4A5D4E] dark:hover:border-[#6E9077] rounded-sm p-6 sm:p-[30px] transition-colors duration-200 flex flex-col justify-start"
+        >
+          <NotebookPen size={24} strokeWidth={1.75} className="text-[#4A5D4E] dark:text-[#6E9077]" />
+          <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-xl sm:text-[21px] leading-[1.25] mt-3 mb-2" style={HOME_SERIF}>
+            A private place to write: reflections and prayers
+          </span>
+          <span className={`block ${HOME_MUTED} text-[14.5px] leading-relaxed mb-4`}>
+            Answer what each post asks you to reflect on, and keep a running prayer list. Private to you, synced wherever you sign in.
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] group-hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
+            Open your Journal
+            <ArrowRight size={14} strokeWidth={2} />
+          </span>
+        </button>
+      </div>
+    </HomeSection>
+  );
+}
+
+// "From the Archive" -- one older post per week. `excludeIds` is every post
+// already shown elsewhere on the page, so it can never repeat one.
+function FromArchiveCard({ openPost, excludeIds }) {
+  const [post] = useState(() => getFromArchivePost(excludeIds));
+  if (!post) return null;
+
+  return (
+    <HomeSection innerClassName="!py-14 sm:!py-16">
+      <button
+        onClick={() => openPost(post)}
+        className="w-full text-left flex items-start sm:items-center gap-4 sm:gap-5 bg-[#1C1F26] dark:bg-[#0B0D10] hover:bg-[#252932] dark:hover:bg-[#15181D] rounded-sm px-6 sm:px-8 py-6 sm:py-7 transition-colors duration-200"
+      >
+        <Archive size={26} strokeWidth={1.75} className="text-[#D9B77C] shrink-0 mt-1 sm:mt-0" />
+        <div className="min-w-0">
+          <span className="text-[11px] uppercase tracking-[0.2em] text-[#D9B77C] font-semibold">From the Archive</span>
+          <p className="text-[13px] text-[#B7BBC4] mt-1 mb-2">A post worth another look — resurfaced from the archive here each week.</p>
+          <div className="text-[#F8F7F3] text-xl sm:text-[21px] leading-snug" style={HOME_SERIF}>
+            {post.title}
+          </div>
+          <span className="text-[13px] text-[#B7BBC4]">
+            {post.author ? `By ${post.author} · ` : ""}Originally published {post.date}
+          </span>
+        </div>
+      </button>
+    </HomeSection>
+  );
+}
+
+function NewsletterBand() {
+  return (
+    <HomeSection>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-7">
+        <div>
+          <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl leading-tight mb-1.5" style={HOME_SERIF}>
+            Get new posts by email
+          </h2>
+          <p className={`${HOME_MUTED} text-base`}>One email, whenever something new is published. No spam.</p>
+        </div>
+        <NewsletterForm />
+      </div>
+    </HomeSection>
+  );
+}
+
+function HomeView({ setView, openPost, openPlanPost, openReadingPlan, openTopic, openScriptureIndex, openJournal }) {
+  const newest = useMemo(() => [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date)), []);
+  const hero = newest[0];
+  const latestLead = newest[1];
+  const latestRows = newest.slice(2, 6);
+  const planPosts = useMemo(() => READING_PLAN_POST_IDS.map((id) => POSTS.find((p) => p.id === id)).filter(Boolean), []);
+
+  // Read history and last-visit time live only in this browser.
+  const [readIds] = useState(() => new Set(getReadHistory().map((e) => e.id)));
+  const hasHistory = readIds.size > 0;
+  const [lastRead] = useState(() => {
+    const history = getReadHistory();
+    if (!history.length) return null;
+    return POSTS.find((p) => p.id === history[history.length - 1].id) || null;
+  });
+  // Posts dated after the day of the last visit.
+  // The baseline for "new since your last visit" is the previous visit's
+  // time, held in sessionStorage for the rest of this browsing session so a
+  // refresh doesn't make the count vanish. The stored last-visit time itself
+  // moves to "now" right after, so the NEXT session compares against this one.
+  const [baseline] = useState(() => {
+    try {
+      const held = window.sessionStorage.getItem(LAST_VISIT_BASELINE_KEY);
+      if (held !== null) return Number(held) || 0;
+      return Number(window.localStorage.getItem(LAST_VISIT_KEY)) || 0;
+    } catch {
+      return 0;
+    }
+  });
+  const newCount = useMemo(() => {
+    if (!baseline) return 0;
+    const prevDay = new Date(baseline);
+    prevDay.setHours(0, 0, 0, 0);
+    return POSTS.filter((p) => new Date(p.date) > prevDay).length;
+  }, [baseline]);
+  useEffect(() => {
+    try {
+      if (window.sessionStorage.getItem(LAST_VISIT_BASELINE_KEY) === null) {
+        window.sessionStorage.setItem(LAST_VISIT_BASELINE_KEY, String(baseline));
+      }
+      window.localStorage.setItem(LAST_VISIT_KEY, String(Date.now()));
+    } catch {
+      // storage unavailable -- the new-posts note just won't show
+    }
+  }, [baseline]);
+
+  const shownIds = [hero, latestLead, ...latestRows, ...planPosts].map((p) => p.id);
+
+  const path = <FourDayPath planPosts={planPosts} readIds={readIds} openPlanPost={openPlanPost} openReadingPlan={openReadingPlan} />;
+
+  return (
+    <>
+      <HomeHero latest={hero} openPost={openPost} openReadingPlan={openReadingPlan} />
+      {hasHistory && lastRead && <ContinueStrip post={lastRead} newCount={newCount} openPost={openPost} />}
+      <MomentsChooser openPost={openPost} openTopic={openTopic} />
+      {!hasHistory && path}
+      <LatestWriting lead={latestLead} rows={latestRows} openPost={openPost} setView={setView} />
+      {hasHistory && path}
+      <TopicBento openTopic={openTopic} />
+      <BeliefBand setView={setView} />
+      <ToolsPair openScriptureIndex={openScriptureIndex} openJournal={openJournal} />
+      <FromArchiveCard openPost={openPost} excludeIds={shownIds} />
+      <NewsletterBand />
     </>
   );
 }
@@ -7197,6 +7564,7 @@ export default function GospelLensApp() {
           <HomeView
             setView={changeView}
             openPost={openPost}
+            openPlanPost={openPlanPost}
             openReadingPlan={openReadingPlan}
             openTopic={openTopic}
             openScriptureIndex={openScriptureIndex}
@@ -7247,7 +7615,7 @@ export default function GospelLensApp() {
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
 
-      <Footer />
+      <Footer showNewsletter={view !== "home"} />
       <BackToTop />
     </div>
   );

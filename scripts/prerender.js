@@ -413,6 +413,29 @@ async function main() {
     seenTopicSlugs.add(t.slug);
   }
 
+  // The homepage's "What are you carrying today?" chooser (MOMENTS in
+  // src/App.jsx, added 2026-10-06) points at specific posts and topics by id
+  // and name. Fail the build if any of them no longer exists, so a renamed
+  // topic or a removed post can't quietly leave a dead link on the homepage.
+  const momentsStart = src.indexOf("const MOMENTS = [");
+  if (momentsStart === -1) throw new Error("MOMENTS not found in src/App.jsx -- the homepage chooser needs it.");
+  const momentsBlock = src.slice(momentsStart, src.indexOf("\n];", momentsStart));
+  const knownPostIds = new Set(posts.map((p) => Number(p.id)));
+  const knownTopicNames = new Set(topics.map((t) => t.name));
+  let momentsChecked = 0;
+  for (const line of momentsBlock.split("\n")) {
+    const lm = line.match(/label:\s*"([^"]+)",\s*topic:\s*"([^"]+)",\s*primary:\s*(\d+),\s*secondary:\s*\[([^\]]*)\]/);
+    if (!lm) continue;
+    const [, label, topic, primary, secondary] = lm;
+    if (!knownTopicNames.has(topic)) throw new Error(`MOMENTS "${label}" points at topic "${topic}", which isn't in POST_TAGS.`);
+    const ids = [Number(primary), ...secondary.split(",").map((s) => s.trim()).filter(Boolean).map(Number)];
+    for (const id of ids) {
+      if (!knownPostIds.has(id)) throw new Error(`MOMENTS "${label}" points at post id ${id}, which doesn't exist in POSTS.`);
+    }
+    momentsChecked += 1;
+  }
+  if (momentsChecked === 0) throw new Error("Couldn't read any entries from MOMENTS -- did its one-entry-per-line format change?");
+
   const ogImageUrl = `${SITE_URL}/og-image.png`;
 
   // One branded PNG per post (category + title, see build-share-cards.js),
@@ -501,6 +524,22 @@ async function main() {
         { name: "Scripture Index", url: `${SITE_URL}/verses` },
       ]),
     })
+  );
+
+  // The homepage itself (dist/index.html) gets WebSite structured data. Done
+  // here, last, from the untouched template, so it lands on the homepage only
+  // and not on the per-post/topic pages that are all derived from `template`.
+  const homeJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "The Gospel Lens",
+    url: `${SITE_URL}/`,
+    description: "Gospel-centered devotionals, sermon notes, and teaching — ordinary life, seen through an eternal lens.",
+    inLanguage: "en",
+  });
+  writeFileSync(
+    path.join(distDir, "index.html"),
+    template.replace("</head>", `  <script type="application/ld+json">${homeJsonLd}</script>\n  </head>`)
   );
 
   writeFileSync(path.join(distDir, "404.html"), build404Page());
