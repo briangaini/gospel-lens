@@ -7055,8 +7055,50 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
       </div>
     );
 
+  // "Yours" filters that are empty because the visitor has none of that yet
+  // (nothing saved, nothing liked, nothing read, or everything read) get a
+  // friendly explanation instead of the generic "nothing matches."
+  const stateEmpty = state && !posts.some(stateOf(state));
+  const stateEmptyCopy = {
+    saved: {
+      Icon: Bookmark,
+      title: "Nothing saved yet",
+      text: "Tap the bookmark on any post to set it aside for later, and it will be waiting for you here.",
+    },
+    liked: {
+      Icon: Heart,
+      title: "No liked posts yet",
+      text: "When a post really speaks to you, tap its heart. The ones that mattered most will collect here.",
+    },
+    read: {
+      Icon: BookOpen,
+      title: "You haven't read anything yet",
+      text: "Start anywhere, whatever catches your eye. Once you open a post, it shows up here so you can find your way back.",
+    },
+    unread: {
+      Icon: Check,
+      title: `You've read all ${total} posts`,
+      text: "That's the whole library. Thank you for spending the time. New posts will appear here as they're published, and any of these are worth a second read.",
+    },
+  }[state];
+
   let body;
-  if (!results.length) {
+  if (!results.length && stateEmpty && stateEmptyCopy) {
+    const { Icon } = stateEmptyCopy;
+    body = (
+      <div className="text-center py-16 px-5 mt-5 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
+        <Icon size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
+        <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          {stateEmptyCopy.title}
+        </h3>
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] leading-relaxed max-w-md mx-auto mb-6">{stateEmptyCopy.text}</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          <BlogChip label="Show all posts" onClick={() => { setState(null); resetPaging(); }} active={false} />
+          {state !== "unread" && <BlogChip label="Surprise me" onClick={surprise} active={false} />}
+        </div>
+      </div>
+    );
+  } else if (!results.length) {
     body = (
       <div className="text-center py-16 px-5 mt-5 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
         <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
