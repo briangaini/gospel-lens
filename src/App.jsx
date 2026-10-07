@@ -28,6 +28,8 @@ import {
   Trash2,
   Download,
   NotebookPen,
+  Shuffle,
+  LayoutGrid,
 } from "lucide-react";
 
 // Firebase (Google sign-in + Saved/Liked sync, see src/firebase.js) is
@@ -6634,155 +6636,697 @@ function HomeView({ setView, openPost, openPlanPost, openReadingPlan, openTopic,
   );
 }
 
-const PAGE_SIZE = 9;
+// BLOGS PAGE -- redesigned 2026-10-07. Restorable, see CLAUDE.md "Blogs page
+// restore" (backup/blogs-classic.jsx). Everything here is derived from data
+// that already exists: POSTS, POST_TAGS, estimateReadTime, getSearchIndex and
+// the visitor's own local read / saved / liked lists.
+const BLOG_PAGE = 12;
+const BLOG_VIEW_KEY = "gospel-lens-blog-view";
+const BLOG_STATES = [["unread", "Unread"], ["read", "Read"], ["saved", "Saved"], ["liked", "Liked"]];
+const BLOG_LENS = [["quick", "2 min or less"], ["mid", "3 min"], ["long", "4 min or more"]];
+const BLOG_SORT_LABELS = { rel: "best match first", new: "newest first", old: "oldest first", short: "shortest first", long: "longest first" };
+const BLOG_CAT_DOT = {
+  Devotional: "bg-[#4A5D4E] dark:bg-[#6E9077]",
+  Teaching: "bg-[#B08D57] dark:bg-[#C9A56B]",
+  Foundations: "bg-[#1C1F26] dark:bg-[#F2F1EC]",
+};
+const BLOG_LABEL = "text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8A8D96] dark:text-[#7C808A] flex-none";
+const BLOG_SCROLL_ROW =
+  "flex flex-nowrap gap-[7px] overflow-x-auto pb-1 -mb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-webkit-mask-image:linear-gradient(90deg,#000_92%,transparent)] [mask-image:linear-gradient(90deg,#000_92%,transparent)]";
 
-function BlogListView({ openPost, initialSearch = "", openTopic }) {
-  const [search, setSearch] = useState(initialSearch);
-  const [category, setCategory] = useState("All");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [readCount] = useState(() => getReadHistory().length);
+function blogLenBucket(minutes) {
+  return minutes <= 2 ? "quick" : minutes === 3 ? "mid" : "long";
+}
 
-  // Whenever a search arrives from the nav bar, apply it here too
-  useEffect(() => {
-    if (initialSearch) setSearch(initialSearch);
-  }, [initialSearch]);
+function blogTerms(q) {
+  return q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
 
-  const filtered = useMemo(() => {
-    const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const matched = [...POSTS]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .filter((post) => (category === "All" ? true : post.category === category))
-      .filter((post) => {
-        if (terms.length === 0) return true;
-        const index = getSearchIndex(post);
-        // Every word the person typed has to appear somewhere in the post —
-        // order and exact phrasing don't matter, so "grace faith" finds
-        // posts about both without needing that exact phrase.
-        return terms.every((term) => index.includes(term));
-      });
-
-    if (terms.length === 0) return matched;
-
-    // While actively searching, a post whose title matches should always
-    // outrank one that just happens to mention the word once in passing —
-    // sort is stable, so date order is preserved within each tier.
-    return [...matched].sort((a, b) => {
-      const aTitleMatch = terms.every((term) => a.title.toLowerCase().includes(term));
-      const bTitleMatch = terms.every((term) => b.title.toLowerCase().includes(term));
-      if (aTitleMatch === bTitleMatch) return 0;
-      return aTitleMatch ? -1 : 1;
+// Per-post facts used by the page, computed once (POSTS never changes at runtime).
+let blogMetaCache = null;
+function getBlogMeta() {
+  if (blogMetaCache) return blogMetaCache;
+  blogMetaCache = new Map();
+  for (const post of POSTS) {
+    const refs = post.blocks
+      .filter((b) => b.type === "scripture" && b.reference)
+      .map((b) => b.reference)
+      .join(" ")
+      .toLowerCase();
+    const minutes = parseInt(estimateReadTime(post), 10) || 1;
+    blogMetaCache.set(post.id, {
+      minutes,
+      refs,
+      tags: tagsForPost(post.id),
+      time: new Date(post.date).getTime(),
     });
-  }, [search, category]);
+  }
+  return blogMetaCache;
+}
 
-  // Reset pagination whenever the search or category changes
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [search, category]);
+// Which part of a post a search matched, shown under the title.
+function blogMatchWhere(post, meta, terms) {
+  if (!terms.length) return "";
+  const has = (text) => terms.every((t) => text.toLowerCase().includes(t));
+  if (has(post.title)) return "Matched in the title";
+  if (meta.refs && has(meta.refs)) return "Matched in a verse";
+  if (has(post.excerpt)) return "Matched in the summary";
+  if (meta.tags.length && has(meta.tags.join(" "))) return "Matched in the topic";
+  return "Matched inside the post";
+}
 
-  const visiblePosts = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
+function BlogHighlight({ text, terms }) {
+  if (!terms.length) return text;
+  const re = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  return text.split(re).map((part, i) =>
+    i % 2 === 1 ? (
+      <mark key={i} className="bg-[#B08D57]/30 text-inherit rounded-[2px] px-px">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+}
+
+function BlogChip({ label, count, active, onClick, dotClass }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap text-[13px] font-medium rounded-full border px-3.5 py-1.5 transition-colors duration-200 ${
+        active
+          ? "bg-[#4A5D4E] border-[#4A5D4E] text-white dark:bg-[#6E9077] dark:border-[#6E9077] dark:text-[#14161B]"
+          : "bg-[#F8F7F3] dark:bg-[#14161B] border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 text-[#5B5F6B] dark:text-[#A9ADB6] hover:border-[#4A5D4E] hover:text-[#4A5D4E] dark:hover:border-[#6E9077] dark:hover:text-[#8FAE95]"
+      }`}
+    >
+      {dotClass && <span className={`w-2 h-2 rounded-full ${dotClass}`} />}
+      {label}
+      {count != null && (
+        <span className={`text-[11.5px] tabular-nums ${active ? "opacity-75" : "text-[#8A8D96] dark:text-[#7C808A]"}`}>{count}</span>
+      )}
+    </button>
+  );
+}
+
+function BlogPostActions({ liked, saved, onToggleLike, onToggleSave, className = "" }) {
+  const base = "w-8 h-8 flex items-center justify-center rounded-full text-[#8A8D96] dark:text-[#7C808A] hover:bg-[#4A5D4E]/10 transition-colors duration-200";
+  return (
+    <div className={`flex items-center gap-1 ${className}`}>
+      <button
+        type="button"
+        onClick={onToggleLike}
+        aria-label={liked ? "Remove from Liked Posts" : "Like this post"}
+        title={liked ? "Remove from Liked Posts" : "Like this post"}
+        className={`${base} hover:text-[#C1584A]`}
+      >
+        <Heart size={15} strokeWidth={2} className={liked ? "text-[#C1584A]" : ""} fill={liked ? "currentColor" : "none"} />
+      </button>
+      <button
+        type="button"
+        onClick={onToggleSave}
+        aria-label={saved ? "Remove from Saved Posts" : "Save for later"}
+        title={saved ? "Remove from Saved Posts" : "Save for later"}
+        className={`${base} hover:text-[#B08D57]`}
+      >
+        <Bookmark size={15} strokeWidth={2} className={saved ? "text-[#B08D57]" : ""} fill={saved ? "currentColor" : "none"} />
+      </button>
+    </div>
+  );
+}
+
+function BlogStatePill({ isRead, isNew }) {
+  if (isRead) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold tracking-[0.08em] uppercase rounded-full px-2 py-0.5 bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]">
+        <Check size={10} strokeWidth={3.2} />
+        Read
+      </span>
+    );
+  }
+  if (isNew) {
+    return <span className="text-[10.5px] font-semibold tracking-[0.08em] uppercase rounded-full px-2 py-0.5 bg-[#B08D57] text-[#1C1F26]">New</span>;
+  }
+  return null;
+}
+
+function BlogCard({ post, meta, terms, isRead, isNew, liked, saved, onOpen, onToggleLike, onToggleSave }) {
+  const why = blogMatchWhere(post, meta, terms);
+  return (
+    <article
+      className={`group relative flex flex-col min-w-0 rounded-sm border border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 hover:border-[#B08D57]/50 transition-all duration-200 hover:-translate-y-[3px] motion-reduce:hover:translate-y-0 hover:shadow-[0_12px_30px_-16px_rgba(28,31,38,0.3)] px-[22px] pt-[22px] pb-[18px] ${
+        isRead ? "bg-transparent" : "bg-white dark:bg-[#1E2128]"
+      }`}
+    >
+      <button type="button" onClick={() => onOpen(post)} aria-label={`Read ${post.title}`} className="absolute inset-0 z-0 rounded-sm" />
+      <BlogPostActions liked={liked} saved={saved} onToggleLike={onToggleLike} onToggleSave={onToggleSave} className="absolute top-3 right-3 z-10" />
+      <div className="pointer-events-none flex flex-col flex-1">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pr-[72px] mb-3 text-[11px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A]">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-[#5B5F6B] dark:text-[#A9ADB6]">
+            <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#8A8D96]"}`} />
+            {post.category}
+          </span>
+          <span>{meta.minutes} min</span>
+          <BlogStatePill isRead={isRead} isNew={isNew} />
+        </div>
+        <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-xl leading-[1.28] mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <BlogHighlight text={post.title} terms={terms} />
+        </h3>
+        {why && <div className="text-xs text-[#8A6F42] dark:text-[#D9B77C] mb-2.5">{why}</div>}
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[14.5px] leading-relaxed line-clamp-3 mb-4">
+          <BlogHighlight text={post.excerpt} terms={terms} />
+        </p>
+        <div className="mt-auto flex items-center justify-between gap-2.5 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 pt-3 text-[12.5px] text-[#8A8D96] dark:text-[#7C808A]">
+          <span className="truncate min-w-0 font-medium text-[#4A5D4E] dark:text-[#8FAE95]">{meta.tags[0] || ""}</span>
+          <span className="whitespace-nowrap">{post.date}</span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function BlogRow({ post, meta, terms, isRead, isNew, liked, saved, onOpen, onToggleLike, onToggleSave }) {
+  const why = blogMatchWhere(post, meta, terms);
+  const d = new Date(post.date);
+  return (
+    <article
+      className={`group relative grid grid-cols-[1fr_auto] sm:grid-cols-[92px_1fr_auto] items-center gap-x-4 sm:gap-x-[18px] px-1 py-4 border-b border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 hover:bg-[#4A5D4E]/8 transition-colors duration-200 ${
+        isRead ? "opacity-80" : ""
+      }`}
+    >
+      <button type="button" onClick={() => onOpen(post)} aria-label={`Read ${post.title}`} className="absolute inset-0 z-0" />
+      <div className="hidden sm:block pointer-events-none text-[12.5px] leading-snug text-[#8A8D96] dark:text-[#7C808A]">
+        {d.toLocaleString("en-US", { month: "short", day: "numeric" })}
+        <br />
+        {d.getFullYear()}
+      </div>
+      <div className="pointer-events-none min-w-0">
+        <h3 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[#1C1F26] dark:text-[#F2F1EC] text-[18.5px] leading-snug mb-0.5" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <span>
+            <BlogHighlight text={post.title} terms={terms} />
+          </span>
+          <BlogStatePill isRead={isRead} isNew={isNew} />
+        </h3>
+        <p className="text-[14px] text-[#5B5F6B] dark:text-[#A9ADB6] line-clamp-2 sm:line-clamp-1">
+          <BlogHighlight text={post.excerpt} terms={terms} />
+        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-[#8A8D96] dark:text-[#7C808A]">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B5F6B] dark:text-[#A9ADB6]">
+            <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#8A8D96]"}`} />
+            {post.category}
+          </span>
+          <span>{meta.minutes} min</span>
+          {meta.tags[0] && <span>{meta.tags[0]}</span>}
+          {why && <span className="text-[#8A6F42] dark:text-[#D9B77C]">{why}</span>}
+        </div>
+      </div>
+      <BlogPostActions liked={liked} saved={saved} onToggleLike={onToggleLike} onToggleSave={onToggleSave} className="relative z-10" />
+    </article>
+  );
+}
+
+function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearch }) {
+  const meta = useMemo(() => getBlogMeta(), []);
+  const posts = useMemo(() => [...POSTS].sort((a, b) => meta.get(b.id).time - meta.get(a.id).time || b.id - a.id), [meta]);
   const topics = Object.keys(POST_TAGS);
+  // Biggest type first (Devotional, Teaching, Foundations), not CATEGORIES' own order.
+  const categories = CATEGORIES.filter((c) => c !== "All").sort(
+    (a, b) => POSTS.filter((p) => p.category === b).length - POSTS.filter((p) => p.category === a).length
+  );
+
+  // Filters live in the address bar (/blog?topic=peace&type=devotional) so a
+  // filtered view can be shared or bookmarked, and survives going into a post
+  // and coming Back. Read once on mount; written back with replaceState.
+  const initial = useMemo(() => {
+    const p = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+    const type = categories.find((c) => c.toLowerCase() === (p.get("type") || "").toLowerCase()) || null;
+    const topic = topics.find((t) => slugify(t) === p.get("topic")) || null;
+    const state = BLOG_STATES.find(([k]) => k === p.get("show"))?.[0] || null;
+    const len = BLOG_LENS.find(([k]) => k === p.get("len"))?.[0] || null;
+    const q = p.get("q") || initialSearch || "";
+    const sortParam = p.get("sort");
+    const sort = Object.keys(BLOG_SORT_LABELS).includes(sortParam) && sortParam !== "rel" ? sortParam : q ? "rel" : "new";
+    return { type, topic, state, len, q, sort };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [q, setQ] = useState(initial.q);
+  const [sort, setSort] = useState(initial.sort);
+  const [type, setType] = useState(initial.type);
+  const [topic, setTopic] = useState(initial.topic);
+  const [state, setState] = useState(initial.state);
+  const [len, setLen] = useState(initial.len);
+  const [visible, setVisible] = useState(BLOG_PAGE);
+  const [layout, setLayout] = useState(() => {
+    try {
+      return window.localStorage.getItem(BLOG_VIEW_KEY) === "list" ? "list" : "grid";
+    } catch {
+      return "grid";
+    }
+  });
+  const [readIds] = useState(() => new Set(getReadHistory().map((e) => e.id)));
+  const [savedIds, setSavedIds] = useState(() => new Set(getSavedPostIds()));
+  const [likedIds, setLikedIds] = useState(() => new Set(getLikedPostIds()));
+  const [surpriseNote, setSurpriseNote] = useState("");
+
+  // A search typed in the top nav arrives here as initialSearch.
+  useEffect(() => {
+    if (initialSearch) {
+      setQ(initialSearch);
+      setSort("rel");
+      setVisible(BLOG_PAGE);
+      consumeNavSearch?.();
+    }
+  }, [initialSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Mirror the filters into the address bar without adding history entries.
+  useEffect(() => {
+    if (window.location.pathname.replace(/\/+$/, "") !== "/blog") return;
+    const p = new URLSearchParams();
+    if (q.trim()) p.set("q", q.trim());
+    if (type) p.set("type", type.toLowerCase());
+    if (topic) p.set("topic", slugify(topic));
+    if (state) p.set("show", state);
+    if (len) p.set("len", len);
+    if (sort !== "new" && !(sort === "rel" && q.trim())) p.set("sort", sort);
+    const qs = p.toString();
+    const url = `/blog${qs ? `?${qs}` : ""}`;
+    if (window.location.pathname + window.location.search !== url) window.history.replaceState(window.history.state, "", url);
+  }, [q, type, topic, state, len, sort]);
+
+  const terms = blogTerms(q);
+
+  // Does a post pass every active filter? `skip` leaves one filter out, which
+  // is how each chip's live count is computed.
+  const searchOk = useMemo(() => {
+    const map = new Map();
+    for (const post of posts) {
+      if (!terms.length) {
+        map.set(post.id, true);
+        continue;
+      }
+      const index = getSearchIndex(post);
+      const m = meta.get(post.id);
+      map.set(post.id, terms.every((t) => index.includes(t) || m.refs.includes(t)));
+    }
+    return map;
+  }, [posts, meta, q]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const passes = (post, skip) => {
+    const m = meta.get(post.id);
+    if (!searchOk.get(post.id)) return false;
+    if (skip !== "type" && type && post.category !== type) return false;
+    if (skip !== "topic" && topic && !m.tags.includes(topic)) return false;
+    if (skip !== "len" && len && blogLenBucket(m.minutes) !== len) return false;
+    if (skip !== "state" && state) {
+      const isRead = readIds.has(post.id);
+      if (state === "unread" && isRead) return false;
+      if (state === "read" && !isRead) return false;
+      if (state === "saved" && !savedIds.has(post.id)) return false;
+      if (state === "liked" && !likedIds.has(post.id)) return false;
+    }
+    return true;
+  };
+
+  const results = useMemo(() => {
+    const list = posts.filter((p) => passes(p));
+    const byTime = (a, b) => meta.get(b.id).time - meta.get(a.id).time || b.id - a.id;
+    if (sort === "old") return [...list].sort((a, b) => -byTime(a, b));
+    if (sort === "short") return [...list].sort((a, b) => meta.get(a.id).minutes - meta.get(b.id).minutes || byTime(a, b));
+    if (sort === "long") return [...list].sort((a, b) => meta.get(b.id).minutes - meta.get(a.id).minutes || byTime(a, b));
+    if (sort === "rel" && terms.length) {
+      // A title match outranks one that merely mentions the word in passing;
+      // date order is kept within each tier.
+      const titleMatch = (p) => terms.every((t) => p.title.toLowerCase().includes(t));
+      return [...list].sort((a, b) => (titleMatch(a) === titleMatch(b) ? byTime(a, b) : titleMatch(a) ? -1 : 1));
+    }
+    return list;
+  }, [posts, searchOk, type, topic, state, len, sort, readIds, savedIds, likedIds]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const countWhere = (skip, extra) => posts.filter((p) => passes(p, skip) && extra(p)).length;
+  const stateOf = (key) => (p) =>
+    key === "unread" ? !readIds.has(p.id) : key === "read" ? readIds.has(p.id) : key === "saved" ? savedIds.has(p.id) : likedIds.has(p.id);
+
+  const resetPaging = () => setVisible(BLOG_PAGE);
+  const clearFilters = () => {
+    setType(null);
+    setTopic(null);
+    setState(null);
+    setLen(null);
+    resetPaging();
+  };
+  const clearAll = () => {
+    clearFilters();
+    setQ("");
+    if (sort === "rel") setSort("new");
+  };
+  const onSearchChange = (value) => {
+    setQ(value);
+    resetPaging();
+    if (blogTerms(value).length) {
+      if (sort === "new") setSort("rel");
+    } else if (sort === "rel") {
+      setSort("new");
+    }
+  };
+  const chooseLayout = (next) => {
+    setLayout(next);
+    try {
+      window.localStorage.setItem(BLOG_VIEW_KEY, next);
+    } catch {
+      // not persisted; non-fatal
+    }
+  };
+  const toggleLike = (id) => {
+    toggleLikedPost(id);
+    setLikedIds(new Set(getLikedPostIds()));
+  };
+  const toggleSave = (id) => {
+    toggleSavedPost(id);
+    setSavedIds(new Set(getSavedPostIds()));
+  };
+  const surprise = () => {
+    let pool = results.filter((p) => !readIds.has(p.id));
+    if (!pool.length) pool = posts.filter((p) => !readIds.has(p.id));
+    if (!pool.length) {
+      setSurpriseNote("You've read every post. Wow.");
+      return;
+    }
+    openPost(pool[Math.floor(Math.random() * pool.length)]);
+  };
+
+  const active = [];
+  if (type) active.push([type, () => setType(null)]);
+  if (topic) active.push([topic, () => setTopic(null)]);
+  if (state) active.push([BLOG_STATES.find(([k]) => k === state)[1], () => setState(null)]);
+  if (len) active.push([BLOG_LENS.find(([k]) => k === len)[1], () => setLen(null)]);
+
+  const shown = results.slice(0, visible);
+  const total = posts.length;
+  const grouped = !terms.length && (sort === "new" || sort === "old");
+  const monthOf = (p) => new Date(p.date).toLocaleString("en-US", { month: "long", year: "numeric" });
+  const monthTotals = {};
+  if (grouped) for (const p of results) monthTotals[monthOf(p)] = (monthTotals[monthOf(p)] || 0) + 1;
+
+  const renderItem = (p) => {
+    const m = meta.get(p.id);
+    const common = {
+      post: p,
+      meta: m,
+      terms,
+      isRead: readIds.has(p.id),
+      isNew: Date.now() - m.time <= 7 * 864e5 && Date.now() >= m.time,
+      liked: likedIds.has(p.id),
+      saved: savedIds.has(p.id),
+      onOpen: openPost,
+      onToggleLike: () => toggleLike(p.id),
+      onToggleSave: () => toggleSave(p.id),
+    };
+    return layout === "list" ? <BlogRow key={p.id} {...common} /> : <BlogCard key={p.id} {...common} />;
+  };
+  const renderBucket = (items, key) =>
+    layout === "list" ? (
+      <div key={key} className="border-t border-[#1C1F26]/12 dark:border-[#F2F1EC]/14">
+        {items.map(renderItem)}
+      </div>
+    ) : (
+      <div key={key} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        {items.map(renderItem)}
+      </div>
+    );
+
+  let body;
+  if (!results.length) {
+    body = (
+      <div className="text-center py-16 px-5 mt-5 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
+        <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          Nothing matches that
+        </h3>
+        <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-5">
+          {terms.length && active.length
+            ? "Your search and filters together are too narrow."
+            : terms.length
+            ? `No post mentions "${q.trim()}".`
+            : "Those filters don't overlap on any post yet."}{" "}
+          Try removing one.
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          <BlogChip label="Clear everything" onClick={clearAll} active={false} />
+          {terms.length > 0 && active.length > 0 && <BlogChip label="Keep search, clear filters" onClick={clearFilters} active={false} />}
+        </div>
+      </div>
+    );
+  } else if (grouped) {
+    const out = [];
+    let bucket = [];
+    let current = null;
+    shown.forEach((p) => {
+      const key = monthOf(p);
+      if (key !== current) {
+        if (bucket.length) out.push(renderBucket(bucket, `b-${current}`));
+        bucket = [];
+        current = key;
+        out.push(
+          <div key={`h-${key}`} className="flex items-baseline gap-3 mt-9 mb-3.5 first:mt-5">
+            <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-[22px]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+              {key}
+            </h2>
+            <span className="text-[13px] text-[#8A8D96] dark:text-[#7C808A]">
+              {monthTotals[key]} {monthTotals[key] === 1 ? "post" : "posts"}
+            </span>
+            <span aria-hidden="true" className="flex-1 h-px bg-[#1C1F26]/12 dark:bg-[#F2F1EC]/14 self-center" />
+          </div>
+        );
+      }
+      bucket.push(p);
+    });
+    if (bucket.length) out.push(renderBucket(bucket, `b-${current}`));
+    body = <>{out}</>;
+  } else {
+    body = <div className="mt-5">{renderBucket(shown, "flat")}</div>;
+  }
+
+  const readCount = readIds.size;
+  const hasMore = visible < results.length;
+  const inputText = "text-[#1C1F26] dark:text-[#F2F1EC]";
 
   return (
-    <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-24">
-      <h1 className="text-4xl text-[#1C1F26] dark:text-[#F2F1EC] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-        Blogs
-      </h1>
-      <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
-        Every post viewed through one lens: the finished work of Christ.
-        {readCount > 0 && (
-          <span className="block text-[#8A8D96] dark:text-[#7C808A] text-[13px] mt-1">
-            You've read {readCount} {readCount === 1 ? "post" : "posts"} so far.
-          </span>
-        )}
-      </p>
-
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-        <div className="relative flex-1 sm:max-w-xs">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8D96] dark:text-[#7C808A]" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search titles, topics, verses…"
-            className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 pl-9 pr-9 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] rounded-sm"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#1C1F26]"
-            >
-              <X size={14} strokeWidth={2} />
-            </button>
+    <div>
+      <header className="max-w-5xl mx-auto px-6 sm:px-8 pt-9 sm:pt-14 pb-5 sm:pb-6 flex flex-wrap items-end justify-between gap-5 sm:gap-7">
+        <div>
+          <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A6F42] dark:text-[#D9B77C]">The library</div>
+          <h1 className={`${inputText} text-[40px] sm:text-[54px] leading-[1.05] mt-2.5 mb-3`} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+            Blogs
+          </h1>
+          <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-base max-w-[520px]">
+            {total} posts, all viewed through one lens: the finished work of Christ.
+          </p>
+        </div>
+        <div className="grid gap-2.5 w-full sm:w-auto sm:min-w-[250px]">
+          {readCount > 0 && (
+            <>
+              <div className="flex justify-between gap-3 text-[13px] text-[#5B5F6B] dark:text-[#A9ADB6]">
+                <span>
+                  You've read{" "}
+                  <b className={`${inputText} font-semibold`}>
+                    {readCount} of {total}
+                  </b>
+                </span>
+                <span>{Math.round((readCount / total) * 100)}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-[#4A5D4E]/16 dark:bg-[#6E9077]/24 overflow-hidden" aria-hidden="true">
+                <div className="h-full rounded-full bg-[#4A5D4E] dark:bg-[#6E9077]" style={{ width: `${Math.max(2, (readCount / total) * 100)}%` }} />
+              </div>
+            </>
           )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const active = category === c;
-            return (
-              <button
-                key={c}
-                onClick={() => setCategory(c)}
-                aria-pressed={active}
-                className={`inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.1em] px-3.5 py-2 rounded-full border-2 transition-all duration-200 ${
-                  active
-                    ? "bg-[#4A5D4E] text-white border-[#4A5D4E] shadow-[0_4px_12px_-4px_rgba(74,93,78,0.5)]"
-                    : "bg-white dark:bg-[#1E2128] text-[#5B5F6B] dark:text-[#A9ADB6] border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 hover:border-[#4A5D4E]/50"
-                }`}
-              >
-                {active && <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#1E2128]" />}
-                {c}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 mb-8">
-        <span className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mr-1">Topics:</span>
-        {topics.map((tag) => (
           <button
-            key={tag}
-            onClick={() => openTopic(tag)}
-            className="text-xs text-[#5B5F6B] dark:text-[#A9ADB6] bg-[#4A5D4E]/6 hover:bg-[#4A5D4E]/12 hover:text-[#4A5D4E] px-3 py-1.5 rounded-full transition-colors duration-200"
+            type="button"
+            onClick={surprise}
+            className="inline-flex items-center justify-center gap-2 text-[13.5px] font-semibold text-[#4A5D4E] dark:text-[#8FAE95] border border-[#4A5D4E] dark:border-[#6E9077] rounded-full px-4 py-2 hover:bg-[#4A5D4E] hover:text-white dark:hover:bg-[#6E9077] dark:hover:text-[#14161B] transition-colors duration-200"
           >
-            {tag}
+            <Shuffle size={15} strokeWidth={2} />
+            Surprise me with something unread
           </button>
-        ))}
+          {surpriseNote && <p className="text-xs text-[#8A8D96] dark:text-[#7C808A] text-center">{surpriseNote}</p>}
+        </div>
+      </header>
+
+      <section aria-label="Filters" className="border-y border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 bg-white dark:bg-[#1E2128]">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 grid grid-cols-[minmax(0,1fr)]">
+          <div className="flex flex-col md:flex-row md:flex-wrap gap-y-3.5 md:gap-x-8 pt-3.5 pb-3 md:py-3.5 border-b border-[#1C1F26]/7 dark:border-[#F2F1EC]/8">
+            <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-3 min-w-0">
+              <span className={BLOG_LABEL}>Type</span>
+              <div className={`${BLOG_SCROLL_ROW} md:flex-wrap md:overflow-visible md:[mask-image:none] md:[-webkit-mask-image:none]`}>
+                <BlogChip label="All" count={countWhere("type", () => true)} active={!type} onClick={() => { setType(null); resetPaging(); }} />
+                {categories.map((c) => (
+                  <BlogChip
+                    key={c}
+                    label={c}
+                    count={countWhere("type", (p) => p.category === c)}
+                    active={type === c}
+                    dotClass={BLOG_CAT_DOT[c]}
+                    onClick={() => { setType(type === c ? null : c); resetPaging(); }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-3 min-w-0">
+              <span className={BLOG_LABEL}>Yours</span>
+              <div className={`${BLOG_SCROLL_ROW} md:flex-wrap md:overflow-visible md:[mask-image:none] md:[-webkit-mask-image:none]`}>
+                {BLOG_STATES.map(([key, label]) => (
+                  <BlogChip
+                    key={key}
+                    label={label}
+                    count={countWhere("state", stateOf(key))}
+                    active={state === key}
+                    onClick={() => { setState(state === key ? null : key); resetPaging(); }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-3 min-w-0">
+              <span className={BLOG_LABEL}>Length</span>
+              <div className={`${BLOG_SCROLL_ROW} md:flex-wrap md:overflow-visible md:[mask-image:none] md:[-webkit-mask-image:none]`}>
+                {BLOG_LENS.map(([key, label]) => (
+                  <BlogChip
+                    key={key}
+                    label={label}
+                    count={countWhere("len", (p) => blogLenBucket(meta.get(p.id).minutes) === key)}
+                    active={len === key}
+                    onClick={() => { setLen(len === key ? null : key); resetPaging(); }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-3 min-w-0 pt-0.5 pb-3.5 md:py-3">
+            <span className={BLOG_LABEL}>Topic</span>
+            <div className={BLOG_SCROLL_ROW}>
+              <BlogChip label="All topics" active={!topic} onClick={() => { setTopic(null); resetPaging(); }} />
+              {topics.map((t) => (
+                <BlogChip
+                  key={t}
+                  label={t}
+                  count={countWhere("topic", (p) => meta.get(p.id).tags.includes(t))}
+                  active={topic === t}
+                  onClick={() => { setTopic(topic === t ? null : t); resetPaging(); }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="sticky top-[81px] z-20 bg-[#F8F7F3]/95 dark:bg-[#14161B]/95 backdrop-blur-sm border-b border-[#1C1F26]/12 dark:border-[#F2F1EC]/14">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 py-3 grid gap-2.5">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 sm:max-w-[420px] min-w-0">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8D96] dark:text-[#7C808A]" />
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Search posts…"
+                aria-label="Search posts"
+                autoComplete="off"
+                className={`w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm pl-9 pr-9 py-2.5 text-base sm:text-[15px] ${inputText} placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] [&::-webkit-search-cancel-button]:hidden`}
+              />
+              {q && (
+                <button
+                  type="button"
+                  onClick={() => onSearchChange("")}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+                >
+                  <X size={14} strokeWidth={2.4} />
+                </button>
+              )}
+            </div>
+            <select
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value);
+                resetPaging();
+              }}
+              aria-label="Sort posts"
+              className={`flex-none w-[128px] sm:w-auto bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm px-1.5 sm:px-2.5 py-2.5 text-base sm:text-[13.5px] ${inputText}`}
+            >
+              {terms.length > 0 && <option value="rel">Best match</option>}
+              <option value="new">Newest first</option>
+              <option value="old">Oldest first</option>
+              <option value="short">Shortest read</option>
+              <option value="long">Longest read</option>
+            </select>
+            <div className="hidden sm:inline-flex border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm overflow-hidden bg-white dark:bg-[#1E2128]" role="group" aria-label="Layout">
+              {[["grid", "Card view", LayoutGrid], ["list", "List view", List]].map(([key, label, Icon]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => chooseLayout(key)}
+                  aria-pressed={layout === key}
+                  aria-label={label}
+                  title={label}
+                  className={`px-[11px] py-[9px] ${layout === key ? "bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]" : "text-[#8A8D96] dark:text-[#7C808A]"}`}
+                >
+                  <Icon size={17} strokeWidth={2} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13.5px] text-[#5B5F6B] dark:text-[#A9ADB6] min-h-[28px]" aria-live="polite">
+            <span>
+              <b className={`${inputText} font-semibold`}>{results.length}</b> {results.length === 1 ? "post" : "posts"}
+              {terms.length > 0 && <> for "{q.trim()}"</>} · {BLOG_SORT_LABELS[sort]}
+            </span>
+            {active.map(([label, remove]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => { remove(); resetPaging(); }}
+                className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#4A5D4E] dark:text-[#8FAE95] bg-[#4A5D4E]/10 rounded-full pl-2.5 pr-2 py-1"
+              >
+                {label}
+                <X size={12} strokeWidth={2.6} />
+              </button>
+            ))}
+            {topic && (
+              <button type="button" onClick={() => openTopic(topic)} className="text-[12.5px] font-semibold text-[#4A5D4E] dark:text-[#8FAE95] underline underline-offset-[3px]">
+                Open the {topic} page →
+              </button>
+            )}
+            {(active.length > 0 || terms.length > 0) && (
+              <button type="button" onClick={clearAll} className="text-[12.5px] font-semibold text-[#8A8D96] dark:text-[#7C808A] underline underline-offset-[3px]">
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      <p className="text-xs text-[#8A8D96] dark:text-[#7C808A] mb-8">
-        Showing {filtered.length} {filtered.length === 1 ? "post" : "posts"}
-        {category !== "All" ? <> in <span className="font-semibold text-[#4A5D4E]">{category}</span></> : null}
-        {search.trim() ? <> matching "<span className="font-semibold text-[#1C1F26] dark:text-[#F2F1EC]">{search.trim()}</span>"</> : null}
-      </p>
-
-      {filtered.length === 0 ? (
-        <p className="text-[#8A8D96] dark:text-[#7C808A] text-sm py-16 text-center">
-          Nothing matches that search yet — try a different word or category.
-        </p>
-      ) : (
-        <>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visiblePosts.map((post) => (
-              <PostCard key={post.id} post={post} onOpen={openPost} />
-            ))}
-          </div>
-
-          {hasMore && (
-            <div className="flex justify-center mt-12">
-              <button
-                onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-                className="inline-flex items-center gap-2 border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 text-[#1C1F26] dark:text-[#F2F1EC] px-7 py-3 text-sm font-medium tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
-              >
-                Load More
-              </button>
+      <main className="max-w-5xl mx-auto px-6 sm:px-8 pt-2 pb-20 sm:pb-24">
+        {body}
+        {results.length > 0 && hasMore && (
+          <div className="grid justify-items-center gap-3 mt-10 text-[13px] text-[#8A8D96] dark:text-[#7C808A]">
+            <div>
+              Showing {shown.length} of {results.length}
             </div>
-          )}
-        </>
-      )}
-    </section>
+            <div className="w-[220px] h-1.5 rounded-full bg-[#4A5D4E]/16 dark:bg-[#6E9077]/24 overflow-hidden" aria-hidden="true">
+              <div className="h-full rounded-full bg-[#4A5D4E] dark:bg-[#6E9077]" style={{ width: `${(shown.length / results.length) * 100}%` }} />
+            </div>
+            <button
+              type="button"
+              onClick={() => setVisible((v) => v + BLOG_PAGE)}
+              className="border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 bg-white dark:bg-[#1E2128] text-[#1C1F26] dark:text-[#F2F1EC] px-7 py-3 text-sm font-semibold tracking-wide hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-300 rounded-sm"
+            >
+              Show {Math.min(BLOG_PAGE, results.length - visible)} more
+            </button>
+          </div>
+        )}
+        {results.length > BLOG_PAGE && !hasMore && (
+          <p className="text-center mt-10 text-[13px] text-[#8A8D96] dark:text-[#7C808A]">That's all {results.length}.</p>
+        )}
+      </main>
+    </div>
   );
 }
 
@@ -7202,6 +7746,9 @@ export default function GospelLensApp() {
   // instead of a toggle being needed to "notice" dark mode is already on.
   const [dark, setDark] = useState(() => typeof document !== "undefined" && document.documentElement.classList.contains("dark"));
   const [navSearch, setNavSearch] = useState("");
+  // Bumped to remount the Blogs page (clearing its filters) whenever Blogs is
+  // opened fresh from the nav or a nav search.
+  const [blogKey, setBlogKey] = useState(0);
   // Signed-in Firebase user, or null. Added 2026-09-07 so Saved/Liked posts
   // can follow someone across devices/browsers instead of living only in
   // one browser's localStorage -- see src/firebase.js for the "why" and
@@ -7486,6 +8033,7 @@ export default function GospelLensApp() {
 
   const handleNavSearch = (query) => {
     setNavSearch(query);
+    setBlogKey((k) => k + 1);
     setView("blog");
     pushHistoryState("/blog");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -7698,6 +8246,7 @@ export default function GospelLensApp() {
   };
 
   const changeView = (v) => {
+    if (v === "blog") setBlogKey((k) => k + 1);
     setView(v);
     setMenuOpen(false);
     pushHistoryState(v === "home" ? "/" : `/${v}`);
@@ -7780,7 +8329,9 @@ export default function GospelLensApp() {
             openJournal={openJournal}
           />
         )}
-        {view === "blog" && <BlogListView openPost={openPost} initialSearch={navSearch} openTopic={openTopic} />}
+        {view === "blog" && (
+          <BlogListView key={blogKey} openPost={openPost} initialSearch={navSearch} openTopic={openTopic} consumeNavSearch={() => setNavSearch("")} />
+        )}
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} goBack={goBack} />}
         {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} goBack={goBack} />}

@@ -497,7 +497,17 @@ async function main() {
   // show), and /start-here's actual content is just posts that already have
   // their own pages — none of these are added to the sitemap below, same
   // reasoning as leaving 404 out of it.
-  writeHtml("blog", template);
+  // /blog (redesigned 2026-10-07) gets its own description. Filters live in
+  // the query string (?topic=...), which is the same page, so only /blog is
+  // prerendered and listed.
+  writeHtml(
+    "blog",
+    withMeta(template, {
+      title: "Blogs",
+      description: `Browse all ${posts.length} posts on The Gospel Lens: devotionals, teachings and foundations on the gospel. Search, filter by topic, and pick up where you left off.`,
+      url: `${SITE_URL}/blog`,
+    })
+  );
   // /about (redesigned 2026-10-07) gets its own description and AboutPage
   // structured data naming Brian. Only the first name: nothing here should
   // claim more about him than the page itself says.
