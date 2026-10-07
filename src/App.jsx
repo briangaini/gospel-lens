@@ -2813,6 +2813,55 @@ const POSTS = [
       },
     ],
   },
+  {
+    id: 72,
+    title: "The Best Plans",
+    author: null,
+    date: "October 7, 2026",
+    category: "Devotional",
+    readTime: "4 min read",
+    excerpt: "Jeremiah 29:11 is printed on mugs and t-shirts, but it was spoken to people in exile. Knowing the context makes the promise deeper, not smaller.",
+    blocks: [
+      p(`Jeremiah 29:11 is a popular verse that's often slapped onto journals, etched into coffee mugs, and printed on t-shirts.`),
+      {
+        type: "scripture",
+        reference: "Jeremiah 29:11, NIV",
+        verses: [`"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, plans to give you hope and a future."`],
+      },
+      p(`And God does have a plan for you. God does want to bless you. God does want to give you hope and a future.`),
+      p(`But we should also pay attention to the original context.`),
+      p(`In this case, God was speaking through the prophet Jeremiah to the people of Judah, people who'd recently been exiled to Babylon for 70 years.`),
+      p(`The Jewish people were banished to a foreign land because of their insatiable appetite for sin. In fact, for 23 years Jeremiah had been warning them to stop rebelling against God or prepare to face the consequences.`),
+      p(`God is patient, but He is also just.`),
+      p(`In other words, the Jews were sent to timeout. And as you can read in the preceding chapters, God made a case against His beloved people.`),
+      p(`They'd exploited foreigners, orphans, and widows. They'd denied the rights of the poor. They'd refused to stand up for truth or obey God's instructions. They'd murdered the innocent and committed adultery. They'd rejoiced in doing evil and their lives were ruled by greed. They'd even built pagan shrines, sacrificing their sons and daughters in the fires. It was a dark time. And yet, somehow, God's mercy always extends to the darkest places on earth.`),
+      p(`That's why, just a few verses later, God said they could seek Him and find Him, and He'd bring them back from captivity (Jeremiah 29:13-14).`),
+      p(`That's why He encouraged them, while in exile, to build houses, plant gardens, get married, have babies, and work for the peace and prosperity of their temporary home (Jeremiah 29:5-7).`),
+      p(`He wanted them to know: He hadn't forgotten them. He still wanted good for them. He still had plans to restore them.`),
+      p(`God is serious about sin, but He's just as passionate about redemption.`),
+      p(`Though Jeremiah 29:11 was meant for a specific people at a specific time, God's heart for the restoration of broken people is generationally timeless.`),
+      p(`Even when we feel stuck in the process, God still has a plan. We can put our trust in the God whose goal is always redemption.`),
+      {
+        type: "share",
+        items: [
+          `Today's challenge: Remind someone that even if they're in their own season of exile, God still has a plan for their life.`,
+          `If you're unsure about sharing your faith, start by living it out. When people respect your actions, they will pay closer attention to your words.`,
+        ],
+      },
+      {
+        type: "reflection",
+        items: [
+          `Where do you feel like you're in "exile" right now? Is there a season where you feel stuck, far from where you expected to be? What would it look like to build a life there, as the exiles were told to, while trusting God hasn't forgotten you?`,
+          `Do you tend to quote Jeremiah 29:11 as a promise of comfort, or also hear its context? How does knowing the exiles were there because of their own rebellion change the way you see God's patience, His justice, and His mercy?`,
+          `Who in your life needs to be reminded that God still has a plan for them? What is one small, practical way you could show them that this week, through your actions as much as your words?`,
+        ],
+      },
+      {
+        type: "prayer",
+        text: `God, I know You have a plan for my life, and You want to bless me. Help me lean into that promise! Sometimes it's hard to see past my present struggles. Thank You for loving me even when I have doubts and fears. Fill me with Your hope and peace. In Jesus' name, Amen.`,
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -2839,7 +2888,7 @@ const POST_TAGS = {
   "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64],
   "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66],
   "Peace": [36, 41, 15, 43, 51, 54, 60, 71],
-  "God's Love & Faithfulness": [32, 57, 58, 65],
+  "God's Love & Faithfulness": [32, 57, 58, 65, 72],
   "Heaven & Eternity": [27, 44, 62],
 };
 
