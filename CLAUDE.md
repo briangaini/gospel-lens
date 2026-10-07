@@ -35,6 +35,7 @@ scripts/
 .buttondown-notified.json — state file for the above, committed back by the bot
 backup/
   homepage-classic.jsx  — plain, never-bundled copy of the pre-2026-10-06 homepage code, see "Homepage restore"
+  about-classic.jsx     — plain, never-bundled copy of the pre-2026-10-07 About page, see "About page restore"
 index.html
 vercel.json     — cleanUrls + SPA rewrite fallback
 tailwind.config.js
@@ -243,6 +244,22 @@ Brian wants to be able to go back, so the classic homepage is saved three ways. 
 - Leave `NewsletterForm`/`Footer` as they are (the refactor is safe on its own and its dark-mode button fix is a real improvement). `MOMENTS`, the `prerender.js` check for it, the `WebSite` JSON-LD, and the `.g-swap` CSS can stay or go; they don't affect the classic page.
 - Run `npm run build`, check the homepage locally at 375px and 360px in light and dark, push, confirm live, then update this section and the Fixed list.
 
+## About page (redesigned 2026-10-07)
+
+Brian asked for a makeover, saw a demo (Claude Artifact, https://claude.ai/artifact/AedvJPYqZmskm6XHhwd5uT), trimmed it over three rounds, then said "go ahead, implement." `AboutView` (and its small `AboutRing` logo) in `src/App.jsx`. **His words about himself are his own, only split into sections; nothing about him was invented** (no biography, doctrine, dates, church claims). Keep it that way: don't add facts about Brian he hasn't supplied.
+
+**Sections, in order:** hero ("The Person Behind the Lens", his greeting, a gold-ring card captioned "Here to explain the gospel plainly.") → dark quote band (the born-in-India / living-in-the-US sentence leading into "The gospel isn't a cultural export or a Western idea...") → "I kept running into the same problem" (struck-through "what many people heard" vs. "the actual news") → "This isn't a pulpit." (a short note, **deliberately unsigned**) → "My hope" on the sage band (**no buttons**) → "Get in touch" (share your story / suggest an idea / submit a post, his email shown as a link with a Copy button, and the newsletter form).
+
+**Things Brian explicitly did not want, don't re-add:** the "No ads. No account needed. You don't have to believe anything to read." line, an India/US caption under the logo, a "Two worlds" heading, a "What's here today" stats section, a "Four ways in" section, buttons under "My hope", a signature on the pulpit note.
+
+**Open questions never answered:** a real photo in place of the ring; he did like the email being shown (he asked to keep "my email").
+
+**Plumbing:** `Footer showNewsletter={view !== "home" && view !== "about"}` so About doesn't stack a second signup under its own. `scripts/prerender.js` gives `dist/about.html` its own description and `AboutPage` JSON-LD (Person name "Brian" only). `NewsletterForm`'s input got `min-w-0` (fixes the Subscribe button poking out of a narrow card on phones; benefits every use of it).
+
+### About page restore (how to put the OLD About back)
+
+Saved three ways: git tag `about-classic-2026-10-07` (pushed), `backup/about-classic.jsx` (plain copy of the old `AboutView`, never bundled), and the demo Artifact's "Current About" tab. **Restore:** in `src/App.jsx` replace `AboutView` and `AboutRing` (from the `ABOUT -- redesigned 2026-10-07` comment through the end of `AboutView`) with the function in `backup/about-classic.jsx`; set `<Footer showNewsletter={view !== "home"} />`; optionally remove the About block in `scripts/prerender.js` (`writeHtml("about", template)` is the old behavior). Don't `git checkout` the tag over `App.jsx` (it would discard newer posts). Then `npm run build`, check, push, verify live.
+
 ## Homepage: Explore by Topic + Scripture Index teaser
 
 **Superseded 2026-10-06 by the full homepage makeover above** (the topic chips became `TopicBento`; the two teaser cards became `ToolsPair`; the originals are in `backup/homepage-classic.jsx`). Kept for history.
@@ -426,6 +443,7 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~A shared post link briefly flashed the "Page Not Found" page for other people before showing the real post~~ — fixed 2026-09-25, see "A real bug hiding in the PWA's service worker..." under "Custom 404 page" above. Root cause: `vite-plugin-pwa` silently routed every navigation through a possibly-stale cached shell before the network, confirmed by reading the actual compiled `dist/sw.js`, not guessed — a returning visitor's old cached bundle genuinely didn't know about a post added since their last visit, briefly rendering the client-side 404 for real reasons before the site's own update-detection caught up and reloaded onto the current bundle. Fixed by disabling that fallback route entirely (`navigateFallbackDenylist: [/.*/]`) — every real route here already has its own accurate static file served straight from Vercel, so the fallback was never actually needed.
 - ~~Topics and the Scripture Index had no presence on the homepage~~ — fixed 2026-10-01, see "Homepage: Explore by Topic + Scripture Index teaser" above. Demoed first (twice — once as part of a full homepage redesign pitch Brian didn't take, once as a narrowly-scoped two-block demo he did approve), then implemented exactly as approved with the one requested trim (no heading/subcopy on the Topics section). Rest of the homepage deliberately untouched.
 - ~~Homepage buried the writing, repeated itself, and gave a visitor no way in~~ — fixed 2026-10-06 with the full makeover, see "Homepage (redesigned 2026-10-06)" above. Also fixed along the way: the archive pick could repeat a post already on the page, the email signup was only in the footer, and the footer signup button was dark-on-dark in dark mode. **The old homepage can be restored on request** — steps are in "Homepage restore" in that same section, backed by git tag `homepage-classic-2026-10-06` and `backup/homepage-classic.jsx`.
+- ~~About page was four paragraphs in one column with no face, no next step, no way to reach Brian~~ — redesigned 2026-10-07, see "About page (redesigned 2026-10-07)". **The old About can be restored on request** (tag `about-classic-2026-10-07`, `backup/about-classic.jsx`).
 - ~~No private place to answer a post's Reflection Questions or keep a prayer list~~ — fixed 2026-10-02, see "Reflection Journal" above. Demoed first, including how the deletion-sync bug and the Firebase-console-access catch would be solved, not just the UI — approved ("go ahead, build it") before implementation.
 
 **Proposed "next level" ideas (not yet greenlit):**

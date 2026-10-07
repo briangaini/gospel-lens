@@ -498,7 +498,24 @@ async function main() {
   // their own pages — none of these are added to the sitemap below, same
   // reasoning as leaving 404 out of it.
   writeHtml("blog", template);
-  writeHtml("about", template);
+  // /about (redesigned 2026-10-07) gets its own description and AboutPage
+  // structured data naming Brian. Only the first name: nothing here should
+  // claim more about him than the page itself says.
+  writeHtml(
+    "about",
+    withMeta(template, {
+      title: "About",
+      description: "Brian is the person behind The Gospel Lens: someone who wants the gospel explained plainly, with voices he trusts, so anyone can see it a little more clearly.",
+      url: `${SITE_URL}/about`,
+      jsonLd: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        name: "About The Gospel Lens",
+        url: `${SITE_URL}/about`,
+        mainEntity: { "@type": "Person", name: "Brian", description: "The person behind The Gospel Lens." },
+      }),
+    })
+  );
   writeHtml("saved", template);
   writeHtml("liked", template);
   writeHtml("journal", template);
