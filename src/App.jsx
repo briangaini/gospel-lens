@@ -2864,6 +2864,105 @@ const POSTS = [
       },
     ],
   },
+  // Ids 74 and 73 share a date (Oct 8). The sort is stable, so the entry
+  // earlier in this array shows as newer: "No Fine Print" (pasted second)
+  // is listed first so it displays above "Healing is Possible".
+  {
+    id: 74,
+    title: "No Fine Print",
+    author: "Jonny Ardavanis",
+    date: "October 8, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt: "Jesus never hid the cost of following Him in the fine print. He said plainly that the world would hate His followers, and that smooth sailing may not be a mark of blessing.",
+    blocks: [
+      p(`You know those commercials where people are frolicking through a field, full of color and vibrancy and promise—and then at the last four seconds the narrator rattles off: "Minor side effects include rage, mood swings, sleepwalking, severe depression, heart palpitations, stroke."`),
+      p(`All in the fine print.`),
+      {
+        type: "quote",
+        text: `Jesus never cloaked, disguised, glossed over, or included in the fine print the difficulty and hostility that would come from following Him.`,
+        attribution: "Jonny Ardavanis",
+      },
+      {
+        type: "scripture",
+        reference: "John 15:18-20; 2 Timothy 3:12; Philippians 1:29",
+        verses: [
+          `If the world hates you, you know that it has hated Me before it hated you. If you were of the world, the world would love its own; but because you are not of the world, but I chose you out of the world, because of this the world hates you.`,
+          `Everyone who wants to live a godly life in Christ Jesus will be persecuted.`,
+          `For it has been granted to you on behalf of Christ, not only to believe on Him, but also to suffer for Him.`,
+        ],
+      },
+      p(`Jesus never cloaked the cost of following Him. He never disguised the opposition that is going to come from identifying with Him. He made it crystal clear. In fact, He makes this the prominent theme of His parting words on the night before His crucifixion.`),
+      p(`He says in Luke 14:27, "Whoever does not carry his own cross and come after Me cannot be My disciple." He constantly wanted to discourage spurious and superficial faith. He wanted to eliminate the shock and surprise that would come from following Him and then being rejected by the world.`),
+      p(`And yet the church in America today largely has a strategy: be as much like the world as possible so that you can reach it. But Jesus says, "If you are following Me, if you are preaching what I preach, if you are living how I live, if you are talking like I talk—you are going to be hated."`),
+      p(`From the earliest moments of His ministry, Jesus reads a scroll in the synagogue—and immediately they try to throw Him off a cliff. But one pastor said, "The Jesus preached in the modern pulpit today would never have been killed."`),
+      p(`Peter says, "Dear friends, do not be surprised at the painful trial you are suffering as though something strange were happening to you." Suffering for Christ is not abnormal. It's normal. And Peter says, "This is nothing strange—this is exactly what Jesus promised."`),
+      p(`Andrew was hung on a cross. Nathaniel was skinned alive. James was stabbed with a sword. Thomas was thrust through with a spear. Paul was beheaded under Nero. There have been more people killed for following Christ in the last 100 years than in the previous 1,900 years combined.`),
+      p(`And yet in the Western world, we experience a reprieve from that—which is a cultural and historical abnormality. And that abnormality is rapidly diminishing.`),
+      p(`Jesus says, "A slave is not greater than his master. If they persecuted Me, they will also persecute you." He says in Luke 6, "Woe to you if all men speak well of you." Isn't that interesting?`),
+      p(`Smooth sailing in this life is not necessarily a mark of blessing. It may actually be an indication that you too closely resemble the world you are called to reach.`),
+      {
+        type: "reflection",
+        items: [
+          `Has Jesus's warning about the world's hatred surprised you, or have you been prepared for it?`,
+          `When was the last time you experienced any opposition or hostility for following Jesus?`,
+          `Does the ease of your Christian life in a comfortable culture concern you or comfort you?`,
+        ],
+      },
+      {
+        type: "heart",
+        text: `No fine print. Jesus said it plainly—the world will hate you. A slave is not greater than his master. If they hated Him, they will hate me.`,
+      },
+    ],
+  },
+  {
+    id: 73,
+    title: "Healing is Possible",
+    author: null,
+    date: "October 8, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt: "A sick person who hides their symptoms struggles alone. So do we when we hide our sin. James 5:16 invites us to share it, pray together, and let God heal.",
+    blocks: [
+      p(`Imagine a sick person who won't tell anyone about their symptoms. Without help, getting through their illness would be challenging. Whether they need help from a doctor or just someone checking to see how they're doing—it's much easier to heal with the help of others.`),
+      p(`Similarly, when we don't tell anyone about the challenges we're facing, it can be hard to work through them. Sometimes we do things we know are wrong, but we don't tell anyone about it because it feels easier to hide. This is because we're all affected by sin—our wrongdoing and brokenness that separate us from God.`),
+      p(`It can be hard to share our wrongdoings with others, but when we keep our sin to ourselves, we're like the sick person who won't ask for help—we suffer in isolation rather than allowing others to help us heal.`),
+      p(`James 5:16 tells us to share our wrongdoings with other believers so that we can heal together and pray for one another. When we share our past mistakes with someone, we are released from isolation. And when we pray together, we give God the opportunity to heal our hearts.`),
+      p(`God is our healer—He saved us from the eternal consequences of sin through His Son Jesus. And because of Jesus, we have access to a relationship with God, and we can bring our requests to Him and trust that He will hear us.`),
+      p(`This doesn't mean God will always answer our prayers in the way we think they should be answered. Instead, when we share our brokenness with Him, He invites us on a journey that will help us grow closer to Him.`),
+      p(`If you're struggling with something today, take some time to share it with a trusted believer. Allow them to pray with you and ask God to guide you as you heal.`),
+      {
+        type: "prayer",
+        text: `God, I don't want to face my challenges alone. I've made mistakes in the past, and I know I need help from You and from others to move forward. Please give me the courage to confess my sins to trusted people. Surround me with a community who's willing to hear my struggles, pray with me, and encourage me to live more like You each day. Thank You, Lord. In Jesus' name, Amen.`,
+      },
+    ],
+  },
+  {
+    id: 75,
+    title: "Keep Practicing",
+    author: null,
+    date: "October 9, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt: "Paul tells the Philippians to put into practice what they've seen in him. Imitation is effective, relational, and comes with a promise of a peace that surpasses understanding.",
+    blocks: [
+      p(`In Philippians 4:9, Paul tells the Philippians to model his behavior by putting everything they have learned, received, heard and seen from him into practice. There are at least three benefits to this approach.`),
+      p(`First, it's effective. We learn best through imitation. We would never just tell a child how to kick a football. We would show them. A carpenter wouldn't take up their trade by reading a manual. They would apprentice under a master.`),
+      p(`Likewise, we shouldn't just read about what our faith should look like. We should seek out mature believers who, like Paul, put it on display. Because although we can certainly read about selflessness, humility, forgiveness and compassion, we get a stronger sense of what those qualities look like when we see them lived out in fellow brothers and sisters.`),
+      p(`Second, it's relational. In 1 Thessalonians 1:6-7, Paul reveals how this process plays out. He imitates Christ. Believers imitate him. And then other believers imitate them. It's a chain reaction. As we model faithful believers, we become models ourselves.`),
+      p(`Third, it's attached to a promise. This is the best part. Paul tells us that if we put these things into practice, the God of peace will be with us. And not just any peace — a peace that Paul says surpasses all understanding.`),
+      p(`So, ask yourself who in your life models the faith and what would it look like to start living like them?`),
+      { type: "encourage", text: `You don't have to figure this out alone. It's a journey Christians are meant to take together.` },
+      {
+        type: "share",
+        items: [`The example shouldn't stop. How can you model the Christian walk for others?`],
+      },
+      {
+        type: "prayer",
+        text: `Jesus, thank You. Thank You for putting on flesh, saving me, and providing me with the ultimate example. Lord, I ask that you put people in my life that show me what it looks like to live like You. And I pray that I put it into action, displaying faith that brings more people to Your peace.`,
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -2881,15 +2980,15 @@ const POSTS = [
 const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19, 28, 57],
   "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70],
-  "Sin & Repentance": [8, 17, 47, 69, 70],
+  "Sin & Repentance": [8, 17, 47, 69, 70, 73],
   "Grief & Comfort": [6, 21, 22, 30],
-  "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59],
-  "Prayer": [2, 18],
+  "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74],
+  "Prayer": [2, 18, 73],
   "Worship": [4, 38, 43],
   "Friendship": [20, 34, 49, 67],
-  "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64],
+  "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64, 75],
   "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66],
-  "Peace": [36, 41, 15, 43, 51, 54, 60, 71],
+  "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75],
   "God's Love & Faithfulness": [32, 57, 58, 65, 72],
   "Heaven & Eternity": [27, 44, 62],
 };
