@@ -7526,6 +7526,7 @@ function ListenButton({ status, onToggle, onRestart, supported }) {
 
 function ShareBar({ post }) {
   const [copied, setCopied] = useState(false);
+  const [igCopied, setIgCopied] = useState(""); // "" | "copied" | "failed"
 
   const shareUrl = () => `${window.location.origin}/${slugify(post.title)}`;
 
@@ -7551,10 +7552,29 @@ function ShareBar({ post }) {
     }
   };
 
-  const shareX = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl())}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+  const shareWhatsApp = () => {
+    // wa.me opens WhatsApp Web on a computer (or the app if it's installed);
+    // the link travels inside the message text.
+    const text = `${post.title}\n${shareUrl()}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   };
+
+  // Instagram has no web address that pre-fills a message, so this copies the
+  // link, opens a new direct message, and tells the visitor to paste it.
+  const shareInstagram = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl());
+      setIgCopied("copied");
+    } catch (err) {
+      setIgCopied("failed");
+    }
+    setTimeout(() => setIgCopied(""), 4000);
+    window.open("https://www.instagram.com/direct/new/", "_blank", "noopener,noreferrer");
+  };
+
+  const emailHref = `mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(
+    `I thought you might like this post on The Gospel Lens:\n\n${post.title}\n${typeof window !== "undefined" ? window.location.origin : ""}/${slugify(post.title)}`
+  )}`;
 
   const shareFacebook = () => {
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`;
@@ -7571,16 +7591,16 @@ function ShareBar({ post }) {
         <Share2 size={14} strokeWidth={2} />
         Share
       </button>
-      <button
-        onClick={shareX}
-        className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
-      >
-        Share on X
+      <button onClick={shareWhatsApp} className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200">
+        Share on WhatsApp
       </button>
-      <button
-        onClick={shareFacebook}
-        className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
-      >
+      <button onClick={shareInstagram} className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200">
+        {igCopied === "copied" ? "Link copied — paste it in your message" : igCopied === "failed" ? "Tap Copy Link, then paste it in your message" : "Share on Instagram"}
+      </button>
+      <a href={emailHref} className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200">
+        Email
+      </a>
+      <button onClick={shareFacebook} className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200">
         Share on Facebook
       </button>
       <button
