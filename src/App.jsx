@@ -6667,7 +6667,7 @@ function VerseOfDay() {
   );
 }
 
-function HomeHero({ latest, openPost, openReadingPlan }) {
+function HomeHero({ latest, openPost, openReadingPlan, setView }) {
   return (
     <section>
       <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-10 sm:pt-14 pb-16 sm:pb-20 grid lg:grid-cols-[1.08fr_0.92fr] gap-10 lg:gap-14 items-start">
@@ -6691,7 +6691,7 @@ function HomeHero({ latest, openPost, openReadingPlan }) {
               <ArrowRight size={15} strokeWidth={2} />
             </button>
             <button
-              onClick={() => openPost(latest)}
+              onClick={() => setView("blog")}
               className="inline-flex items-center gap-2 border border-[#1C1F26]/25 dark:border-[#F2F1EC]/35 text-[#1C1F26] dark:text-[#F2F1EC] px-5 sm:px-6 py-3 text-sm font-medium hover:border-[#4A5D4E] dark:hover:border-[#6E9077] transition-colors duration-300 rounded-sm"
             >
               Read the latest
@@ -7156,7 +7156,7 @@ function HomeView({ setView, openPost, openPlanPost, openReadingPlan, openTopic,
 
   return (
     <>
-      <HomeHero latest={hero} openPost={openPost} openReadingPlan={openReadingPlan} />
+      <HomeHero latest={hero} openPost={openPost} openReadingPlan={openReadingPlan} setView={setView} />
       {hasHistory && lastRead && <ContinueStrip post={lastRead} newCount={newCount} openPost={openPost} />}
       <MomentsChooser openPost={openPost} openTopic={openTopic} />
       {!hasHistory && path}
