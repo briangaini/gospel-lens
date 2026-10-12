@@ -2937,6 +2937,37 @@ const POSTS = [
       },
     ],
   },
+  // Ids 76 and 75 share a date (Oct 9). The sort is stable, so the entry
+  // earlier in this array shows as newer: "The Good Life" (pasted later) is
+  // listed first so it displays above "Keep Practicing".
+  {
+    id: 76,
+    title: "The Good Life",
+    author: null,
+    date: "October 9, 2026",
+    category: "Devotional",
+    readTime: "3 min read",
+    excerpt: "Everyone is searching for the good life. Jesus, the Good Shepherd, says real fulfillment isn't found in status, possessions or success, but in following Him.",
+    blocks: [
+      p(`Everyone on earth is searching for "the good life." We all want our lives to matter—to be filled with purpose and significance. But often, we're searching for fulfillment and meaning through things, people, or efforts that simply cannot satisfy us.`),
+      p(`Many people try to find significance from the admiration and acceptance of those around them. Others look for fulfillment through material possessions and worldly success—by working hard and building wealth. Still others chase what they think is "the good life" through the allure of power and influence.`),
+      p(`Though none of these things are necessarily wrong on their own, they cannot bring true peace and fulfillment in life. There will come a time when fame and accolades fade, when material possessions lose their charm, and when our reputations can only take us so far. Even the good relationships in our lives cannot bring us ultimate peace and fulfillment.`),
+      p(`Jesus lets us know how the enemy tries to keep us from the actual good life He has for us. The thief tries to steal our attention away from what truly matters by distracting us with earthly things that have the allure of satisfaction, but this way only ends in death and destruction. However, Jesus says there is another way to find abundant life.`),
+      p(`In John 10, Jesus compares Himself to a good shepherd who cares for and feeds the sheep in His pasture. Jesus says that He is the gate for the sheep to enter into the courtyard. While speaking in metaphors, Jesus is saying that anyone who wants to gain true access to salvation must come through Him.`),
+      p(`Jesus also says that it is through Him that we will find true life. It is only through trusting in Jesus and following Him that we can experience life to the fullest. Real fulfillment and meaning come through following Jesus as our Shepherd, rather than following the world around us.`),
+      p(`Take some time to think about the way you're searching for fulfillment and meaning in your life. Are you trying to find "the good life" through possessions, status, relationships, or success? Or are you following Jesus and trusting Him to produce meaning and purpose in your life?`),
+      p(`Jesus is the Good Shepherd, so continue to trust in and follow Him. He is the way to abundant life.`),
+      {
+        type: "scripture",
+        reference: "John 10:10, ESV",
+        verses: [`The thief comes only to steal and kill and destroy. I came that they may have life and have it abundantly.`],
+      },
+      {
+        type: "prayer",
+        text: `God, I pray against every scheme and distraction of the enemy. I know that true joy and satisfaction can only be found in You—the giver of life. Help me as I face daily attacks on my time, attention, energy, family, and character. Empty my life of any lies and false securities. You are the way to abundant life! And I am looking to You. In Jesus' name, Amen.`,
+      },
+    ],
+  },
   {
     id: 75,
     title: "Keep Practicing",
@@ -2982,7 +3013,7 @@ const POST_TAGS = {
   "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70],
   "Sin & Repentance": [8, 17, 47, 69, 70, 73],
   "Grief & Comfort": [6, 21, 22, 30],
-  "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74],
+  "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74, 76],
   "Prayer": [2, 18, 73],
   "Worship": [4, 38, 43],
   "Friendship": [20, 34, 49, 67],
