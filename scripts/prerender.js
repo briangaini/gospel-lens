@@ -89,6 +89,22 @@ function loadAuthors(src) {
 // POST_TAGS is a flat object: "Topic Name": [id, id, ...]. Much simpler
 // shape than AUTHORS, so a single regex over the whole block is enough --
 // no need to split into per-entry chunks first.
+// SERIES (added 2026-10-12): one entry per line in App.jsx, e.g.
+//   proverbs: { slug: "proverbs", name: "...", tag: "...", description: "...", ... },
+// read with a regex like everything else here (so descriptions must not
+// contain double quotes). Each becomes /series/<slug> with its own meta.
+function loadSeries(src) {
+  const start = src.indexOf("const SERIES = {");
+  if (start === -1) return [];
+  const end = src.indexOf("\n};", start);
+  const block = src.slice(start, end);
+  const re = /^\s*(\w+): \{ slug: "([^"]+)", name: "([^"]+)", tag: "([^"]*)", description: "([^"]*)"/gm;
+  const out = [];
+  let m;
+  while ((m = re.exec(block))) out.push({ id: m[1], slug: m[2], name: m[3], tag: m[4], description: m[5] });
+  return out;
+}
+
 function loadTopics(src) {
   const start = src.indexOf("const POST_TAGS = {");
   if (start === -1) return [];
@@ -243,7 +259,7 @@ function writeHtml(relativeSlug, html) {
   writeFileSync(filePath, html);
 }
 
-function buildSitemap(posts, authors, topics) {
+function buildSitemap(posts, authors, topics, seriesList = []) {
   const today = new Date().toISOString().slice(0, 10);
   const urls = [
     { loc: `${SITE_URL}/`, priority: "1.0" },
@@ -253,6 +269,7 @@ function buildSitemap(posts, authors, topics) {
     { loc: `${SITE_URL}/rss.xml`, priority: "0.3" },
     ...authors.map((a) => ({ loc: `${SITE_URL}/collection/${a.slug}`, priority: "0.5" })),
     ...topics.map((t) => ({ loc: `${SITE_URL}/topics/${t.slug}`, priority: "0.5" })),
+    ...seriesList.map((s) => ({ loc: `${SITE_URL}/series/${s.slug}`, priority: "0.7" })),
     ...posts.map((p) => ({ loc: `${SITE_URL}/${p.slug}`, priority: "0.6" })),
   ];
   const body = urls
@@ -399,8 +416,9 @@ async function main() {
   const posts = loadPosts(src);
   const authors = loadAuthors(src);
   const topics = loadTopics(src);
+  const seriesList = loadSeries(src);
 
-  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved", "liked", "journal", "start-here", "topics", "verses"]);
+  const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved", "liked", "journal", "start-here", "topics", "verses", "series"]);
   const seenSlugs = new Set();
   for (const p of posts) {
     if (seenSlugs.has(p.slug)) throw new Error(`Duplicate post slug detected: "${p.slug}" (id ${p.id}) — two titles slugify to the same URL.`);
@@ -488,6 +506,18 @@ async function main() {
     writeHtml(path.join("topics", topic.slug), html);
   }
 
+  // Series pages (/series/<slug>): public, indexable, listed in the sitemap.
+  for (const series of seriesList) {
+    writeHtml(
+      path.join("series", series.slug),
+      withMeta(template, {
+        title: series.name,
+        description: `${series.tag}. ${series.description}`,
+        url: `${SITE_URL}/series/${series.slug}`,
+      })
+    );
+  }
+
   // /blog, /about, /saved, /liked, /journal, and /start-here need their own
   // flat files too — verified live that vercel.json's rewrites catch-all
   // does NOT reliably fall back to index.html here even with cleanUrls on,
@@ -571,7 +601,7 @@ async function main() {
 
   writeFileSync(path.join(distDir, "404.html"), build404Page());
 
-  writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors, topics));
+  writeFileSync(path.join(distDir, "sitemap.xml"), buildSitemap(posts, authors, topics, seriesList));
   writeFileSync(path.join(distDir, "rss.xml"), buildRss(posts));
 
   console.log(`Prerendered ${posts.length} post pages, ${authors.length} collection page(s), ${topics.length} topic page(s), blog/about, and 404. Sitemap, RSS feed, and per-post share cards regenerated.`);

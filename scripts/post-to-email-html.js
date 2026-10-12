@@ -37,13 +37,21 @@ function boxTable(innerHtml, { background, borderLeft, border }) {
 </table>`;
 }
 
+// **bold** and *italic* inside paragraph text (used by some Proverbs Series
+// posts), escaped first so only our own markers become tags.
+function inlineHtml(text) {
+  return escapeHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>");
+}
+
 function label(text, color) {
   return `<div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:${color}; font-weight:700; margin:0 0 10px; font-family:Helvetica,Arial,sans-serif;">${escapeHtml(text)}</div>`;
 }
 
 function renderBlock(block) {
   const p = (text) =>
-    `<p style="font-size:16px; line-height:1.75; color:${COLOR.body}; margin:0 0 18px; font-family:Georgia,'Times New Roman',serif;">${escapeHtml(text)}</p>`;
+    `<p style="font-size:16px; line-height:1.75; color:${COLOR.body}; margin:0 0 18px; font-family:Georgia,'Times New Roman',serif;">${inlineHtml(text)}</p>`;
 
   switch (block.type) {
     case "p":

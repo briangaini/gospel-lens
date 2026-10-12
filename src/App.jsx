@@ -2937,6 +2937,368 @@ const POSTS = [
       },
     ],
   },
+  // The Proverbs Series (ids 77-82, tagged `series: "proverbs"`). Each pair
+  // below shares a date, and the sort is stable, so the entry EARLIER in
+  // this array shows as newer: ids are listed newest-first (82 down to 77)
+  // so the later-pasted post of each pair displays above the earlier one.
+  {
+    id: 82,
+    title: "Guard Your Heart",
+    author: null,
+    date: "October 12, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "7 min read",
+    excerpt: "Above all else, guard your heart. But what if the heart can't be trusted? Proverbs, Jeremiah, and the new heart God promises.",
+    blocks: [
+      p(`If you had to pick the single most important thing to protect in your life, what would it be?`),
+      p(`Your health? Your family? Your reputation, your savings, your faith? All reasonable answers. But the writer of Proverbs, a father giving advice to his son, picks something different. And he does it with a phrase that stops you in your tracks:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 4:23",
+        verses: [`Above all else, guard your heart, for everything you do flows from it.`],
+      },
+      p(`*Above all else.* Not "among other things." Not "when you have time." Above everything, the thing to watch over is the heart. Because whatever is in there is the source, and everything else in your life, your words, your choices, your habits, your relationships, is downstream from it.`),
+      p(`It's a great line. It's also a bit of a problem, as we'll see in a minute.`),
+      { type: "heading", text: "Where Do You Post the Guards?" },
+      p(`First, notice that this verse doesn't float on its own. It sits in the middle of a short passage, and the surrounding verses read like a security plan.`),
+      p(`Before the verse, the father talks about the *ears*: "pay attention to what I say; turn your ear to my words" (4:20). After it, he moves to the *mouth*: "Keep your mouth free of perversity; keep corrupt talk far from your lips" (4:24). Then the *eyes*: "Let your eyes look straight ahead; fix your gaze directly before you" (4:25). And finally the *feet*: "Give careful thought to the paths for your feet and be steadfast in all your ways" (4:26).`),
+      p(`Ears, mouth, eyes, feet. They're the entry and exit points. Think of an ancient walled city. The wall doesn't matter nearly as much as the gates, because that's where everything comes in and goes out. And the father is saying: your heart is the city, and these are its gates. If you want to guard the heart, you have to watch what comes through them.`),
+      p(`That's where this gets uncomfortably practical.`),
+      { type: "heading", text: "What Gets Through the Gates" },
+      p(`Think about what you let in on an ordinary day.`),
+      p(`Through your **eyes and ears**: hours of screens, scrolling, shows, headlines, and opinions, most of it designed to hold your attention rather than serve your good. Voices you listen to, music you play, conversations you stay in. Whatever you consistently let in, you eventually absorb. It sets your mood, shapes your assumptions, and quietly trains your desires.`),
+      p(`Through your **mouth**: what you say shapes what you believe. Gossip, complaining, and cynical jokes may feel harmless, but repeating something long enough has a way of making it true to you.`),
+      p(`Through your **feet**: the places you go and the paths you take. The habits that become routines, the routines that become a life.`),
+      p(`And then there are the gates we forget about entirely, the ones on the inside. A resentment you keep rehearsing. A grudge you feed. A secret you've decided to keep. Hebrews warns about a "bitter root" that springs up and causes trouble, defiling many (12:15). Nobody plants a bitter root on purpose. It grows in the places we leave unattended.`),
+      p(`None of this means you should wall yourself off from the world and refuse to engage. Jesus walked into messy rooms and unlikely places, and He was never contaminated by them. But He also guarded what shaped Him. He rose early to pray. He knew Scripture. He was deliberate about what He let define Him. Guarding isn't isolation. It's intention.`),
+      { type: "heading", text: "The Problem" },
+      p(`Now we come to the catch I mentioned. Here is what Jeremiah says about the thing we're supposed to be guarding:`),
+      {
+        type: "scripture",
+        reference: "Jeremiah 17:9",
+        verses: [`The heart is deceitful above all things and beyond cure. Who can understand it?`],
+      },
+      p(`Wait. We're told to guard our heart above all else, and then told that heart can't be trusted? How do you guard something that lies to you?`),
+      p(`Jesus agrees with Jeremiah, and says it with unsettling clarity: "For out of the heart come evil thoughts, murder, adultery, sexual immorality, theft, false testimony, slander" (Matthew 15:19). Not the environment. Not just the world around us. The heart itself.`),
+      p(`That's a hard thing to sit with. It means that even if you perfectly managed your inputs, deleted every app, cut off every bad influence, and filled your days with Scripture and good company, you'd still have a problem. The problem wouldn't only be what's out there. It would be what's in *here.*`),
+      p(`This is where a lot of well-meaning advice goes wrong. If "guard your heart" were all we had, it would turn into an exhausting project of self-management, a lifetime of white-knuckled vigilance, constantly policing our thoughts and feeling like failures every time something slips through. Some people live that way, and it wears them out.`),
+      p(`But that isn't where the Bible leaves us.`),
+      { type: "heading", text: "A New Heart" },
+      p(`Here's what God says, through the prophet Ezekiel:`),
+      {
+        type: "scripture",
+        reference: "Ezekiel 36:26",
+        verses: [`I will give you a new heart and put a new spirit in you; I will remove from you your heart of stone and give you a heart of flesh.`],
+      },
+      p(`Read the verbs. *I will give. I will put. I will remove.* This isn't a repair job we're expected to do ourselves. It's a transplant, and God is the surgeon. He doesn't hand us a broken heart and a to-do list. He promises to replace the heart itself, and to put His own Spirit inside to keep it alive.`),
+      p(`This is the piece that changes everything about how we read Proverbs 4:23. We aren't guarding a heart we're trying to fix through effort. We're guarding something God has made new. It's the difference between protecting a stained, failing machine and protecting a gift. You tend it, you care for it, and you keep out what would poison it, but you do so from gratitude, not fear.`),
+      p(`It's also why David, after his fall, didn't pray, "Help me do better." He prayed, "Create in me a clean heart, O God" (Psalm 51:10). He knew a new heart had to come from outside him.`),
+      p(`And there's one more thing, tucked in the New Testament, that I find deeply comforting. Paul writes: "the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus" (Philippians 4:7).`),
+      p(`Look at who's doing the guarding there. It's God's peace. *He* stands at the gate. We're not carrying this alone. Our job is to keep showing up, to keep bringing our anxieties to Him in prayer, as the verses before it describe, and to let His peace do what our own vigilance never could.`),
+      { type: "heading", text: "So What Does Guarding Actually Look Like?" },
+      p(`If it isn't grim self-policing, then what is it? A few things come to mind.`),
+      p(`**Pay attention to what you're feeding on.** Notice what leaves you drained, anxious, bitter, or numb, and what leaves you steadier. You don't need a rigid system. Just start by noticing, and then make one small change.`),
+      p(`**Fill the space with something better.** It's hard to simply remove bad input; it works better to replace it. "Whatever is true, whatever is noble, whatever is right, whatever is pure... think about such things" (Philippians 4:8). The psalmist says, "I have hidden your word in my heart that I might not sin against you" (Psalm 119:11). A heart stocked with Scripture has less room for the junk.`),
+      p(`**Invite God to search what you can't see.** Since we can't fully understand our own hearts, we ask the One who can. "Search me, God, and know my heart... See if there is any offensive way in me, and lead me in the way everlasting" (Psalm 139:23–24). It's a brave prayer. It's also a safe one, because the One searching is the One who loves you.`),
+      p(`**Deal with the small things early.** Bitterness, secret habits, quiet compromises. Address them while they're small, with God and with a trusted friend. Roots are easier to pull when they're young.`),
+      p(`**Give yourself grace.** You will still fail at this. Something will get through the gate. When it does, you don't need to panic or spiral. You go to the One who promised to make you new, and you start again.`),
+      { type: "heading", text: "The Source Matters" },
+      p(`Everything you do flows from it. Your words, your patience, your love, your choices, even the way you handle a hard Tuesday. That's what makes the heart worth guarding above all else.`),
+      p(`But the good news of the gospel is that you were never meant to guard it by yourself, or to fix it by yourself. You have a new heart on the way, and a God who stands at the gate. So guard it, not from fear but from love, and let Him keep making it more like His own.`),
+      {
+        type: "reflection",
+        items: [
+          `What are you letting through the "gates" most often? Think about what you watch, listen to, say, and dwell on. What is one input you could reduce or replace this week to protect your heart?`,
+          `Is there a "bitter root" or hidden resentment you've been leaving unattended? What would it look like to bring it to God, or to a trusted friend, before it grows?`,
+          `Do you tend to guard your heart out of fear or out of trust? How does knowing that God promises a new heart, and stands guard through His peace, change the way you approach it?`,
+        ],
+      },
+      {
+        type: "prayer",
+        text: `Lord, thank You that You don't ask me to fix my own heart. Forgive me for the things I've let in, and for the places I've guarded poorly. Search me, and show me what I can't see. Give me the new heart You promised, and let Your peace stand guard over my heart and mind. Help me protect what You've made new, not out of fear, but because I love You. Amen.`,
+      },
+    ],
+  },
+  {
+    id: 81,
+    title: "The Company You Keep",
+    author: null,
+    date: "October 12, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "6 min read",
+    excerpt: "Proverbs says we become like the people we walk with. Friends who sharpen us, tell us the truth, and the friend who sticks closer than a brother.",
+    blocks: [
+      p(`Try something for a moment. Think of the five people you spend the most time with, or talk to the most. Not the people you wish you saw more, but the ones who actually fill your days, your texts, your group chats.`),
+      p(`Got them?`),
+      p(`Now ask a slightly uncomfortable question. Are you becoming more like Christ around those people, or less? Do you leave their company braver or smaller? More honest or more guarded? More hopeful or more cynical?`),
+      p(`Most of us never ask this. We think of friendship as something that happens *to* us, a matter of who we click with, who lives nearby, who we ended up sitting next to. But Proverbs sees it differently. It treats the people we walk with as one of the most powerful forces shaping the person we become, and it says so with surprising bluntness.`),
+      { type: "heading", text: "You Become Who You Walk With" },
+      {
+        type: "scripture",
+        reference: "Proverbs 13:20",
+        verses: [`Walk with the wise and become wise, for a companion of fools suffers harm.`],
+      },
+      p(`Notice the verb. It doesn't say *listen to* the wise. It says *walk with* them. Wisdom, like a lot of things, is caught more than taught. You absorb it through proximity: the way someone handles a hard week, what they laugh at, what they refuse to say, how they treat the waiter. You can't help picking up the habits, attitudes, and assumptions of the people closest to you, and usually you don't notice it happening.`),
+      p(`That cuts both ways. Proverbs gives a pointed warning elsewhere: "Do not make friends with a hot-tempered person, do not associate with one easily angered, or you may learn their ways and get yourself ensnared" (22:24–25). *You may learn their ways.* Not decide to, just learn. Slowly, quietly, without ever making a decision.`),
+      p(`None of this is about being a snob or cutting off everyone who's struggling. Jesus was famously called "a friend of tax collectors and sinners" (Luke 7:34), and He loved them without being shaped by them. But He did that from a place of deep rootedness, and He still went off alone to pray. The question isn't "should I spend time with imperfect people?" (everyone is). It's "who is shaping me, and in which direction?"`),
+      { type: "heading", text: "Friction Is the Point" },
+      p(`Here's a verse many of us know without realizing how strange it is:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 27:17",
+        verses: [`As iron sharpens iron, so one person sharpens another.`],
+      },
+      p(`Think about what that image actually involves. Sharpening iron means scraping iron against iron. Sparks fly. There's noise, pressure, friction. Nobody gets sharper by being politely left alone.`),
+      p(`Which is a bit inconvenient, because a lot of us want friendships that never rub. We want agreeable company, people who nod along, validate us, and never push back. But a friend who never challenges you isn't sharpening anything. They're just keeping you comfortable. And comfort, as lovely as it feels, is rarely where growth happens.`),
+      p(`Think of Jonathan and David. David was on the run, hunted by a jealous king, exhausted and afraid. And Scripture says that Jonathan "went to David... and helped him find strength in God" (1 Samuel 23:16). Look at what he did. He didn't just say "everything will be fine." He pointed David back to God. That's iron sharpening iron. A real friend makes you better at trusting God, not just feel better about your circumstances.`),
+      { type: "heading", text: "The Friend Who Tells You the Truth" },
+      p(`Then there's this verse, which might be the most countercultural line in the whole book on friendship:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 27:6",
+        verses: [`Wounds from a friend can be trusted, but an enemy multiplies kisses.`],
+      },
+      p(`Read that again slowly. A friend can wound you, and you can still trust them. And someone who flatters you constantly, who showers you with praise and agreement and never says anything difficult, might actually be doing you harm.`),
+      p(`That's a hard thing to hear, especially in a world that tends to confuse *support* with *constant affirmation.* But think about the people in your life whose opinion has actually changed you. Chances are, at some point, they told you something you didn't want to hear. Maybe they said you were being unfair. Maybe they pointed out a pattern you couldn't see. It stung. But you knew they said it because they cared, and so you trusted it.`),
+      p(`Real love is willing to risk the moment for the sake of the person. A friend who only ever tells you what you want to hear is protecting the friendship. A friend who will occasionally tell you the truth is protecting *you.*`),
+      p(`It works the other direction too. If you want to be that kind of friend, it will cost you a few uncomfortable conversations. Proverbs says it's worth it: "Better is open rebuke than hidden love" (27:5). Say it kindly, say it privately, say it prayerfully. But don't let someone you love walk toward a cliff because you didn't want things to get awkward.`),
+      { type: "heading", text: "The Friend Who Shows Up" },
+      p(`Of course, friendship isn't only about challenge. Proverbs is just as clear about presence.`),
+      p(`"A friend loves at all times, and a brother is born for a time of adversity" (17:17). *At all times.* Not just when it's convenient, not just when the invitation is fun. The real test of a friendship is what happens when life falls apart: the diagnosis, the divorce, the long season of grief. Who's still there on the hard days? Who shows up without being asked?`),
+      p(`There's a story in the Gospels I love for this. Four men carried a paralyzed friend to Jesus, but the house was so crowded they couldn't get him through the door. So they climbed on the roof, tore open the ceiling, and lowered him down in front of everyone (Mark 2:1–12). Scripture says Jesus saw *their* faith. They didn't heal their friend. They couldn't. But they carried him to the One who could.`),
+      p(`That's the kind of friend most of us want. It's also the kind most of us are called to be.`),
+      { type: "heading", text: "If You Feel Alone Right Now" },
+      p(`I'd be remiss not to say something to the reader who finished this post feeling more lonely than inspired. Maybe there aren't five people to think of. Maybe there's one, or none. Maybe you've moved, or grown apart from people, or been burned.`),
+      p(`Friendship is rarely instant. Most of the deepest ones are built slowly, through small consistent things: showing up, asking a second question, following up after a hard week. And you don't need five. You need one or two. If you're not sure where to start, a church, a small group, or a Bible study is often the most natural place to meet people who are walking in the same direction. Be willing to be the one who reaches out first. It's awkward almost every time, and it's almost always worth it.`),
+      p(`And know that you aren't as alone as you feel.`),
+      { type: "heading", text: "The Friend Who Sticks Closer" },
+      p(`Proverbs 18:24 holds a sentence that might be the most beautiful thing the book says about friendship: "One who has unreliable friends soon comes to ruin, but there is a friend who sticks closer than a brother."`),
+      p(`The first half is honest about human friendship. Some friends will let us down, and we will let others down. We're all unreliable sometimes. But the second half points to someone beyond us. A friend who sticks closer than a brother.`),
+      p(`Jesus says it Himself, and He means it literally. "I no longer call you servants... Instead, I have called you friends" (John 15:15). And then, as if to prove it, He adds: "Greater love has no one than this: to lay down one's life for one's friends" (John 15:13). Not just a friend who stays when it's easy. A friend who stayed when it cost Him everything.`),
+      p(`He knows you completely, and He hasn't left. He tells you the truth without crushing you. He carries you when you can't walk. And He is, more than anyone, the one worth becoming like.`),
+      p(`So look again at those five names. And ask who is making you more like Him. Be intentional about leaning toward them. And be that kind of friend yourself.`),
+      {
+        type: "reflection",
+        items: [
+          `Looking at the five people closest to you, who is shaping you most, and in which direction? Do you leave their company more like Christ or less? What might need to change, whether that's spending more time with some people or setting healthier limits with others?`,
+          `Who in your life is willing to tell you the truth, and are you willing to hear it? Is there a "wound from a friend" you've been resisting? On the flip side, is there someone you love who needs an honest, gentle word from you?`,
+          `Who could you show up for this week? Think of someone going through a hard season. What is one practical way you could carry them, the way the four friends carried the paralyzed man to Jesus?`,
+        ],
+      },
+      {
+        type: "prayer",
+        text: `Lord Jesus, thank You for being the friend who sticks closer than a brother. Thank You for the people You've placed in my life, and forgive me for the times I've taken them for granted or let them lead me away from You. Give me wise friends, the courage to be honest with them in love, and the willingness to show up when it's hard. Make me the kind of friend who points others back to You. Amen.`,
+      },
+    ],
+  },
+  {
+    id: 80,
+    title: "Just a Little Longer",
+    author: null,
+    date: "October 11, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "6 min read",
+    excerpt: "Few lives fall apart in a day. Proverbs on the slow drift of just a little longer, and the rest that Jesus gives.",
+    blocks: [
+      p(`Think of the thing that has been sitting on your list the longest.`),
+      p(`Maybe it's a phone call you keep meaning to make. A conversation you know you need to have. A project you've been "about to start" since spring. An apology. A budget. A doctor's appointment. A decision. It's not that you've decided against it. You haven't. You just haven't done it *yet*, and today doesn't feel quite right, so you'll get to it tomorrow. Or next week. After things calm down.`),
+      p(`Nobody wakes up and decides to let their life quietly fall apart. But one of the oldest observations in Proverbs is that this is exactly how it happens, not through a dramatic decision, but through a long series of "just a little longer."`),
+      { type: "heading", text: "The Field Along the Road" },
+      p(`The writer of Proverbs tells a short story about a walk he took one day.`),
+      p(`"I went past the field of a sluggard, past the vineyard of someone who has no sense; thorns had come up everywhere, the ground was covered with weeds, and the stone wall was in ruins" (Proverbs 24:30–31).`),
+      p(`It's a simple picture. There was a field that used to be worth something. Someone had planted it, built a wall around it, and put real effort into it once. And now it's overgrown. The wall has collapsed. The weeds have taken over.`),
+      p(`What I love is the next line: "I applied my heart to what I observed and learned a lesson from what I saw" (24:32). He doesn't just walk past and shake his head. He stops, and he asks how a field gets like this.`),
+      p(`And his answer is almost anticlimactic:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 24:33–34",
+        verses: [`A little sleep, a little slumber, a little folding of the hands to rest — and poverty will come on you like a thief and scarcity like an armed man.`],
+      },
+      p(`That's it. No catastrophe. No single day when everything fell apart. Just *a little* sleep, *a little* slumber, *a little* folding of the hands. Each one tiny. Each one reasonable. Each one easy to justify. And then, one day, the thief shows up, and the field is gone.`),
+      p(`The writer liked this line so much that he used it twice. It appears almost word for word back in chapter 6, as part of a famous rebuke.`),
+      { type: "heading", text: "Learning from an Ant" },
+      p(`"Go to the ant, you sluggard; consider its ways and be wise!" (6:6).`),
+      p(`It's a funny image, being sent to school by an insect. But the lesson is sharp. "It has no commander, no overseer or ruler, yet it stores its provisions in summer and gathers its food at harvest" (6:7–8).`),
+      p(`The ant has no boss standing over her. No deadline, no notification, no one to be accountable to. And she still does the work, because she understands something we often forget: the season for preparing is not the season when you need what you prepared. The ant gathers in summer because winter is coming. Procrastination's whole trick is convincing you that there's plenty of summer left.`),
+      p(`Then Proverbs asks a pair of questions that feel uncomfortably personal: "How long will you lie there? When will you get up from your sleep?" (6:9). It's not a harsh question, really. It's the kind of question you'd want a good friend to ask.`),
+      { type: "heading", text: "Why We Really Drift" },
+      p(`Here's where I want to be careful, because it's easy to read passages like this and walk away feeling like you've been called lazy. And that's not quite the whole picture.`),
+      p(`A lot of procrastination isn't laziness at all. It's fear. Fear that we'll do it badly. Fear of the conversation. Fear that we'll try and fail, which feels worse than never trying. Sometimes it's simply overwhelm, a task so big we don't know where to begin. Proverbs doesn't ignore this. Elsewhere it describes a man who won't leave the house because "there's a lion in the road!" (26:13). The excuse sounds reasonable. The lion may not even be real. But the effect is the same: a life that never leaves the doorway.`),
+      p(`It's also worth saying that Proverbs isn't against rest. Scripture is full of Sabbath, of Jesus withdrawing to quiet places, of sleep as a gift from God. The difference is in what the rest is *for.* Rest that refuels you is a gift. "Just a little longer" that you use to avoid something you know you need to face is something else. You usually know which one you're doing.`),
+      p(`And notice the real danger the passage describes. It isn't that you'll miss a deadline. It's that scarcity will come "like a thief." You won't see it coming. You won't hear it break in. You'll just look up one day and find something was taken that you never noticed leaving.`),
+      { type: "heading", text: "Small Starts, Not Giant Leaps" },
+      p(`If you're sitting with something you've been avoiding, Proverbs' solution isn't a dramatic overhaul. It's the same size as the problem. The slow drift happened one small delay at a time, and it turns around one small start at a time.`),
+      p(`You don't have to fix the whole field today. You just have to pull one weed. Send the one email. Make the one call. Open the document and write one bad paragraph. The ant doesn't build the whole colony in an afternoon. She carries one crumb, and then another. Momentum is built from beginnings, not finishes.`),
+      p(`And be gentle with yourself about it. The goal isn't to shame yourself into action. Shame is a terrible motivator and usually just feeds the avoidance. The goal is to take one step, and let the step make the next one a little easier.`),
+      { type: "heading", text: "The Delay That Matters Most" },
+      p(`But there's one kind of procrastination that I think matters more than all the rest, and the Bible has a lot to say about it.`),
+      p(`We put off many things we know we should do, but some of us put off the biggest one of all: dealing with God. We keep meaning to pray more, to take faith seriously, to actually think about who Jesus is and what He's asking of us. We tell ourselves we'll sort it out when life calms down. After the busy season. After this next thing. We're not saying no. We're just saying *not yet.*`),
+      p(`Proverbs warns, "Do not boast about tomorrow, for you do not know what a day may bring" (27:1). And the New Testament carries the same urgency into matters of the soul. "Encourage one another daily, as long as it is called 'Today,' so that none of you may be hardened by sin's deceitfulness" (Hebrews 3:13). Notice that word, *hardened.* Delay doesn't leave us where we started. Each "later" makes the next "later" easier, until a heart that once felt tender has quietly gone quiet. Paul puts it plainly: "now is the time of God's favor, now is the day of salvation" (2 Corinthians 6:2).`),
+      { type: "heading", text: "Rest That Isn't Earned" },
+      p(`Here's the good news that makes all this bearable. Jesus doesn't call procrastinators to try harder to be good enough. He says, "Come to me, all you who are weary and burdened, and I will give you rest" (Matthew 11:28).`),
+      p(`On the cross, He said, "It is finished" (John 19:30). The work that mattered most, the work of making you right with God, is done. You don't have to earn your way to the table. You don't have to clean up the overgrown field before He'll step into it. You can come as you are, weeds and all, and let Him do what you've been unable to do yourself.`),
+      p(`And once you're resting in that, you find something strange begins to happen. The things you've been avoiding stop feeling like giants. You're no longer working to prove yourself, so you can simply work, one small step at a time, from a place of peace instead of dread.`),
+      p(`So whatever's been sitting on your list the longest, start there. Not because you have to, and not to earn anything, but because you're loved, and because today is the day you actually have.`),
+      p(`The thief only wins when we keep saying "later." You don't have to.`),
+      {
+        type: "reflection",
+        items: [
+          `What has been sitting on your list the longest, and what is it really about? Is it laziness, fear of failing, or simply feeling overwhelmed? What is one small step you could take on it today?`,
+          `Where do you see the "little sleep, little slumber" pattern in your own life? Think of an area (a relationship, a habit, your health, your work) where small delays have quietly added up. What would one small start look like there this week?`,
+          `Is there a "not yet" you've been giving God? What would it look like to answer Him today instead of waiting for life to calm down?`,
+        ],
+      },
+      {
+        type: "prayer",
+        text: `Lord, You know the things I've been putting off, the big ones and the small ones. Forgive me for the delay, and forgive me for the times I've put You off too. Give me the courage to take one small step today, and the peace to know I'm doing it from Your love and not out of fear. Thank You that the work that matters most is already finished. Amen.`,
+      },
+    ],
+  },
+  {
+    id: 79,
+    title: "The Way That Seems Right",
+    author: null,
+    date: "October 11, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "6 min read",
+    excerpt: "Proverbs says it twice: there is a way that seems right but leads to death. Why our own certainty isn't a safe guide, and who is.",
+    blocks: [
+      p(`Here's something odd about the book of Proverbs.`),
+      p(`It is a book made of short, sharp sayings, hundreds of them, each one a different angle on how to live well. Nothing is wasted. There's no filler. And yet, if you read carefully, you'll find one sentence that appears twice, word for word, eleven chapters apart:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 14:12 and 16:25",
+        verses: [`There is a way that appears to be right, but in the end it leads to death.`],
+      },
+      p(`The writer of Proverbs wasn't running out of material. When a book that compact repeats itself exactly, it's worth stopping to ask why. What did he want us to notice so badly that he said it twice?`),
+      p(`I think the answer is hiding in a single word: *appears*.`),
+      { type: "heading", text: "The Most Convincing Voice You'll Ever Hear" },
+      p(`Notice what the verse doesn't say. It doesn't warn about the way that looks wrong, or feels wrong, or comes with a flashing sign. We don't need Proverbs for that. We already know to avoid the obviously bad path.`),
+      p(`The danger it points to is the path that looks *right*. It makes sense. It feels justified. It has reasons, and the reasons are good ones. And the voice recommending it is the most persuasive voice in your life: your own.`),
+      p(`Proverbs comes back to this over and over. "A person may think their own ways are right, but the LORD weighs the heart" (21:2). "Those who trust in themselves are fools" (28:26). Strong words, but the point isn't that you're stupid. It's that your sense of certainty isn't a reliable measure of whether you're correct. Feeling sure and being right are two different things, and from the inside they feel exactly the same.`),
+      p(`Think of the last time you made a decision you later regretted. Chances are, at the time, you had your reasons. You weren't being reckless. You'd talked yourself into it, step by logical step. Maybe you were even praying about it, and the "peace" you felt was really just the relief of getting the answer you wanted.`),
+      p(`Sincerity is not the same as safety. History has plenty of examples, but my favorite is also the most uncomfortable.`),
+      { type: "heading", text: "A Man Who Was Absolutely Certain" },
+      p(`Before he was the apostle Paul, he was Saul of Tarsus, and he was passionate. He'd studied Scripture his whole life. He was zealous for God. And he was fully convinced that the new Jesus movement was a dangerous heresy that needed to be stopped. So he hunted down believers and approved of their deaths.`),
+      p(`Years later, looking back, he says something chilling: "I too was convinced that I ought to do all that was possible to oppose the name of Jesus" (Acts 26:9).`),
+      p(`*Convinced.* Not confused. Not conflicted. Saul wasn't a man struggling with doubt who chose evil anyway. He was a man with total clarity, moving in total sincerity, in exactly the wrong direction. If anyone ever had a way that seemed right, he did. He wasn't lacking zeal. He was lacking sight, and he couldn't see it until the light on the Damascus road knocked him to the ground.`),
+      p(`That should humble all of us. It means that the strength of your conviction can't be the only thing you check. A person can be sure and still be walking toward the wrong thing.`),
+      { type: "heading", text: "So What Do We Do With That?" },
+      p(`If we can't fully trust our own sense of "this feels right," how are we supposed to live? Proverbs doesn't leave us hanging.`),
+      {
+        type: "scripture",
+        reference: "Proverbs 3:5–6",
+        verses: [`Trust in the LORD with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.`],
+      },
+      p(`This verse is so familiar it can slide past without landing, and it's often misread as "don't think" or "turn off your brain." That isn't the point. God gave you a mind, and He expects you to use it. The point is about where your final trust sits. Your understanding is a tool, not a throne. It's useful, but it's limited, and it can be wrong without telling you.`),
+      p(`Notice, too, the posture in the second half: *submit*. Submit to Him in all your ways. That's a hard word in a culture that prizes self-determination. But here it isn't a loss. It's a promise. Do that, and He will make your paths straight. He doesn't promise a path with no hills, only one that actually gets you where you were meant to go.`),
+      p(`Alongside that, Proverbs gives some very practical guardrails for decisions:`),
+      p(`**Hold your plans loosely.** "In their hearts humans plan their course, but the LORD establishes their steps" (16:9). Planning is good. Gripping is the problem. The wisest plans leave room for God to say something different.`),
+      p(`**Welcome counsel, especially the uncomfortable kind.** "The way of fools seems right to them, but the wise listen to advice" (12:15). Notice the echo of that repeated phrase, *seems right*. The mark of a fool here isn't a lack of intelligence. It's the inability to hear a second opinion. If you have a decision you're very sure about, and you're reluctant to run it past anyone you trust, that reluctance is information.`),
+      p(`**Check it against what God has already said.** The final verse of the book of Judges has a haunting line about a time when "everyone did what was right in his own eyes" (21:25). The result wasn't freedom. It was chaos. God's Word isn't there to limit us. It's a fixed point outside ourselves, something our own certainty can't bend.`),
+      { type: "heading", text: "The Answer Isn't a Method" },
+      p(`Here's what I love about the way the Bible lands this. It would be easy to walk away from a passage like this with a checklist: seek counsel, test your motives, read your Bible. All good things. But a checklist can only get you so far, because the real problem is that we can't see our own blind spots, and we need more than a better technique.`),
+      p(`What we need is someone who can see what we can't, and who will actually walk with us.`),
+      p(`Jesus said something that, in this context, hits differently: "I am the way and the truth and the life" (John 14:6). He didn't say, "I'll show you the way." He didn't say, "I'll give you better directions." He said, *I am the way.* The answer to every path that only appears right is a person, not a plan.`),
+      p(`And He modeled it. In the garden, the night before the cross, facing the hardest decision any person has ever faced, He prayed, "Not my will, but yours be done" (Luke 22:42). Perfect wisdom, and yet He still submitted. If the Son of God laid down His own preferences to follow the Father, we can stop pretending our own are reliable enough to trust alone.`),
+      { type: "heading", text: "A Question Worth Asking This Week" },
+      p(`Is there something in your life you feel really sure about right now? A decision, a direction, a grievance, a relationship? Something where you've already made up your mind?`),
+      p(`Don't panic. Being sure isn't a sin. But ask yourself the question Proverbs is pressing on you: *Have I actually handed this to God, or have I just decided and asked Him to agree?* Talk to someone wise. Open the Word. Sit still long enough to hear something you might not like.`),
+      p(`The way that seems right is dangerous precisely because it feels so safe. Don't trust the feeling. Trust the One who knows where every road actually ends.`),
+      {
+        type: "prayer",
+        text: `Lord, You see what I can't. Forgive me for the times I've leaned on my own understanding and called it wisdom. Show me where I'm certain and wrong. Give me the humility to listen, the courage to submit, and the faith to follow You even when my own path seems clearer. Be my way. Amen.`,
+      },
+    ],
+  },
+  {
+    id: 78,
+    title: "Words You Can't Take Back",
+    author: null,
+    date: "October 10, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "6 min read",
+    excerpt: "Words can give life or wound deeply. Proverbs on the tongue, gentle answers, and the grace for the words you can't take back.",
+    blocks: [
+      p(`You know the silence.`),
+      p(`It comes right after you say the thing. The sentence is already out of your mouth, already in the air, already landing on the face of the person you said it to. You watch it hit. And in that half-second, every part of you scrambles to reach out and pull it back, the way you'd grab a glass sliding off a counter.`),
+      p(`But you can't. Words don't work that way. Once they leave, they're gone, and all that's left is the silence and the look on their face.`),
+      p(`Most of us have been on both sides of that moment. We've said the thing, and we've been the one it was said to. And if we're honest, we can still replay a few of those sentences, word for word, years later. The ones that cut us have a way of staying with us longer than almost anything else.`),
+      p(`The book of Proverbs understood this better than we do. It spends an unusual amount of time on speech, and it doesn't treat it as a matter of manners. It treats it as a matter of life and death.`),
+      { type: "heading", text: "More Than Manners" },
+      {
+        type: "scripture",
+        reference: "Proverbs 18:21",
+        verses: [`The tongue has the power of life and death, and those who love it will eat its fruit.`],
+      },
+      p(`That's not a poetic exaggeration. Think about what words have actually done in your life. A teacher who said you were capable, and you believed her for decades. A parent's offhand comment you've never quite shaken. The sentence that ended a friendship. The sentence that started a marriage. We tend to treat words as light, quick, disposable things. Proverbs says they're closer to seeds. Whatever you plant, you eat from.`),
+      p(`Look at how the book describes the two extremes. On one side: "The words of the reckless pierce like swords" (12:18). Notice the word *reckless*. It doesn't say malicious. Most of the damage we do with our mouths isn't planned. It's the joke that went too far, the thing said in the heat of the moment, the careless comment we didn't think twice about. We didn't mean it that deeply. They felt it that deeply.`),
+      p(`And on the other side, in the very same verse: "but the tongue of the wise brings healing." Healing. As though a sentence could do the work of medicine. And apparently, it can. "Gracious words are a honeycomb, sweet to the soul and healing to the bones" (16:24). You've probably felt this too: the encouragement that got you through a week, the apology that finally lifted something heavy, the "I'm proud of you" you didn't know you needed.`),
+      p(`The same small muscle can do both. That's the sobering part.`),
+      { type: "heading", text: "The Smallest Advantage in an Argument" },
+      p(`If you want to see Proverbs at its most practical, try this one:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 15:1",
+        verses: [`A gentle answer turns away wrath, but a harsh word stirs up anger.`],
+      },
+      p(`There's a quiet kind of wisdom in that. Anger feeds on anger. If someone raises their voice at you, every instinct says to raise yours back, and for a moment it even feels justified. But a gentle answer refuses to feed the fire. It doesn't mean you're weak or that you agree. It means you've decided that winning the moment isn't worth losing the person.`),
+      p(`Anyone who has tried this knows how hard it is. It takes more strength to soften your voice when you're angry than to sharpen it. But watch what happens when you do it. Often the whole temperature of the room changes. You didn't win an argument. You may have saved a relationship.`),
+      { type: "heading", text: "The Wisdom of Saying Less" },
+      p(`Here is one of the most countercultural lines in the whole book:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 10:19",
+        verses: [`Sin is not ended by multiplying words, but the prudent hold their tongues.`],
+      },
+      p(`We live in a world that rewards the quick response. The fast take, the instant reply, the comment typed before the thought is finished. We've built entire platforms around the idea that having an opinion immediately is a virtue. Proverbs suggests that the more we talk, the more chances we give ourselves to say something we'll wish we hadn't.`),
+      p(`That doesn't mean silence is always right. There are times to speak up, and Proverbs says that too. But it does mean there's a skill most of us never learned: the pause. The breath before the reply. The question, *Is this true? Is this kind? Does this need to be said by me, and does it need to be said right now?*`),
+      p(`If you take only one thing from this post, let it be that pause. It's small. It's almost embarrassingly simple. And it will prevent more regret than almost anything else you could practice.`),
+      { type: "heading", text: "But What About the Words You Already Said?" },
+      p(`This is where I think a lot of us get stuck. It's all well and good to talk about future words. But what about the ones already out there? The things you said to your child in a moment of frustration. The text you sent that you can't unsend. The thing you said about someone behind their back. The cruel line you delivered because you knew exactly where it would hurt.`),
+      p(`Proverbs can't fix that. It can only show you the problem, and maybe that's why it leaves you with an ache. We recognize ourselves in the "reckless" and we know we've done damage we can't undo.`),
+      p(`This is where the gospel steps in. The Bible has a startling way of describing who Jesus is: "In the beginning was the Word... and the Word became flesh and dwelt among us" (John 1:1, 14). God's own Word, His final and fullest message to us, arrived in a person.`),
+      p(`And look at what that Word did with His own mouth. When He was insulted, Scripture says, "he did not retaliate" (1 Peter 2:23). He was mocked, lied about, spat on, and told to prove Himself, and He answered with a restraint that none of us could manage on our best day. The One whose words created the universe held His tongue when it would have been completely justified to speak.`),
+      p(`And then He did something more. He carried the weight of every word we've regretted, every cruel thing, every careless thing, every lie, to the cross. The writer of Hebrews says His blood "speaks a better word" than any accusation against us (Hebrews 12:24). The words we can't take back have been answered by a Word that can't be taken away.`),
+      p(`That doesn't erase the need to make things right. If you owe someone an apology, go and give it. But you don't go carrying the full weight of the thing yourself. "If we confess our sins, he is faithful and just to forgive us" (1 John 1:9). Even the sentences you wish you could unsay.`),
+      { type: "heading", text: "Starting Over, One Sentence at a Time" },
+      p(`So here's what I'd leave you with. Before your next conversation, before your next reply, before the next time you feel the heat rising in your chest, try the pause. Let the Spirit of the One who spoke life into you shape what comes out of your mouth next. Ask for words that heal instead of pierce. Let your answers be gentle, even when the other person's aren't. And when you fail, as you will, come back to the Word who didn't fail on your behalf.`),
+      p(`You can't take back the words you've said. But you can choose the next ones. And you're not choosing them alone.`),
+      {
+        type: "prayer",
+        text: `Lord Jesus, You know every word I've said that I wish I could take back, and You know the ones still sitting in my heart that I haven't said. Forgive me. Heal what I've broken. Teach me to pause before I speak, to answer gently, and to use my words to build up instead of tear down. Let what comes out of my mouth reflect the grace You've shown me. Amen.`,
+      },
+    ],
+  },
+  {
+    id: 77,
+    title: "Passing Along God's Wisdom",
+    author: null,
+    date: "October 10, 2026",
+    category: "Devotional",
+    series: "proverbs",
+    readTime: "3 min read",
+    excerpt: "Proverbs 22:6 reminds us that our faithfulness shapes others. Why passing along God's wisdom takes time, care, and trust in Him.",
+    blocks: [
+      p(`What if the choices you make today could shape someone else's life for years to come?`),
+      p(`Proverbs 22:6 says, "Direct your children onto the right path, and when they are older, they will not leave it."`),
+      p(`It reminds us that our actions don't just affect us—they also act as an example, guiding and directing others, whether we realize it or not. And which direction we guide others… matters.`),
+      p(`When you trust Him, God can use your consistent acts of faithfulness over time to plant His wisdom deep in a person's heart.`),
+      p(`The book of Proverbs is a powerful collection of wisdom meant to teach people how to live well and thrive according to God's values. Throughout Proverbs, parents are encouraged to pass that wisdom on to their children. It's one of the clearest examples of the Bible telling us exactly what Scripture is for. The goal is not simply to pass on rules to follow, but to train others to see clearly so they can recognize the difference between the path of wisdom and the path of foolishness.`),
+      p(`Proverbs 22:6 isn't saying that parents can control the choices their children make. Instead, it points to the lasting influence of faithful, consistent guidance.`),
+      p(`This kind of influence takes time and genuine care. It happens through repeated conversations, everyday choices, Scripture, prayer, correction, encouragement, and setting an example. If you're not sure where to start, consider inviting a child, friend, or family member to begin a simple practice with you: reading one chapter of the book of Proverbs each day. It is full of God's powerful wisdom for a thriving life.`),
+      p(`Whether you're guiding a child, mentoring someone younger, or simply trying to live faithfully before others, remember this: you may not see the results of your faithfulness today. That doesn't mean you aren't making an impact. Keep going. Trust God with what you cannot see. Trust that when you plant God's wisdom, over time, it will take root and grow.`),
+      {
+        type: "prayer",
+        text: `God, today I lift up the future generation. Empower and encourage them to live and love like You. Prepare me to be a godly example for the young people in my own life. Move in this generation's hearts like never before. Give them a hunger for Your truth. In Jesus' name, Amen.`,
+      },
+    ],
+  },
   // Ids 76 and 75 share a date (Oct 9). The sort is stable, so the entry
   // earlier in this array shows as newer: "The Good Life" (pasted later) is
   // listed first so it displays above "Keep Practicing".
@@ -3010,15 +3372,15 @@ const POSTS = [
 
 const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19, 28, 57],
-  "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70],
-  "Sin & Repentance": [8, 17, 47, 69, 70, 73],
+  "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70, 78, 80],
+  "Sin & Repentance": [8, 17, 47, 69, 70, 73, 78],
   "Grief & Comfort": [6, 21, 22, 30],
-  "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74, 76],
+  "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74, 76, 77],
   "Prayer": [2, 18, 73],
   "Worship": [4, 38, 43],
-  "Friendship": [20, 34, 49, 67],
-  "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64, 75],
-  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66],
+  "Friendship": [20, 34, 49, 67, 81],
+  "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64, 75, 79, 80],
+  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66, 82],
   "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75],
   "God's Love & Faithfulness": [32, 57, 58, 65, 72],
   "Heaven & Eternity": [27, 44, 62],
@@ -3029,6 +3391,31 @@ const POST_TAGS = {
 // meta description in scripts/prerender.js, so a search engine sees the
 // same honest description a visitor does, not a generic "N posts about X."
 // Keep these in sync if a topic name ever changes.
+// SERIES -- a named, open-ended set of posts with its own page (/series/<slug>)
+// and a spot on the homepage. A post joins a series with `series: "<id>"` in
+// its object (independent of its category, so a post can be, say, a
+// Devotional AND part of the Proverbs Series). The Proverbs Series also picks
+// up any post whose category is "Wisdom from Proverbs". Keep each entry on one
+// line with no double quotes inside the strings: scripts/prerender.js reads
+// this block with a regex to build the page's meta description and sitemap.
+const SERIES = {
+  proverbs: { slug: "proverbs", name: "The Proverbs Series", tag: "Wisdom for everyday life from the book of Proverbs", description: "Short, practical posts on the book of Proverbs: how we speak, who we walk with, what we guard, and the everyday choices that shape a life. Each one points back to Jesus, the wisdom of God. New posts are added to this series as they're written.", verse: "Above all else, guard your heart, for everything you do flows from it.", verseRef: "Proverbs 4:23", introId: 77 },
+};
+
+function isInSeries(post, seriesId) {
+  return post.series === seriesId || (seriesId === "proverbs" && post.category === "Wisdom from Proverbs");
+}
+
+// A series reads in the order it was published (oldest first), unlike the
+// rest of the site, which is newest first.
+function postsInSeries(seriesId) {
+  return POSTS.filter((p) => isInSeries(p, seriesId)).sort((a, b) => new Date(a.date) - new Date(b.date) || a.id - b.id);
+}
+
+function seriesIdForPost(post) {
+  return Object.keys(SERIES).find((id) => isInSeries(post, id)) || null;
+}
+
 const TOPIC_DESCRIPTIONS = {
   "The Gospel Explained": "What the gospel actually is, and why it changes everything — the clearest place to start if any of this is new to you.",
   "Grace & Assurance": "Why God's acceptance comes first, not last, and how to actually rest in that instead of always wondering if you've done enough.",
@@ -3123,7 +3510,7 @@ function getPostBySlug(slug) {
   return POSTS.find((post) => slugify(post.title) === slug) || null;
 }
 
-const CATEGORIES = ["All", "Foundations", "Teaching", "Devotional"];
+const CATEGORIES = ["All", "Foundations", "Teaching", "Devotional", "Wisdom from Proverbs"];
 
 
 
@@ -3709,6 +4096,24 @@ function estimateReadTime(post) {
   return `${Math.max(1, Math.round(words / 200))} min read`;
 }
 
+// Light inline formatting for paragraph text: **bold** and *italic*. Only `p`
+// blocks use it (a few Proverbs Series posts lean on italics and bold
+// run-in lead-ins). Everything that reads post text as plain text (search,
+// listen-to-post) goes through stripInline() so no stray asterisks leak.
+function stripInline(text) {
+  return typeof text === "string" ? text.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1") : text;
+}
+
+function renderInline(text) {
+  if (typeof text !== "string" || !text.includes("*")) return text;
+  const parts = text.split(/(\*\*.+?\*\*|\*.+?\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) return <strong key={i} className="font-semibold text-[#1C1F26] dark:text-[#F2F1EC]">{part.slice(2, -2)}</strong>;
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) return <em key={i}>{part.slice(1, -1)}</em>;
+    return part;
+  });
+}
+
 // Splits a post into one text segment per block (title first) for the
 // browser's built-in text-to-speech (see useListenToPost). Read as separate
 // queued utterances rather than one giant string — each block gets a clean
@@ -3717,7 +4122,7 @@ function postToSpeechSegments(post) {
   const segments = [`${post.title}.`];
   post.blocks.forEach((block) => {
     if (["p", "heading", "quote", "heart", "prayer", "encourage", "closing"].includes(block.type)) {
-      segments.push(block.text);
+      segments.push(stripInline(block.text));
     } else if (block.type === "scripture") {
       segments.push(block.verses.join(". "));
     } else if (block.type === "reflection" || block.type === "share" || block.type === "list") {
@@ -3938,7 +4343,7 @@ function getSearchIndex(post) {
 
   const bodyText = post.blocks
     .map((block) => {
-      if (block.text) return block.text;
+      if (block.text) return stripInline(block.text);
       if (block.verses) return block.verses.join(" ");
       if (block.items) return block.items.join(" ");
       return "";
@@ -4664,10 +5069,10 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
                   >
                     {block.text.charAt(0)}
                   </span>
-                  {block.text.slice(1)}
+                  {renderInline(block.text.slice(1))}
                 </>
               ) : (
-                block.text
+                renderInline(block.text)
               )}
             </p>
           );
@@ -6699,7 +7104,7 @@ function NewsletterBand() {
   );
 }
 
-function HomeView({ setView, openPost, openPlanPost, openReadingPlan, openTopic, openScriptureIndex, openJournal }) {
+function HomeView({ setView, openPost, openPlanPost, openReadingPlan, openTopic, openScriptureIndex, openJournal, openSeries }) {
   const newest = useMemo(() => [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date)), []);
   const hero = newest[0];
   const latestLead = newest[1];
@@ -6760,9 +7165,223 @@ function HomeView({ setView, openPost, openPlanPost, openReadingPlan, openTopic,
       <TopicBento openTopic={openTopic} />
       <BeliefBand setView={setView} />
       <ToolsPair openScriptureIndex={openScriptureIndex} openJournal={openJournal} />
+      <SeriesBand seriesId="proverbs" openSeries={openSeries} openPost={openPost} />
       <FromArchiveCard openPost={openPost} excludeIds={shownIds} />
       <NewsletterBand />
     </>
+  );
+}
+
+// THE SERIES PAGE (/series/<slug>) -- hero, the posts in reading order as a
+// numbered path, and a closing card that says the series is still growing.
+function SeriesView({ seriesId, openPost, goBack }) {
+  const series = SERIES[seriesId];
+  const posts = useMemo(() => postsInSeries(seriesId), [seriesId]);
+  const [readIds] = useState(() => new Set(getReadHistory().map((e) => e.id)));
+  if (!series || posts.length === 0) return null;
+
+  const readCount = posts.filter((p) => readIds.has(p.id)).length;
+  const next = posts.find((p) => !readIds.has(p.id));
+  const ctaPost = next || posts[0];
+  const hasIntro = series.introId && posts[0].id === series.introId;
+  const ctaLabel = readCount === 0 ? (hasIntro ? "Start with the intro" : "Start with the first post") : next ? `Continue: ${next.title}` : "Read it again from the start";
+  const sinceLabel = new Date(posts[0].date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+  return (
+    <div className="pt-14 sm:pt-16 pb-24 sm:pb-28">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8">
+        <button
+          onClick={() => goBack("blog")}
+          className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-8 hover:gap-3 transition-all duration-300"
+        >
+          <ArrowLeft size={15} strokeWidth={2} />
+          Back
+        </button>
+
+        <header className="relative overflow-hidden rounded-sm bg-[#1C1F26] dark:bg-[#0B0D10] text-[#F8F7F3] px-6 sm:px-12 py-10 sm:py-14">
+          <svg
+            aria-hidden="true"
+            className="absolute -right-16 -top-16 w-[260px] h-[260px] sm:w-[380px] sm:h-[380px] text-[#D9B77C] opacity-[0.10] pointer-events-none"
+            viewBox="0 0 400 400"
+          >
+            <circle cx="200" cy="200" r="170" fill="none" stroke="currentColor" strokeWidth="5" />
+            <circle cx="200" cy="200" r="140" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M200 120v160M140 175h120" stroke="currentColor" strokeWidth="18" fill="none" />
+          </svg>
+          <div className="relative">
+            <div className="flex items-center gap-2.5 text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D9B77C] mb-4">
+              <span className="w-7 h-px bg-[#B08D57]" />A series
+            </div>
+            <h1 className="text-[38px] sm:text-6xl leading-[1.08] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+              {series.name}
+            </h1>
+            <p className="text-[#D9B77C] text-[17px] sm:text-xl mb-5 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {series.tag}
+            </p>
+            <p className="text-[#C9CCD3] text-base sm:text-[17px] leading-[1.75] max-w-[60ch] mb-7">{series.description}</p>
+
+            {series.verse && (
+              <blockquote className="border-l-2 border-[#B08D57] pl-4 sm:pl-5 mb-8 max-w-[52ch]">
+                <p className="text-[#F8F7F3] text-[18px] sm:text-[21px] leading-[1.5]" style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}>
+                  {series.verse}
+                </p>
+                <footer className="text-[12px] uppercase tracking-[0.15em] text-[#D9B77C] mt-2">{series.verseRef}</footer>
+              </blockquote>
+            )}
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+              <button
+                onClick={() => openPost(ctaPost)}
+                className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-3 text-sm font-semibold rounded-full hover:bg-white transition-colors duration-200 max-w-full"
+              >
+                <span className="truncate">{ctaLabel}</span>
+                <ArrowRight size={14} strokeWidth={2} className="shrink-0" />
+              </button>
+              <p className="text-[13px] text-[#B7BBC4]">
+                {posts.length} {posts.length === 1 ? "post" : "posts"} so far · started {sinceLabel}
+                {readCount > 0 && (
+                  <>
+                    {" "}
+                    · you've read <span className="text-[#F8F7F3] font-semibold">{readCount} of {posts.length}</span>
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <div className="mt-12 sm:mt-14 mb-6">
+          <div className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#8A6F42] dark:text-[#D9B77C] mb-2">In reading order</div>
+          <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] max-w-[60ch]">
+            Read them in the order they were published, or jump to any one. Each stands on its own.
+          </p>
+        </div>
+
+        <ol className="list-none p-0 m-0">
+          {posts.map((p, i) => {
+            const isRead = readIds.has(p.id);
+            const isNew = Date.now() - new Date(p.date).getTime() <= 7 * 864e5 && Date.now() >= new Date(p.date).getTime();
+            return (
+              <li key={p.id} className="relative pl-14 sm:pl-[72px] pb-5 sm:pb-6">
+                <span
+                  className={`absolute left-0 top-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center text-lg sm:text-xl ${
+                    isRead
+                      ? "bg-[#4A5D4E] border-[#4A5D4E] text-white dark:bg-[#6E9077] dark:border-[#6E9077] dark:text-[#14161B]"
+                      : "bg-white dark:bg-[#1E2128] border-[#B08D57]/60 text-[#8A6F42] dark:text-[#D9B77C]"
+                  }`}
+                  style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+                  aria-hidden="true"
+                >
+                  {isRead ? <Check size={18} strokeWidth={3} /> : i + 1}
+                </span>
+                <span aria-hidden="true" className="absolute left-5 sm:left-6 top-12 sm:top-14 bottom-0 w-px bg-[#B08D57]/40" />
+                <button
+                  onClick={() => openPost(p)}
+                  className="group w-full text-left bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 hover:border-[#B08D57]/60 rounded-sm p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:shadow-[0_12px_30px_-18px_rgba(28,31,38,0.3)]"
+                >
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2 text-[11px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A]">
+                    <span className="font-semibold text-[#5B5F6B] dark:text-[#A9ADB6]">
+                      {i === 0 && hasIntro ? "The intro" : `No. ${i + 1}`}
+                    </span>
+                    <span>{estimateReadTime(p)}</span>
+                    <span>{p.date}</span>
+                    <BlogStatePill isRead={isRead} isNew={isNew} />
+                  </div>
+                  <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-[22px] sm:text-2xl leading-[1.25] mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                    {p.title}
+                  </h2>
+                  <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] leading-relaxed mb-3">{p.excerpt}</p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] group-hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
+                    {isRead ? "Read again" : "Read this one"}
+                    <ArrowRight size={14} strokeWidth={2} />
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+          <li className="relative pl-14 sm:pl-[72px]">
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-dashed border-[#B08D57]/70 flex items-center justify-center text-[#8A6F42] dark:text-[#D9B77C] text-xl"
+            >
+              +
+            </span>
+            <div className="border border-dashed border-[#B08D57]/60 rounded-sm p-5 sm:p-6">
+              <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-xl leading-snug mb-1.5" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                More to come
+              </h2>
+              <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] leading-relaxed">
+                This series is still growing. New posts on Proverbs land here as soon as they're published, so check back, or subscribe below to get them by email.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+// The homepage's slot for a series: description and pull verse on the left,
+// the latest posts in the series on the right.
+function SeriesBand({ seriesId, openSeries, openPost }) {
+  const series = SERIES[seriesId];
+  const posts = useMemo(() => postsInSeries(seriesId), [seriesId]);
+  if (!series || posts.length === 0) return null;
+  const latest = [...posts].reverse().slice(0, 3);
+  const numberOf = (p) => posts.findIndex((x) => x.id === p.id) + 1;
+
+  return (
+    <section className="border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 bg-[#B08D57]/[0.09] dark:bg-[#B08D57]/[0.06]">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 py-16 sm:py-20 grid md:grid-cols-[1.05fr_1fr] gap-10 md:gap-14 items-start">
+        <div>
+          <HomeLabel>A series</HomeLabel>
+          <HomeHeading>{series.name}</HomeHeading>
+          <p className={`${HOME_MUTED} text-base sm:text-[17px] leading-[1.7] mb-6 max-w-[52ch]`}>{series.description}</p>
+          {series.verse && (
+            <blockquote className="border-l-2 border-[#B08D57] pl-4 mb-7 max-w-[46ch]">
+              <p className="text-[#1C1F26] dark:text-[#F2F1EC] text-[18px] sm:text-xl leading-[1.5] italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                {series.verse}
+              </p>
+              <footer className={`text-[11.5px] uppercase tracking-[0.15em] mt-2 ${HOME_GOLD_TEXT}`}>{series.verseRef}</footer>
+            </blockquote>
+          )}
+          <button
+            onClick={() => openSeries(seriesId)}
+            className="inline-flex items-center gap-2 bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] px-5 py-3 text-sm font-semibold rounded-full hover:bg-[#4A5D4E] dark:hover:bg-white transition-colors duration-200"
+          >
+            Explore the series
+            <ArrowRight size={14} strokeWidth={2} />
+          </button>
+          <span className={`ml-4 text-[13px] ${HOME_FAINT}`}>
+            {posts.length} {posts.length === 1 ? "post" : "posts"} · still growing
+          </span>
+        </div>
+        <div>
+          <div className={`text-[11px] uppercase tracking-[0.2em] font-semibold mb-3 ${HOME_GOLD_TEXT}`}>Latest in the series</div>
+          <div className="grid gap-3">
+            {latest.map((p) => (
+              <button key={p.id} onClick={() => openPost(p)} className={`${HOME_CARD} ${HOME_LIFT} text-left p-4 sm:p-5 flex items-start gap-4`}>
+                <span className="shrink-0 w-9 h-9 rounded-full border border-[#B08D57]/60 flex items-center justify-center text-[15px] text-[#8A6F42] dark:text-[#D9B77C]" style={HOME_SERIF} aria-hidden="true">
+                  {numberOf(p)}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-[17px] sm:text-[18px] leading-snug mb-1" style={HOME_SERIF}>
+                    {p.title}
+                  </span>
+                  <span className={`block text-[12.5px] ${HOME_FAINT}`}>
+                    {estimateReadTime(p)} · {p.date}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <button onClick={() => openSeries(seriesId)} className={`mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${HOME_GOLD_TEXT} hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none`}>
+            See all {posts.length}, in order
+            <ArrowRight size={14} strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -6779,6 +7398,7 @@ const BLOG_CAT_DOT = {
   Devotional: "bg-[#4A5D4E] dark:bg-[#6E9077]",
   Teaching: "bg-[#B08D57] dark:bg-[#C9A56B]",
   Foundations: "bg-[#1C1F26] dark:bg-[#F2F1EC]",
+  "Wisdom from Proverbs": "bg-[#9A5B45] dark:bg-[#D08A70]",
 };
 const BLOG_LABEL = "text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8A8D96] dark:text-[#7C808A] flex-none";
 const BLOG_SCROLL_ROW =
@@ -7645,7 +8265,7 @@ function ShareBar({ post }) {
   );
 }
 
-function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal }) {
+function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal, openSeries }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
@@ -7692,6 +8312,13 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
   const isLastPlanDay = isPlanPost && planIndex === READING_PLAN_POST_IDS.length - 1;
   const nextPlanPost = isPlanPost && !isLastPlanDay ? POSTS.find((p) => p.id === READING_PLAN_POST_IDS[planIndex + 1]) : null;
 
+  // Series membership (e.g. The Proverbs Series): a banner up top and a
+  // "next in the series" card at the end. Shown however the post was reached.
+  const seriesId = seriesIdForPost(post);
+  const seriesPosts = seriesId ? postsInSeries(seriesId) : [];
+  const seriesIndex = seriesPosts.findIndex((p) => p.id === post.id);
+  const nextInSeries = seriesIndex !== -1 ? seriesPosts[seriesIndex + 1] || null : null;
+
   const sortedByDate = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
   const currentIndex = sortedByDate.findIndex((p) => p.id === post.id);
   const newerPost = currentIndex > 0 ? sortedByDate[currentIndex - 1] : null;
@@ -7716,6 +8343,17 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
             </span>
             <button onClick={openReadingPlan} className="text-[13px] font-medium text-[#B08D57] hover:underline whitespace-nowrap shrink-0">
               View Plan
+            </button>
+          </div>
+        )}
+
+        {seriesId && seriesIndex !== -1 && (
+          <div className="no-print flex items-center justify-between gap-3 mb-6 bg-[#9A5B45]/8 dark:bg-[#D08A70]/10 border border-[#9A5B45]/25 dark:border-[#D08A70]/30 rounded-sm px-4 py-3">
+            <span className="text-[13px] font-medium text-[#7C4636] dark:text-[#E3A98F]">
+              {SERIES[seriesId].name} · No. {seriesIndex + 1} of {seriesPosts.length}
+            </span>
+            <button onClick={() => openSeries(seriesId)} className="text-[13px] font-medium text-[#9A5B45] dark:text-[#E3A98F] hover:underline whitespace-nowrap shrink-0">
+              View series
             </button>
           </div>
         )}
@@ -7782,6 +8420,35 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
         </div>
 
         <ShareBar post={post} />
+
+        {seriesId && seriesIndex !== -1 && (
+          <div className="no-print border border-[#9A5B45]/30 dark:border-[#D08A70]/35 bg-[#9A5B45]/[0.05] dark:bg-[#D08A70]/[0.07] rounded-sm px-6 py-6 mt-8">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9A5B45] dark:text-[#E3A98F] font-semibold mb-2">{SERIES[seriesId].name}</p>
+            {nextInSeries ? (
+              <>
+                <p className="text-[#2E323B] dark:text-[#D9D9D9] text-[15px] mb-4">Next in the series, No. {seriesIndex + 2} of {seriesPosts.length}:</p>
+                <button
+                  onClick={() => openPost(nextInSeries)}
+                  className="inline-flex items-center gap-2 bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-[#4A5D4E] dark:hover:bg-white transition-colors duration-200 text-left"
+                >
+                  {nextInSeries.title}
+                  <ArrowRight size={14} strokeWidth={2} className="shrink-0" />
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-[#2E323B] dark:text-[#D9D9D9] text-[15px] mb-4">That's the latest in the series so far. More are on the way.</p>
+                <button
+                  onClick={() => openSeries(seriesId)}
+                  className="inline-flex items-center gap-2 border border-[#1C1F26]/20 dark:border-[#F2F1EC]/25 text-[#1C1F26] dark:text-[#F2F1EC] px-5 py-2.5 text-sm font-medium rounded-full hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-200"
+                >
+                  See the whole series
+                  <ArrowRight size={14} strokeWidth={2} />
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {isPlanPost && (
           <div className="no-print bg-[#1C1F26] dark:bg-[#14161B] border border-[#F2F1EC]/10 rounded-sm px-6 py-6 mt-8">
@@ -7930,6 +8597,7 @@ export default function GospelLensApp() {
   const navDepthRef = useRef(0);
   const [activeAuthor, setActiveAuthor] = useState(null);
   const [activeTopic, setActiveTopic] = useState(null);
+  const [activeSeries, setActiveSeries] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   // The inline script in index.html already applied the right class to
   // <html> before this ever mounts (saved localStorage choice, else the
@@ -8302,6 +8970,15 @@ export default function GospelLensApp() {
           return;
         }
       }
+      if (path.startsWith("/series/")) {
+        const seriesSlug = path.replace("/series/", "");
+        const seriesId = Object.keys(SERIES).find((id) => SERIES[id].slug === seriesSlug);
+        if (seriesId) {
+          setActiveSeries(seriesId);
+          setView("series");
+          return;
+        }
+      }
       if (path === "/liked") {
         setView("liked");
         return;
@@ -8348,6 +9025,8 @@ export default function GospelLensApp() {
       document.title = "The Person Behind the Lens — The Gospel Lens";
     } else if (view === "collection" && activeAuthor) {
       document.title = `${activeAuthor} — The Gospel Lens`;
+    } else if (view === "series" && activeSeries) {
+      document.title = `${SERIES[activeSeries].name} — The Gospel Lens`;
     } else if (view === "topic" && activeTopic) {
       document.title = `${activeTopic} — The Gospel Lens`;
     } else if (view === "saved") {
@@ -8365,7 +9044,7 @@ export default function GospelLensApp() {
     } else {
       document.title = "The Gospel Lens";
     }
-  }, [view, activePost, activeAuthor, activeTopic]);
+  }, [view, activePost, activeAuthor, activeTopic, activeSeries]);
 
   const openPost = (post) => {
     setActivePost(post);
@@ -8401,6 +9080,13 @@ export default function GospelLensApp() {
     setActiveTopic(topicName);
     setView("topic");
     pushHistoryState(`/topics/${slugify(topicName)}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const openSeries = (seriesId) => {
+    setActiveSeries(seriesId);
+    setView("series");
+    pushHistoryState(`/series/${SERIES[seriesId].slug}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -8519,6 +9205,7 @@ export default function GospelLensApp() {
             openTopic={openTopic}
             openScriptureIndex={openScriptureIndex}
             openJournal={openJournal}
+            openSeries={openSeries}
           />
         )}
         {view === "blog" && (
@@ -8526,6 +9213,7 @@ export default function GospelLensApp() {
         )}
         {view === "about" && <AboutView />}
         {view === "collection" && <CollectionView authorName={activeAuthor} openPost={openPost} setView={changeView} goBack={goBack} />}
+        {view === "series" && activeSeries && <SeriesView seriesId={activeSeries} openPost={openPost} goBack={goBack} />}
         {view === "topic" && <TopicView topicName={activeTopic} openPost={openPost} setView={changeView} openTopic={openTopic} goBack={goBack} />}
         {view === "post" && (
           <SinglePostView
@@ -8542,6 +9230,7 @@ export default function GospelLensApp() {
             onSaveAnswer={handleSaveAnswer}
             signedIn={Boolean(user)}
             openJournal={openJournal}
+            openSeries={openSeries}
           />
         )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
