@@ -2937,7 +2937,243 @@ const POSTS = [
       },
     ],
   },
-  // The Proverbs Series (ids 77-82, tagged `series: "proverbs"`). Each pair
+  // Proverbs Series, second batch (ids 83-85). Ids 84 and 83 share a date
+  // (Oct 13); the sort is stable, so the entry earlier in this array shows as
+  // newer: "Enough" (pasted second) is listed first so it displays above
+  // "Haughty Eyes".
+  {
+    id: 85,
+    title: "The Honey and the Gall",
+    author: null,
+    date: "October 14, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "8 min read",
+    excerpt: "Nobody falls in one step. Proverbs 7 watches a slow-motion fall, and shows the way out: run, and receive the grace that meets us after.",
+    blocks: [
+      p(`Nobody falls in one step.`),
+      p(`If you've ever watched someone's life come apart through a moral failure, an affair, a hidden habit, a double life, you may have wondered how it could possibly have happened. They were a good person. They loved God. They would never have done *that.*`),
+      p(`Proverbs 7 is the Bible's answer, and it reads like a slow-motion replay. The writer stands at his window, looks down at the street, and watches a young man walk toward the worst decision of his life. And what's startling is how quiet it all is. There's no moment where the young man decides to wreck everything. There's just a series of small steps, each one almost reasonable, until the last one isn't small at all.`),
+      p(`Let's watch it together. Slowly.`),
+      { type: "heading", text: "Step One: He Chose the Route" },
+      p(`"He was going down the street near her corner, walking along in the direction of her house" (Proverbs 7:8).`),
+      p(`Read that sentence again and notice what it doesn't say. It doesn't say he planned anything. It doesn't say he intended to sin. He's just *walking.* But look at where. Near her corner. In the direction of her house.`),
+      p(`He didn't have to take that street. He had other options. And whatever his reasons were, the Bible doesn't ask what he was thinking. It just notes where his feet were pointed. The fall began long before the fall, at the moment he chose a route that would make it easy.`),
+      p(`This is where most of us deceive ourselves. We think temptation is something that ambushes us. More often, we walk toward it, a little at a time, and call it coincidence. The late-night scroll we "just happened" to start. The coworker we've been confiding in a bit more than we should. The message we replied to when we could have let it go. The app we installed "just to look." Nobody stumbles into it. The path is usually chosen first.`),
+      { type: "heading", text: "Step Two: It Was Getting Dark" },
+      p(`"...at twilight, as the day was fading, as the dark of night set in" (7:9).`),
+      p(`Of course it was dark. Temptation loves the dark. Not just the hour, but the conditions: when we're tired, when we're lonely, when no one is checking in, when the day has worn our defenses down. The same person who would never be tempted at noon, surrounded by friends, may be defenseless at midnight, alone, scrolling, worn out.`),
+      p(`It's worth asking yourself: when are you most vulnerable? Not the dramatic moments, but the ordinary ones. Tired. Bored. Stressed. Feeling unseen. Whatever the hour is, that's where the guard needs to be posted.`),
+      { type: "heading", text: "Step Three: A Voice That Sounded Right" },
+      p(`Then she appears, and notice how she talks. She doesn't sound sinister. She sounds *warm.*`),
+      p(`She starts with religious language: "Today I fulfilled my vows" (7:14). In other words, *I'm a spiritual person too.* Then comes flattery: "I came out to meet you; I looked for you and have found you!" (7:15). You're special. You were wanted. Then reassurance: "My husband is not at home; he has gone on a long journey" (7:19). It's safe. No one will know.`),
+      p(`Look at what the voice offers. Connection. Being noticed. A sense of significance. Safety. Almost all of it is something he might genuinely have wanted. Sin rarely offers something we don't want. It offers something we do, in a way that will cost far more than it's worth.`),
+      p(`And that final promise, *no one will know*, is the oldest lie there is. As the previous chapter says, "your ways are in full view of the LORD, and he examines all your paths" (5:21). The only person this secrecy protects is the one doing the hiding.`),
+      { type: "heading", text: "Step Four: All at Once" },
+      p(`"All at once he followed her like an ox going to the slaughter, like a deer stepping into a noose till an arrow pierces its liver, like a bird darting into a snare, little knowing it will cost him his life" (7:22–23).`),
+      p(`*All at once.* That's the phrase to catch. It feels sudden, but only because we weren't watching the steps. The falling looks like a moment. It was actually a road.`),
+      p(`And look at the last phrase: *little knowing.* He didn't know what it would cost. Nobody does. The animal doesn't see the trap. It sees the grain. The cost is always hidden at the moment of choosing and obvious afterward.`),
+      { type: "heading", text: "The Honey and the Gall" },
+      p(`Earlier, in chapter 5, the father puts it another way:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 5:3–4",
+        verses: [`For the lips of the adulterous woman drip honey, and her speech is smoother than oil; but in the end she is bitter as gall, sharp as a double-edged sword.`],
+      },
+      p(`*Honey* now. *Gall* later. That's the whole deal. The early part is real, sweetness, attention, a rush. Proverbs doesn't pretend otherwise. But the end of the story is bitterness: broken trust, shattered marriages, wounded children, lost ministries, years of regret. Verses 11–12 imagine a man at the end of his life groaning, "How I hated discipline! How my heart spurned correction!"`),
+      p(`And chapter 6 asks a question no one can answer in the way they'd like: "Can a man scoop fire into his lap without his clothes being burned? Can a man walk on hot coals without his feet being scorched?" (6:27–28). The problem isn't that we don't know the warning. It's that we think we'll be the exception. We believe we're stronger, smarter, more careful. We aren't.`),
+      p(`A quick word: Proverbs was written to a young man, and the tempter in these passages is a woman. But the pattern doesn't belong to any one gender, any one kind of sin, or any one stage of life. It's true of the married woman who finds herself confiding in a coworker, the man who discovers pornography, the teenager lured by someone online, the husband and wife pulling quietly apart. Emotional affairs, secret habits, and porn aren't lesser versions of this story. They're early chapters of it.`),
+      { type: "heading", text: "God Isn't Against Joy" },
+      p(`Before going further, I want to push back on a misreading. It would be easy to hear all of this and conclude that the Bible just wants to take pleasure away.`),
+      p(`It's the opposite. Right in the middle of these warnings, the father says: "Drink water from your own cistern, running water from your own well... May your fountain be blessed, and may you rejoice in the wife of your youth... may you ever be intoxicated with her love" (5:15–19). God isn't prudish. He designed desire, and He designed it for a purpose: deep, faithful, committed love. The fence around it isn't there to deprive us. It's there to protect something precious.`),
+      p(`Counterfeits only ever offer a sliver of what the real thing is meant to give.`),
+      { type: "heading", text: "Run" },
+      p(`So what do you do?`),
+      p(`Proverbs' answer is blunt and simple: "Keep to a path far from her, do not go near the door of her house" (5:8). Not *carefully approach.* Not *test your limits.* Stay far.`),
+      p(`The New Testament says it in even fewer words: "Flee from sexual immorality" (1 Corinthians 6:18). The word is *flee.* Run. Not "resist" or "debate." Run.`),
+      p(`The best example is Joseph, who was repeatedly pressured by his master's wife in Egypt. When she finally grabbed his cloak, he didn't stay to argue or negotiate. He left it in her hand and ran out of the house (Genesis 39:12). Not because he was weak, but because he was wise. He knew some battles are won by leaving.`),
+      p(`In practice, fleeing might mean:`),
+      {
+        type: "list",
+        items: [
+          `**Changing the route.** Deleting the app, blocking the number, ending the lunches, setting up filters, putting your phone out of the bedroom.`,
+          `**Not being alone in the dark.** Telling someone, a friend, a spouse, a pastor, someone who can ask you directly how you're doing.`,
+          `**Dealing with what's underneath.** Loneliness, resentment, feeling unseen. Temptation rarely starts in desire. It starts in a need that's going unmet.`,
+          `**Filling the gap with something real.** Real friendships, real marriage, real worship. Sin loses its pull when the soul is nourished elsewhere.`,
+        ],
+      },
+      { type: "heading", text: "If You've Already Fallen" },
+      p(`If you've read this with a sinking feeling because you aren't at the beginning of the story but somewhere in the middle or after the end, I want you to hear something clearly.`),
+      p(`There's a story in John 8. A woman is dragged into the street, caught in adultery, and thrown at Jesus' feet by men holding stones. Everyone knows what the law says. And Jesus, who was without sin, the only one with the right to throw a stone, says, "Neither do I condemn you." Then He adds, "Go now and leave your life of sin" (John 8:11).`),
+      p(`Look at the order. Grace first. *Then* the call to change. He doesn't wait for her to clean herself up before showing mercy. And He doesn't use mercy as an excuse to leave her where she was. Both are true.`),
+      p(`"Therefore, there is now no condemnation for those who are in Christ Jesus" (Romans 8:1). Your past isn't too far gone. The cross covers this too. Confess it, to God and to someone you trust ("confess your sins to each other and pray for each other so that you may be healed," James 5:16), turn from it, and let Him begin the repair. It may take time. Consequences may remain. But shame isn't His plan for you. Restoration is.`),
+      p(`And if you're carrying shame from something done *to* you, that isn't yours to carry. It was never your fault.`),
+      p(`The honey is always sweet at first. The gall always comes later. But there's a table where the sweetness doesn't turn bitter, and Jesus is already setting it.`),
+      {
+        type: "reflection",
+        items: [
+          `What "route" are you walking right now? Is there a habit, a friendship, an app, or a pattern that is quietly pointing you toward somewhere you know you shouldn't go? What would it look like to change direction today, before the last step?`,
+          `When are you most vulnerable? Think about the time of day, emotional state, or circumstance where your defenses are lowest. What one safeguard or person could you put in place around that moment?`,
+          `Is there something you've been hiding that needs to be brought into the light? What would it take to tell God, and one trusted person, the truth this week?`,
+        ],
+      },
+      {
+        type: "prayer",
+        text: `Lord, You see every road I walk and every step I take. Forgive me for the times I've walked toward what I knew was wrong. Give me wisdom to see the steps before the fall, and courage to run when I should. Where I've already fallen, meet me with the mercy You showed the woman in the street, and begin to heal what's broken. Teach me to find in You what I've looked for everywhere else. Amen.`,
+      },
+    ],
+  },
+  {
+    id: 84,
+    title: "Enough",
+    author: null,
+    date: "October 13, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "7 min read",
+    excerpt: "Agur prayed for just enough: keep me honest and give me my daily bread. Proverbs on contentment, and the One who became poor for us.",
+    blocks: [
+      p(`Buried near the end of Proverbs is a man almost nobody talks about.`),
+      p(`His name is Agur. We don't know where he lived, what he did, or how old he was. The Bible gives us a single chapter of his sayings, and tucked inside it is one short prayer. It might be the most unusual prayer in Scripture, because of what he leaves out.`),
+      {
+        type: "scripture",
+        reference: "Proverbs 30:7–8",
+        verses: [`Two things I ask of you, LORD; do not refuse me before I die: Keep falsehood and lies far from me; give me neither poverty nor riches, but give me only my daily bread.`],
+      },
+      p(`Read that again slowly. He is asking God for two things before he dies, and he can ask for *anything.* And what he asks for is: keep me honest, and give me just enough.`),
+      p(`Not more. Not a bigger house, a better position, a safer cushion. *Just enough.*`),
+      p(`When was the last time you prayed that?`),
+      { type: "heading", text: "The Prayer Nobody Prays" },
+      p(`Most of us, if we're honest, pray in the other direction. We pray for provision, which is fine, and Jesus told us to. But somewhere underneath, we often mean *more.* More income. More security. More room in the budget, more margin, a little bit more than we have now, because then we'd finally relax.`),
+      p(`The trouble is that "more" has no finish line. Reach it, and a new one appears. Agur seems to know this. A few verses later, he describes a pair of leech's daughters, hungry creatures whose only word is "Give! Give!" (30:15). And then he lists four things that never get filled up, four things that never say, "Enough!" (30:15–16). The grave. The barren womb. Thirsty land. Fire. And somewhere nearby, in another proverb, the human eye: "Death and Destruction are never satisfied, and neither are human eyes" (27:20).`),
+      p(`That's how Proverbs describes our wanting. Like fire, it doesn't stop when it's fed. It only grows.`),
+      p(`So the first thing Agur's prayer does is quietly cut against our whole way of living. He's saying: *I've decided there's such a thing as enough, and I'd like to ask God to help me find it.*`),
+      { type: "heading", text: "Why Not Riches?" },
+      p(`Here's where Agur surprises us even more. It's easy to see why he doesn't want poverty. But why would a man of faith ask *not* to be rich? Isn't wealth a blessing?`),
+      p(`He explains himself, and the reasoning is remarkably honest:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 30:9",
+        verses: [`Otherwise, I may have too much and disown you and say, 'Who is the LORD?' Or I may become poor and steal, and so dishonor the name of my God.`],
+      },
+      p(`He fears both extremes, and for the same reason. Not because money is evil, but because of what each side does to a person's heart.`),
+      p(`Having too much, he says, might make me forget God. When everything is provided for, when the accounts are full and the future feels safe, it's easy to stop praying. We stop needing Him, and without noticing, we start saying with our lives, *Who is the LORD?* Few people decide to leave God. Plenty simply drift when they stop needing Him.`),
+      p(`And having too little might make me desperate enough to compromise. Poverty isn't a moral failing, and Agur doesn't treat it as one. He's being realistic about how pressure bends people.`),
+      p(`What's striking is that he knows himself. He doesn't assume he'd handle wealth well. Most of us pray for more without ever asking whether we could carry it. Agur asked the harder question first.`),
+      { type: "heading", text: "Money Has Wings" },
+      p(`Elsewhere, Proverbs puts it plainly. "Do not wear yourself out to get rich; do not trust your own cleverness. Cast but a glance at riches, and they are gone, for they surely sprout wings and fly off to the sky like an eagle" (23:4–5).`),
+      p(`That image sticks with me. You glance at it, and it's gone. Anyone who has watched savings vanish to a medical bill, a layoff, or a market drop knows this isn't theoretical. The things we most trust to hold us up are the most fragile things we own. "Those who trust in their riches will fall," the book says, "but the righteous will thrive like a green leaf" (11:28).`),
+      p(`And it isn't only about money leaving. It's about what the chase takes from us while it's here. "Better a little with the fear of the LORD than great wealth with turmoil" (15:16). "Better a dry crust with peace and quiet than a house full of feasting, with strife" (17:1). Proverbs keeps returning to the same strange math: a small amount with peace beats a large amount with anxiety. Anyone who has lived on both sides of that equation knows it's true.`),
+      { type: "heading", text: "A Lesson from the Desert" },
+      p(`None of this was new for God's people. They had learned it the hard way, in the wilderness, with a daily lesson in bread.`),
+      p(`After the exodus, with no food and nowhere to buy any, God sent manna from heaven, a fresh supply every morning. There was one rule: gather what you need for today. Some people, understandably nervous, tried to store extra overnight. By morning it had spoiled and was full of worms (Exodus 16:19–20).`),
+      p(`God wasn't being harsh. He was teaching them to trust Him daily, to wake up depending on Him. Not hoarding, not anxious, just receiving. It's exactly what Agur means by "my daily bread," and it's why Jesus taught His disciples to pray, "Give us today our daily bread" (Matthew 6:11). Not a year's supply. Today's.`),
+      p(`That can feel uncomfortable, especially if you're someone who likes to plan ahead. And planning is good. Proverbs praises the ant that stores up in summer. But there's a line between wise planning and a heart that can't rest unless it has a buffer of its own making. The first is stewardship. The second is a quiet way of saying *I'm not sure God will be there.*`),
+      { type: "heading", text: `If "Enough" Feels Out of Reach` },
+      p(`I want to say something to the reader who finished that last section feeling the opposite of content. Maybe you're counting every dollar. Maybe "enough" isn't a spiritual question for you right now, it's a rent question, a grocery question, a how-do-I-get-through-this-month question.`),
+      p(`If that's you, hear this clearly: this passage isn't a lecture. Agur doesn't treat need as shameful, and neither does the God he's praying to. Jesus said, "Your heavenly Father knows that you need them" (Matthew 6:32). He sees the specifics. And Agur's prayer is, at its root, a prayer of dependence, one you can pray right where you are. *Give me today's bread.* Not as a technique, but as an honest request to a Father who has promised to hear it.`),
+      { type: "heading", text: "The One Who Gave Up Everything" },
+      p(`This is where the whole thing turns from advice into good news.`),
+      p(`We're tempted to chase "more" because we believe, deep down, that something is missing. That if we just had enough money, enough safety, enough success, we'd finally feel secure. But the gospel tells a different story about who we are. We aren't people who lack. We're people who have been given everything.`),
+      p(`"For you know the grace of our Lord Jesus Christ, that though he was rich, yet for your sake he became poor, so that you through his poverty might become rich" (2 Corinthians 8:9). The One who owned everything gave it all up, not to teach us a lesson about budgeting, but to make us heirs of the very thing money could never buy. Peace with God. A place at His table. A future that can't spoil.`),
+      p(`And that's why Hebrews can say something that would sound ridiculous anywhere else: "Keep your lives free from the love of money and be content with what you have, because God has said, 'Never will I leave you; never will I forsake you'" (13:5). Notice the reason. Not "be content because you have enough stuff." Be content because *you have Him.* Contentment isn't a feeling we manufacture. It's what grows when we realize the One who gave Himself for us isn't going anywhere.`),
+      p(`So, what would "enough" look like for you? Not a number in a bank account, but a place where you could honestly say, *God has provided. I can rest.* Maybe it's closer than you think. Maybe it already is.`),
+      {
+        type: "reflection",
+        items: [
+          `If you're honest, what is your "just a little more"? More income, more security, a bigger house, a better title. What do you believe it would finally give you, and has anything you've reached so far actually delivered that?`,
+          `Which side of Agur's fear is more true of you right now: forgetting God because you feel provided for, or being tempted to compromise because you feel the pressure? What does that tell you about where you most need to depend on Him?`,
+          `What would it look like to practice "daily bread" this week? Is there an area where you've been trying to control the future, and what would it mean to hand today's need to God and trust Him with tomorrow?`,
+        ],
+      },
+      {
+        type: "prayer",
+        text: `Lord, I confess how often I pray for more without asking whether I could handle it. Keep falsehood far from me. Teach me what enough looks like, and give me my daily bread. Free me from the quiet fear that makes me hold too tightly, and from the pride that forgets You when things are good. Thank You that in Christ I already have what matters most. Help me rest in that, and be generous with what You've given. Amen.`,
+      },
+    ],
+  },
+  {
+    id: 83,
+    title: "Haughty Eyes",
+    author: null,
+    date: "October 13, 2026",
+    category: "Wisdom from Proverbs",
+    series: "proverbs",
+    readTime: "7 min read",
+    excerpt: "Pride tops the list of things the LORD hates, and it's the sin we're least likely to see in ourselves. Proverbs on pride, and the humility of Jesus.",
+    blocks: [
+      p(`Let me guess how you're reading this.`),
+      p(`You're probably nodding along, thinking of someone you know who really needs to hear it. A coworker who can't admit a mistake. A relative who always has to be right. A public figure whose ego is out of control. Pride is such an obvious problem in *them.*`),
+      p(`And that's exactly the problem. Pride is the only sin that gets worse the more certain you are that you don't have it.`),
+      p(`Keep that in mind as we read what Proverbs says, because the writer isn't gentle about this one.`),
+      { type: "heading", text: "First on the List" },
+      {
+        type: "scripture",
+        reference: "Proverbs 6:16–17",
+        verses: [`There are six things the LORD hates, seven that are detestable to him: haughty eyes, a lying tongue, hands that shed innocent blood...`],
+      },
+      p(`Read the list again and pay attention to the order. Before lying. Before violence. Before the schemes of a wicked heart, the lead item is *haughty eyes.* A look. A posture. A way of seeing yourself above other people.`),
+      p(`Why would God put that at the front? Most of us would rank murder well above an attitude. But Proverbs seems to see pride as the root the other sins grow from. Think about it. Lying often starts with protecting an image. Violence often starts with wounded ego. Cruelty, gossip, and refusing to forgive all trace back to one quiet sentence: *I matter more than you.*`),
+      p(`Pride is the original sin in more ways than one. It was the first temptation: "you will be like God" (Genesis 3:5). And it still is.`),
+      { type: "heading", text: "Where Pride Hides" },
+      p(`The reason pride is so dangerous is that it rarely looks like pride from the inside. It disguises itself.`),
+      p(`It looks like **confidence.** It looks like *being right.* It looks like **high standards,** like **strength,** like **never needing help.** It can even look like **humility,** the person who constantly talks themselves down so you'll reassure them, which is still entirely about themselves.`),
+      p(`So here are a few symptoms, and you can check them against your own life.`),
+      {
+        type: "list",
+        items: [
+          `**You can't say "I was wrong."** Not "I'm sorry you feel that way." Not "mistakes were made." Just: *I was wrong.* If that sentence sticks in your throat, pay attention.`,
+          `**You can't be corrected.** When someone points out a flaw, your first reaction is defense, not curiosity. You have an explanation ready before they've finished the sentence.`,
+          `**You keep score.** You know exactly who owes you an apology, who didn't thank you, and how much more you've given than they have.`,
+          `**You quietly believe you'd handle it better.** Their parenting, their marriage, their job, their ministry. You'd never say it out loud, but the thought is always there.`,
+          `**You can't ask for help.** Needing someone feels like losing.`,
+          `**You look down.** At people who've made different choices, who aren't as disciplined, as informed, as spiritual as you.`,
+        ],
+      },
+      p(`If you found yourself in two or three of those, you're in good company. I found myself in most of them.`),
+      { type: "heading", text: `"More Hope for a Fool"` },
+      p(`Now we get to the sentence that I think is one of the harshest in the whole book:`),
+      {
+        type: "scripture",
+        reference: "Proverbs 26:12",
+        verses: [`Do you see a person wise in their own eyes? There is more hope for a fool than for them.`],
+      },
+      p(`Stop and absorb that. In Proverbs, the *fool* is about as low as it gets. He's the one who ignores wisdom, repeats his mistakes, and ruins his own life. And yet the book says there is more hope for him than for the person who thinks they already have it figured out.`),
+      p(`Why? Because a fool can still be taught. If he ever wakes up and realizes he doesn't know what he's doing, the door is open. But the person who's convinced they're already wise has nothing left to learn. They've closed the one door that leads out. You can't help someone who doesn't think they need it.`),
+      p(`It's worth noticing who Jesus reserved His sharpest words for. Not the prostitutes or tax collectors. The people who were *sure* they were righteous.`),
+      { type: "heading", text: "The Prayer That Sounded Perfect" },
+      p(`He told a story about this. Two men went up to the temple to pray (Luke 18:9–14). One was a Pharisee, a deeply religious man, respected and disciplined. The other was a tax collector, widely despised.`),
+      p(`The Pharisee stood and prayed: "God, I thank you that I am not like other people — robbers, evildoers, adulterers — or even like this tax collector. I fast twice a week and give a tenth of all I get."`),
+      p(`Read it carefully. It sounds like a prayer. It begins with thanks. It's full of good things: he fasts, he tithes, he stays away from obvious sin. And yet Jesus says it never made it past the ceiling. Because the whole prayer was a performance, a comparison, a way of standing taller than the man next to him. Pride dressed up as gratitude.`),
+      p(`Meanwhile, the tax collector wouldn't even lift his eyes. He beat his chest and said just seven words: "God, have mercy on me, a sinner."`),
+      p(`And Jesus says *that* man went home right with God. Not the one with the resume. The one with empty hands.`),
+      { type: "heading", text: "What Pride Costs" },
+      p(`Proverbs doesn't leave this abstract. "Pride goes before destruction, a haughty spirit before a fall" (16:18). "Pride brings a person low, but the lowly in spirit gain honor" (29:23). And elsewhere: "Where there is strife, there is pride" (13:10). Look at the last time a relationship exploded. Chances are, somewhere in the middle of it, two people each refused to be the first to say sorry.`),
+      p(`The Bible's history is full of proud people who were brought low. King Nebuchadnezzar stood on his palace roof and boasted, "Is not this the great Babylon I have built... by my mighty power and for the glory of my majesty?" (Daniel 4:30). Within the hour, he lost his mind and lived like an animal for years. When he finally recovered, the first thing he did was lift his eyes to heaven and praise God, and confess that "those who walk in pride he is able to humble" (4:37).`),
+      p(`God isn't being petty. He's being merciful. Pride is a lie about who we are, and left alone it leads somewhere terrible. Sometimes the kindest thing He can do is to take away what we've been leaning on.`),
+      p(`And listen to what the other half of the promise says: "He mocks proud mockers but shows favor to the humble and oppressed" (3:34). The New Testament repeats it twice (James 4:6, 1 Peter 5:5): "God opposes the proud but shows favor to the humble."`),
+      p(`Think about that. *God opposes the proud.* Not just disapproves. Opposes. Whoever you've been trying to impress, whatever you've been trying to prove, you don't want to be on the wrong side of that.`),
+      { type: "heading", text: "The One Who Had Every Right" },
+      p(`If humility were just about thinking less of yourself, it would be miserable. It isn't. It's seeing yourself accurately, as someone deeply loved and deeply in need, and then forgetting yourself long enough to love others.`),
+      p(`And the clearest picture of it is Jesus. Paul describes it in one of the most breathtaking passages in the Bible. Jesus, "being in very nature God, did not consider equality with God something to be used to his own advantage; rather, he made himself nothing... he humbled himself by becoming obedient to death — even death on a cross!" (Philippians 2:6–8).`),
+      p(`Think about who has the most right to be proud in all of history. The One who made the universe. The One who deserved worship, who could have demanded it. And He washed His disciples' feet. He was slapped, mocked, and spat on, and He didn't defend Himself. Next to Him, every one of our reasons for pride starts to look small.`),
+      p(`Here's the good news. You don't have to defend your image anymore. You don't have to be right all the time, or the best at everything, or impressive. The tax collector's seven words are enough. *God, have mercy on me, a sinner.* The One who humbled Himself for you is ready to lift you up, because He loves you.`),
+      p(`So look at your own eyes today. Where have they been looking down? Where have you been defending, comparing, keeping score? And what would it look like to lower them, just a little, and let God be God?`),
+      {
+        type: "reflection",
+        items: [
+          `Which of the symptoms felt most uncomfortably familiar? Can't apologize, can't be corrected, keeping score, looking down on others, or refusing help. What is one specific situation where pride might be quietly running things right now?`,
+          `When was the last time you said "I was wrong" and meant it? Is there someone you owe an apology to, someone you've been waiting for to go first? What would it look like to be the one who goes first?`,
+          `Are you more like the Pharisee or the tax collector in how you come to God? Do you come with a list of what you've done, or with empty hands? What would it look like to pray those seven words honestly today?`,
+        ],
+      },
+      {
+        type: "prayer",
+        text: `Lord, I'm sorry for the ways I've exalted myself and looked down on others. Search me and show me where pride is hiding, in my defensiveness, my comparisons, my need to be right. Give me the humility of Jesus, who made Himself nothing for my sake. Teach me to receive correction, to say sorry first, and to come to You with empty hands. God, have mercy on me, a sinner. Amen.`,
+      },
+    ],
+  },
+  // The Proverbs Series (ids 77-85, tagged `series: "proverbs"`). Each pair
   // below shares a date, and the sort is stable, so the entry EARLIER in
   // this array shows as newer: ids are listed newest-first (82 down to 77)
   // so the later-pasted post of each pair displays above the earlier one.
@@ -3372,17 +3608,17 @@ const POSTS = [
 
 const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19, 28, 57],
-  "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70, 78, 80],
-  "Sin & Repentance": [8, 17, 47, 69, 70, 73, 78],
+  "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70, 78, 80, 85],
+  "Sin & Repentance": [8, 17, 47, 69, 70, 73, 78, 83, 85],
   "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74, 76, 77],
   "Prayer": [2, 18, 73],
   "Worship": [4, 38, 43],
   "Friendship": [20, 34, 49, 67, 81],
   "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64, 75, 79, 80],
-  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66, 82],
-  "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75],
-  "God's Love & Faithfulness": [32, 57, 58, 65, 72],
+  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66, 82, 83],
+  "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75, 84],
+  "God's Love & Faithfulness": [32, 57, 58, 65, 72, 84],
   "Heaven & Eternity": [27, 44, 62],
 };
 
@@ -4126,7 +4362,7 @@ function postToSpeechSegments(post) {
     } else if (block.type === "scripture") {
       segments.push(block.verses.join(". "));
     } else if (block.type === "reflection" || block.type === "share" || block.type === "list") {
-      segments.push(block.items.join(". "));
+      segments.push(block.items.map(stripInline).join(". "));
     }
   });
   return segments;
@@ -4345,7 +4581,7 @@ function getSearchIndex(post) {
     .map((block) => {
       if (block.text) return stripInline(block.text);
       if (block.verses) return block.verses.join(" ");
-      if (block.items) return block.items.join(" ");
+      if (block.items) return block.items.map(stripInline).join(" ");
       return "";
     })
     .join(" ");
@@ -5096,7 +5332,7 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
               {block.items.map((item, ii) => (
                 <li key={ii} className="flex gap-3 text-[18px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9]">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#B08D57] mt-3 shrink-0" />
-                  {item}
+                  <span>{renderInline(item)}</span>
                 </li>
               ))}
             </ul>

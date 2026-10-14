@@ -62,7 +62,7 @@ function renderBlock(block) {
 
     case "list":
       return `<ul style="margin:0 0 18px; padding-left:22px;">${block.items
-        .map((i) => `<li style="font-size:16px; line-height:1.6; color:${COLOR.body}; margin-bottom:8px; font-family:Georgia,'Times New Roman',serif;">${escapeHtml(i)}</li>`)
+        .map((i) => `<li style="font-size:16px; line-height:1.6; color:${COLOR.body}; margin-bottom:8px; font-family:Georgia,'Times New Roman',serif;">${inlineHtml(i)}</li>`)
         .join("")}</ul>`;
 
     case "quote":
