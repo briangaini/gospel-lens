@@ -61,7 +61,8 @@ function loadPosts(src) {
     if (!idMatch || !title || !excerpt || !date || !category) {
       throw new Error(`Failed to extract post fields near: ${chunk.slice(0, 60)}...`);
     }
-    return { id: Number(idMatch[1]), title, excerpt, date, category, author, slug: slugify(title) };
+    const seriesMatch = chunk.match(/series:\s*"([^"]+)"/);
+    return { id: Number(idMatch[1]), title, excerpt, date, category, author, series: seriesMatch ? seriesMatch[1] : null, slug: slugify(title) };
   });
 }
 
@@ -153,11 +154,27 @@ function truncateAtWord(str, max) {
   return `${cut.slice(0, lastSpace > 0 ? lastSpace : max)}…`;
 }
 
-function withMeta(template, { title, description, url, ogType = "website", jsonLd = null, imageUrl = null }) {
+// Google cuts a meta description off around 155-160 characters. Clip long ones
+// at a sentence end (or, failing that, a word) so what shows in search results
+// is a clean thought, not a chopped one. The full excerpt still shows on the
+// site itself; only the description in the page head is clipped.
+function clipDescription(text, max = 158) {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const sentenceEnd = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "), cut.lastIndexOf("! "));
+  if (sentenceEnd > 90) return cut.slice(0, sentenceEnd + 1);
+  const space = cut.lastIndexOf(" ");
+  return cut.slice(0, space > 90 ? space : max).replace(/[,;:\s]+$/, "") + "\u2026";
+}
+
+function withMeta(template, { title, description: rawDescription, url, ogType = "website", jsonLd = null, imageUrl = null }) {
+  const description = clipDescription(rawDescription);
   const fullTitle = `${title} — The Gospel Lens`;
   const safeTitle = escapeHtml(fullTitle);
   const safeDescription = escapeHtml(description);
   let html = template
+    .replace("</head>", `  <link rel="canonical" href="${url}" />\n  <meta property="og:site_name" content="The Gospel Lens" />\n  </head>`)
     .replace(/<title>[^<]*<\/title>/, `<title>${safeTitle}</title>`)
     .replace(
       /<meta name="description" content="[^"]*" \/>/,
@@ -260,20 +277,30 @@ function writeHtml(relativeSlug, html) {
 }
 
 function buildSitemap(posts, authors, topics, seriesList = []) {
-  const today = new Date().toISOString().slice(0, 10);
+  // lastmod is the date of the newest post a page shows (a post's own date for
+  // a post page), not the build day: Google learns to ignore lastmod when it
+  // is the same "today" on every URL. Pages with no post-driven date (About)
+  // leave it out.
+  const iso = (d) => new Date(d).toISOString().slice(0, 10);
+  const newest = (list) => (list.length ? iso(list.reduce((a, b) => (new Date(a.date) > new Date(b.date) ? a : b)).date) : null);
+  const allNewest = newest(posts);
+  const byId = new Map(posts.map((p) => [p.id, p]));
   const urls = [
-    { loc: `${SITE_URL}/`, priority: "1.0" },
-    { loc: `${SITE_URL}/blog`, priority: "0.8" },
-    { loc: `${SITE_URL}/about`, priority: "0.5" },
-    { loc: `${SITE_URL}/verses`, priority: "0.6" },
-    { loc: `${SITE_URL}/rss.xml`, priority: "0.3" },
-    ...authors.map((a) => ({ loc: `${SITE_URL}/collection/${a.slug}`, priority: "0.5" })),
-    ...topics.map((t) => ({ loc: `${SITE_URL}/topics/${t.slug}`, priority: "0.5" })),
-    ...seriesList.map((s) => ({ loc: `${SITE_URL}/series/${s.slug}`, priority: "0.7" })),
-    ...posts.map((p) => ({ loc: `${SITE_URL}/${p.slug}`, priority: "0.6" })),
+    { loc: `${SITE_URL}/`, priority: "1.0", lastmod: allNewest },
+    { loc: `${SITE_URL}/blog`, priority: "0.8", lastmod: allNewest },
+    { loc: `${SITE_URL}/about`, priority: "0.5", lastmod: null },
+    { loc: `${SITE_URL}/verses`, priority: "0.6", lastmod: allNewest },
+    ...authors.map((a) => ({ loc: `${SITE_URL}/collection/${a.slug}`, priority: "0.5", lastmod: newest(posts.filter((p) => p.author === a.name)) })),
+    ...topics.map((t) => ({ loc: `${SITE_URL}/topics/${t.slug}`, priority: "0.5", lastmod: newest(t.ids.map((id) => byId.get(id)).filter(Boolean)) })),
+    ...seriesList.map((s) => ({
+      loc: `${SITE_URL}/series/${s.slug}`,
+      priority: "0.7",
+      lastmod: newest(posts.filter((p) => p.series === s.id || (s.id === "proverbs" && p.category === "Wisdom from Proverbs"))),
+    })),
+    ...posts.map((p) => ({ loc: `${SITE_URL}/${p.slug}`, priority: "0.6", lastmod: iso(p.date) })),
   ];
   const body = urls
-    .map((u) => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${u.priority}</priority>\n  </url>`)
+    .map((u) => `  <url>\n    <loc>${u.loc}</loc>\n${u.lastmod ? `    <lastmod>${u.lastmod}</lastmod>\n` : ""}    <priority>${u.priority}</priority>\n  </url>`)
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
@@ -596,7 +623,7 @@ async function main() {
   });
   writeFileSync(
     path.join(distDir, "index.html"),
-    template.replace("</head>", `  <script type="application/ld+json">${homeJsonLd}</script>\n  </head>`)
+    template.replace("</head>", `  <link rel="canonical" href="${SITE_URL}/" />\n  <meta property="og:site_name" content="The Gospel Lens" />\n  <script type="application/ld+json">${homeJsonLd}</script>\n  </head>`)
   );
 
   writeFileSync(path.join(distDir, "404.html"), build404Page());

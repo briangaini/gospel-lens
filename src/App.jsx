@@ -6403,7 +6403,7 @@ function ReadingPlanView({ openPlanPost }) {
             than most letters, so scaling it up compounds into a "bold dark
             blob" rather than a same-size match. Settled on a smaller bump
             (1.05em) at the lighter 600 weight instead -- also a real, loaded
-            weight for this font (see the @import a few lines below), not a
+            weight for this font (loaded in index.html), not a
             synthetic/unloaded one a browser might render inconsistently --
             which reads as blending with the rest of the heading rather than
             standing out, verified by rendering it directly in the actual
@@ -9392,7 +9392,6 @@ export default function GospelLensApp() {
   return (
     <div className="min-h-screen bg-[#F8F7F3] dark:bg-[#14161B] flex flex-col transition-colors duration-300">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
         * { font-family: 'Inter', sans-serif; }
 
         @media print {
