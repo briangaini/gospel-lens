@@ -3857,7 +3857,13 @@ const READING_PLAN_POST_IDS = [1, 9, 12, 19];
 // ---------------------------------------------------------------------------
 
 const READ_HISTORY_KEY = "gospel-lens-read-history";
-const READ_HISTORY_MAX = 100;
+// Raised from 100 on 2026-10-14. The cap exists only to stop localStorage and
+// the synced cloud doc growing forever, but with posts being added every day
+// 100 was about to start silently forgetting older reads (the Blogs page's
+// Read/Unread filters and "You've read N of M" all count from this list). 1000
+// entries is roughly 30KB, tiny for both localStorage and a Firestore doc, and
+// covers years of posts at the current pace.
+const READ_HISTORY_MAX = 1000;
 
 // Each entry is { id, readAt } -- a real timestamp per post, not just an id.
 // Added 2026-09-11 when read history started syncing to the cloud: merging
