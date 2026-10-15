@@ -30,6 +30,9 @@ import {
   NotebookPen,
   Shuffle,
   LayoutGrid,
+  Headphones,
+  ChevronDown,
+  Type,
 } from "lucide-react";
 
 // Firebase (Google sign-in + Saved/Liked sync, see src/firebase.js) is
@@ -4350,8 +4353,8 @@ function renderInline(text) {
   if (typeof text !== "string" || !text.includes("*")) return text;
   const parts = text.split(/(\*\*.+?\*\*|\*.+?\*)/g);
   return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) return <strong key={i} className="font-semibold text-[#1C1F26] dark:text-[#F2F1EC]">{part.slice(2, -2)}</strong>;
-    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) return <em key={i}>{part.slice(1, -1)}</em>;
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) return <strong key={i} className="font-semibold text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "inherit" }}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) return <em key={i} style={{ fontFamily: "inherit" }}>{part.slice(1, -1)}</em>;
     return part;
   });
 }
@@ -5292,17 +5295,25 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
   );
 }
 
-function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal }) {
+function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal }) {
   let paragraphIndex = -1;
+  let headingIndex = -1;
+  // Reading preferences (text size, sans/serif) only affect the running text;
+  // the callout boxes keep their own fixed sizes.
+  // (The site's global `* { font-family: Inter }` rule means a font set on this
+  // wrapper would not inherit, so the serif choice is applied to the running
+  // text itself: paragraphs, list items and their bold/italic.)
+  const bodyStyle = prefs ? { fontSize: prefs.size } : undefined;
+  const textFont = prefs && prefs.font === "serif" ? { fontFamily: "'Source Serif 4', Georgia, serif" } : undefined;
 
   return (
-    <div className="space-y-6 text-[#2E323B] dark:text-[#D9D9D9] text-[18px] leading-[1.9]">
+    <div className="space-y-6 text-[#2E323B] dark:text-[#D9D9D9] text-[18px] leading-[1.85]" style={bodyStyle}>
       {blocks.map((block, i) => {
         if (block.type === "p") {
           paragraphIndex += 1;
           const isFirst = paragraphIndex === 0;
           return (
-            <p key={i}>
+            <p key={i} style={textFont}>
               {isFirst ? (
                 <>
                   <span
@@ -5321,11 +5332,13 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
         }
 
         if (block.type === "heading") {
+          headingIndex += 1;
           return (
             <h2
               key={i}
-              className="text-2xl text-[#1C1F26] dark:text-[#F2F1EC] pt-4"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
+              id={`post-h${headingIndex}`}
+              className="relative text-[26px] sm:text-[30px] leading-[1.2] text-[#1C1F26] dark:text-[#F2F1EC] pt-6 mt-10 scroll-mt-[160px] before:content-[''] before:absolute before:top-0 before:left-0 before:w-11 before:h-0.5 before:bg-[#B08D57]"
+              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: undefined }}
             >
               {block.text}
             </h2>
@@ -5336,7 +5349,7 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
           return (
             <ul key={i} className="not-prose space-y-2 pl-1">
               {block.items.map((item, ii) => (
-                <li key={ii} className="flex gap-3 text-[18px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9]">
+                <li key={ii} className="flex gap-3 leading-[1.7] text-[#2E323B] dark:text-[#D9D9D9]" style={textFont}>
                   <span className="w-1.5 h-1.5 rounded-full bg-[#B08D57] mt-3 shrink-0" />
                   <span>{renderInline(item)}</span>
                 </li>
@@ -5410,7 +5423,7 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
               </div>
               <div className="space-y-3">
                 {block.verses.map((v, vi) => (
-                  <p key={vi} className="text-[17px] leading-relaxed italic text-[#2E323B] dark:text-[#D9D9D9]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <p key={vi} className="text-[19px] sm:text-[21px] leading-[1.55] italic text-[#2E323B] dark:text-[#D9D9D9]" style={{ fontFamily: "'Playfair Display', serif", fontSize: undefined }}>
                     "{v}"
                   </p>
                 ))}
@@ -5422,7 +5435,7 @@ function PostBody({ blocks, post, openScriptureIndex, journalEntries, onSaveAnsw
 
         if (block.type === "reflection") {
           return (
-            <div key={i} className="not-prose bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-7 py-6 my-8">
+            <div key={i} id="post-reflection" className="not-prose scroll-mt-[160px] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-7 py-6 my-8" style={{ fontSize: 16 }}>
               <div className="flex items-start justify-between gap-3 mb-2">
                 <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold">
                   Reflection Questions
@@ -8364,27 +8377,6 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
   );
 }
 
-function ReadingProgress() {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0);
-    };
-    window.addEventListener("scroll", onScroll);
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <div className="no-print fixed top-20 left-0 w-full h-[3px] bg-transparent z-20">
-      <div className="h-full bg-[#B08D57] transition-[width] duration-150" style={{ width: `${progress}%` }} />
-    </div>
-  );
-}
-
 // Presentational only — playback state/logic lives in useListenToPost so the
 // top and bottom buttons on a post can share one state and either can
 // control the same reading. Main button is a simple play/pause/resume
@@ -8417,7 +8409,7 @@ function ListenButton({ status, onToggle, onRestart, supported }) {
   );
 }
 
-function ShareBar({ post }) {
+function ShareBar({ post, onPrint }) {
   const [copied, setCopied] = useState(false);
   const [igCopied, setIgCopied] = useState(""); // "" | "copied" | "failed"
 
@@ -8475,7 +8467,7 @@ function ShareBar({ post }) {
   };
 
   return (
-    <div className="no-print flex flex-wrap items-center gap-3 mt-14 pt-8 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
+    <div className="no-print flex flex-wrap items-center gap-3 py-6">
       <span className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mr-1">Share</span>
       <button
         onClick={handleNativeShare}
@@ -8503,14 +8495,236 @@ function ShareBar({ post }) {
         {copied ? <Check size={14} strokeWidth={2} /> : <Link2 size={14} strokeWidth={2} />}
         {copied ? "Link Copied" : "Copy Link"}
       </button>
+      {onPrint && (
+        <button
+          onClick={onPrint}
+          className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+        >
+          <Printer size={14} strokeWidth={2} />
+          Print / Save as PDF
+        </button>
+      )}
     </div>
   );
 }
 
-function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal, openSeries }) {
+// POST PAGE -- redesigned 2026-10-15. Restorable, see CLAUDE.md "Post page
+// restore" (backup/post-classic.jsx). Everything it shows is derived from data
+// that already exists; the only new state is two small local-only preferences.
+const READING_PREFS_KEY = "gospel-lens-reading-prefs";
+const READ_POSITION_KEY = "gospel-lens-read-position";
+const POST_TEXT_SIZES = [["Small", 17], ["Medium", 19], ["Large", 21]];
+const POST_BAR_TOP = 81; // the site header is 80px plus its 1px border
+
+function countPostWords(post) {
+  return post.blocks.reduce((total, block) => {
+    const text = block.text || (block.verses && block.verses.join(" ")) || (block.items && block.items.join(" ")) || "";
+    return total + text.split(/\s+/).filter(Boolean).length;
+  }, 0);
+}
+
+// Reading preferences (text size, sans or serif), remembered on this device.
+function useReadingPrefs() {
+  const [prefs, setPrefsState] = useState(() => {
+    try {
+      const p = JSON.parse(window.localStorage.getItem(READING_PREFS_KEY) || "{}");
+      return { size: POST_TEXT_SIZES.some(([, n]) => n === p.size) ? p.size : 19, font: p.font === "serif" ? "serif" : "sans" };
+    } catch {
+      return { size: 19, font: "sans" };
+    }
+  });
+  const setPrefs = (next) => {
+    setPrefsState(next);
+    try {
+      window.localStorage.setItem(READING_PREFS_KEY, JSON.stringify(next));
+    } catch {
+      // not persisted; non-fatal
+    }
+  };
+  return [prefs, setPrefs];
+}
+
+function getReadPositions() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(READ_POSITION_KEY) || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveReadPosition(postId, pct) {
+  try {
+    const all = getReadPositions();
+    if (pct === null) delete all[postId];
+    else all[postId] = { pct, at: Date.now() };
+    // keep the 60 most recently touched posts so this can't grow without limit
+    const kept = Object.entries(all).sort((a, b) => (b[1].at || 0) - (a[1].at || 0)).slice(0, 60);
+    window.localStorage.setItem(READ_POSITION_KEY, JSON.stringify(Object.fromEntries(kept)));
+  } catch {
+    // storage unavailable -- resume just won't be offered
+  }
+}
+
+// Scroll progress through the post body, which section is current, and
+// whether the title block has scrolled away (which is when the sticky bar and
+// the floating actions appear).
+function usePostScroll({ bodyRef, headerRef, headingCount, postId }) {
+  const [state, setState] = useState({ pct: 0, headerGone: false, active: -1 });
+  useEffect(() => {
+    const onScroll = () => {
+      const body = bodyRef.current;
+      const header = headerRef.current;
+      if (!body || !header) return;
+      const top = body.getBoundingClientRect().top + window.scrollY;
+      const h = Math.max(1, body.offsetHeight);
+      const pct = Math.max(0, Math.min(100, Math.round(((window.scrollY + 220 - top) / h) * 100)));
+      const headerGone = header.getBoundingClientRect().bottom < POST_BAR_TOP + 20;
+      let active = -1;
+      for (let i = 0; i < headingCount; i++) {
+        const el = document.getElementById(`post-h${i}`);
+        if (el && el.getBoundingClientRect().top < POST_BAR_TOP + 49 + 90) active = i;
+      }
+      setState((prev) => (prev.pct === pct && prev.headerGone === headerGone && prev.active === active ? prev : { pct, headerGone, active }));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [postId, headingCount]); // eslint-disable-line react-hooks/exhaustive-deps
+  return state;
+}
+
+function TextSettings({ prefs, setPrefs, className = "" }) {
+  const btn = (active) =>
+    `flex-1 text-sm font-medium rounded-sm border py-2 transition-colors ${
+      active
+        ? "bg-[#4A5D4E] border-[#4A5D4E] text-white dark:bg-[#6E9077] dark:border-[#6E9077] dark:text-[#14161B]"
+        : "bg-[#F8F7F3] dark:bg-[#14161B] border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 text-[#5B5F6B] dark:text-[#A9ADB6]"
+    }`;
+  return (
+    <div role="dialog" aria-label="Text settings" onClick={(e) => e.stopPropagation()} className={`no-print absolute z-40 w-[250px] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-md shadow-[0_14px_34px_-18px_rgba(28,31,38,0.45)] p-4 text-left ${className}`}>
+      <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8A8D96] dark:text-[#7C808A] mb-2">Text size</p>
+      <div className="flex gap-1.5 mb-4">
+        {POST_TEXT_SIZES.map(([label, n]) => (
+          <button key={n} type="button" aria-pressed={prefs.size === n} onClick={() => setPrefs({ ...prefs, size: n })} className={btn(prefs.size === n)} style={{ fontSize: n - 4 }}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8A8D96] dark:text-[#7C808A] mb-2">Typeface</p>
+      <div className="flex gap-1.5">
+        <button type="button" aria-pressed={prefs.font === "sans"} onClick={() => setPrefs({ ...prefs, font: "sans" })} className={btn(prefs.font === "sans")}>
+          Sans
+        </button>
+        <button type="button" aria-pressed={prefs.font === "serif"} onClick={() => setPrefs({ ...prefs, font: "serif" })} className={btn(prefs.font === "serif")} style={{ fontFamily: "'Source Serif 4', Georgia, serif" }}>
+          Serif
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// A small toolbar that appears when a sentence in the post is selected with a
+// mouse: copy it as a quote, or share it.
+function SelectionToolbar({ bodyRef, post }) {
+  const [sel, setSel] = useState(null);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    const onUp = () => {
+      setTimeout(() => {
+        const s = window.getSelection();
+        const text = s ? s.toString().trim() : "";
+        const body = bodyRef.current;
+        if (s && !s.isCollapsed && text.length > 12 && body && body.contains(s.anchorNode)) {
+          const r = s.getRangeAt(0).getBoundingClientRect();
+          setSel({ text, x: Math.min(Math.max(8, r.left + r.width / 2 - 80), window.innerWidth - 168), y: Math.max(90, r.top - 50) });
+        } else {
+          setSel(null);
+        }
+      }, 10);
+    };
+    const hide = () => setSel(null);
+    document.addEventListener("mouseup", onUp);
+    window.addEventListener("scroll", hide, { passive: true });
+    return () => {
+      document.removeEventListener("mouseup", onUp);
+      window.removeEventListener("scroll", hide);
+    };
+  }, [bodyRef, post.id]);
+  if (!sel) return null;
+  const url = `${window.location.origin}/${slugify(post.title)}`;
+  const quote = `"${sel.text}" — ${post.title}, The Gospel Lens`;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${quote}\n${url}`);
+      setCopied(true);
+      setTimeout(() => { setCopied(false); setSel(null); }, 900);
+    } catch {
+      setSel(null);
+    }
+  };
+  const share = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: quote, url });
+      } catch {
+        // cancelled
+      }
+      setSel(null);
+    } else {
+      copy();
+    }
+  };
+  return (
+    <div className="no-print fixed z-50 flex gap-0.5 p-1 rounded-md bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] shadow-[0_10px_30px_-8px_rgba(0,0,0,0.5)]" style={{ left: sel.x, top: sel.y }} onMouseDown={(e) => e.preventDefault()}>
+      <button type="button" onClick={copy} className="px-3 py-1.5 text-[12.5px] font-semibold rounded hover:bg-white/15 dark:hover:bg-black/10">
+        {copied ? "Copied" : "Copy quote"}
+      </button>
+      <button type="button" onClick={share} className="px-3 py-1.5 text-[12.5px] font-semibold rounded hover:bg-white/15 dark:hover:bg-black/10">
+        Share
+      </button>
+    </div>
+  );
+}
+
+function PostRelatedCard({ post, onOpen }) {
+  const tag = tagsForPost(post.id)[0] || post.category;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(post)}
+      className="text-left flex flex-col gap-2 min-w-0 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 hover:border-[#B08D57]/55 rounded-sm p-[18px] transition-all duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+    >
+      <span className="text-[18px] leading-[1.28] text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+        {post.title}
+      </span>
+      <span className="text-[13.5px] leading-relaxed text-[#5B5F6B] dark:text-[#A9ADB6] line-clamp-3">{post.excerpt}</span>
+      <span className="mt-auto flex justify-between gap-2 text-xs text-[#8A8D96] dark:text-[#7C808A]">
+        <span className="truncate font-medium text-[#4A5D4E] dark:text-[#8FAE95]">{tag}</span>
+        <span className="whitespace-nowrap">{estimateReadTime(post).replace(" read", "")}</span>
+      </span>
+    </button>
+  );
+}
+
+function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCollection, openReadingPlan, cameFromPlan, openScriptureIndex, journalEntries, onSaveAnswer, signedIn, openJournal, openSeries, openTopic }) {
   const { status: listenStatus, toggle: toggleListen, restart: restartListen, supported: listenSupported } = useListenToPost(post || POSTS[0]);
   const [saved, setSaved] = useState(() => isPostSaved((post || POSTS[0]).id));
   const [liked, setLiked] = useState(() => isPostLiked((post || POSTS[0]).id));
+  const [prefs, setPrefs] = useReadingPrefs();
+  const [aaOpen, setAaOpen] = useState(null); // null | "rail" | "bar"
+  const [tocOpen, setTocOpen] = useState(false);
+  const [resumePct, setResumePct] = useState(null);
+  const bodyRef = useRef(null);
+  const headerRef = useRef(null);
+
+  const headings = post ? post.blocks.filter((b) => b.type === "heading").map((b) => b.text) : [];
+  const hasToc = headings.length >= 3;
+  const { pct, headerGone, active } = usePostScroll({ bodyRef, headerRef, headingCount: headings.length, postId: post?.id });
 
   // Quietly note this post as read — see the READ HISTORY section above.
   useEffect(() => {
@@ -8524,15 +8738,47 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
     if (post) {
       setSaved(isPostSaved(post.id));
       setLiked(isPostLiked(post.id));
+      setAaOpen(null);
+      setTocOpen(false);
     }
   }, [post?.id]);
+
+  // "Pick up where you left off": offered when someone left this post
+  // partway through on this device. Local only, like read history.
+  useEffect(() => {
+    if (!post) return;
+    const saved = getReadPositions()[post.id];
+    setResumePct(saved && saved.pct >= 12 && saved.pct <= 90 && window.scrollY < 400 ? saved.pct : null);
+  }, [post?.id]);
+  useEffect(() => {
+    if (!post) return;
+    if (pct >= 96) saveReadPosition(post.id, null);
+    else if (pct >= 8) {
+      const t = setTimeout(() => saveReadPosition(post.id, pct), 500);
+      return () => clearTimeout(t);
+    }
+  }, [pct, post?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close the text-settings popover whenever the page scrolls or someone taps elsewhere.
+  useEffect(() => {
+    if (!aaOpen) return;
+    const close = () => setAaOpen(null);
+    window.addEventListener("scroll", close, { passive: true });
+    document.addEventListener("click", close);
+    return () => {
+      window.removeEventListener("scroll", close);
+      document.removeEventListener("click", close);
+    };
+  }, [aaOpen]);
 
   if (!post) return null;
 
   const handleToggleSave = () => setSaved(toggleSavedPost(post.id));
   const handleToggleLike = () => setLiked(toggleLikedPost(post.id));
 
-  const related = getRelatedPosts(post, 2);
+  const words = countPostWords(post);
+  const minutes = Math.max(1, Math.round(words / 200));
+  const minutesLeft = Math.max(0, Math.ceil(((100 - pct) / 100) * minutes));
 
   // Is this post one of the 4-Day Reading Plan's days, AND did the reader
   // actually get here by following the plan (its overview, or "Continue" on
@@ -8554,228 +8800,440 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
   const isLastPlanDay = isPlanPost && planIndex === READING_PLAN_POST_IDS.length - 1;
   const nextPlanPost = isPlanPost && !isLastPlanDay ? POSTS.find((p) => p.id === READING_PLAN_POST_IDS[planIndex + 1]) : null;
 
-  // Series membership (e.g. The Proverbs Series): a banner up top and a
-  // "next in the series" card at the end. Shown however the post was reached.
+  // Series membership (e.g. The Proverbs Series).
   const seriesId = seriesIdForPost(post);
   const seriesPosts = seriesId ? postsInSeries(seriesId) : [];
   const seriesIndex = seriesPosts.findIndex((p) => p.id === post.id);
   const nextInSeries = seriesIndex !== -1 ? seriesPosts[seriesIndex + 1] || null : null;
+
+  // What to read next: the next post in the series, else the closest post by topic.
+  const relatedPool = getRelatedPosts(post, 5);
+  const upNext = nextInSeries || relatedPool[0] || null;
+  const related = relatedPool.filter((p) => !upNext || p.id !== upNext.id).slice(0, 3);
+  const hasReflection = post.blocks.some((b) => b.type === "reflection");
 
   const sortedByDate = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
   const currentIndex = sortedByDate.findIndex((p) => p.id === post.id);
   const newerPost = currentIndex > 0 ? sortedByDate[currentIndex - 1] : null;
   const olderPost = currentIndex < sortedByDate.length - 1 ? sortedByDate[currentIndex + 1] : null;
 
+  const scrollToHeading = (i) => {
+    const el = document.getElementById(`post-h${i}`);
+    if (!el) return;
+    // Close the phone contents list first and scroll after the layout has
+    // settled, so the heading lands exactly under the sticky bar.
+    setTocOpen(false);
+    setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 30);
+  };
+  const quickShare = async () => {
+    const url = `${window.location.origin}/${slugify(post.title)}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: post.title, url });
+      } catch {
+        // cancelled
+      }
+    } else {
+      document.getElementById("post-share")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+  const resumeNow = () => {
+    const body = bodyRef.current;
+    if (body) window.scrollTo({ top: body.getBoundingClientRect().top + window.scrollY + body.offsetHeight * (resumePct / 100) - 200, behavior: "smooth" });
+    setResumePct(null);
+  };
+
+  const railBtn =
+    "relative w-11 h-11 rounded-full border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 bg-white dark:bg-[#1E2128] text-[#5B5F6B] dark:text-[#A9ADB6] flex items-center justify-center hover:border-[#4A5D4E] hover:text-[#4A5D4E] dark:hover:text-[#8FAE95] transition-colors duration-200";
+  const listenIcon = listenStatus === "speaking" ? <Pause size={16} strokeWidth={2} /> : <Headphones size={16} strokeWidth={2} />;
+  const listenLabel = listenStatus === "speaking" ? "Pause" : listenStatus === "paused" ? "Resume" : "Listen";
+  const pill =
+    "inline-flex items-center gap-1.5 text-[13.5px] font-medium text-[#5B5F6B] dark:text-[#A9ADB6] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-[15px] py-2.5 rounded-full hover:border-[#4A5D4E]/60 hover:text-[#4A5D4E] transition-colors duration-200";
+  const eyebrow = "text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A6F42] dark:text-[#D9B77C]";
+  const topicName = tagsForPost(post.id)[0] || post.category;
+
   return (
-    <article className="pt-16 pb-28">
-      <ReadingProgress />
-      <div className="max-w-2xl mx-auto px-6 sm:px-8">
-        <button
-          onClick={() => goBack("blog")}
-          className="no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
-        >
-          <ArrowLeft size={15} strokeWidth={2} />
-          Back
-        </button>
-
-        {isPlanPost && (
-          <div className="no-print flex items-center justify-between gap-3 mb-8 bg-[#B08D57]/10 border border-[#B08D57]/30 rounded-sm px-4 py-3">
-            <span className="text-[13px] font-medium text-[#8A6D3F] dark:text-[#D9B77C]">
-              Day {planIndex + 1} of {READING_PLAN_POST_IDS.length} · 4-Day Reading Plan
-            </span>
-            <button onClick={openReadingPlan} className="text-[13px] font-medium text-[#B08D57] hover:underline whitespace-nowrap shrink-0">
-              View Plan
-            </button>
-          </div>
-        )}
-
-        {seriesId && seriesIndex !== -1 && (
-          <div className="no-print flex items-center justify-between gap-3 mb-6 bg-[#9A5B45]/8 dark:bg-[#D08A70]/10 border border-[#9A5B45]/25 dark:border-[#D08A70]/30 rounded-sm px-4 py-3">
-            <span className="text-[13px] font-medium text-[#7C4636] dark:text-[#E3A98F]">
-              {SERIES[seriesId].name} · No. {seriesIndex + 1} of {seriesPosts.length}
-            </span>
-            <button onClick={() => openSeries(seriesId)} className="text-[13px] font-medium text-[#9A5B45] dark:text-[#E3A98F] hover:underline whitespace-nowrap shrink-0">
-              View series
-            </button>
-          </div>
-        )}
-
-        <CategoryTag category={post.category} />
-        <p className="post-byline text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mt-3">
-          {post.author && AUTHORS[post.author] ? (
-            <button
-              onClick={() => openCollection(post.author)}
-              className="hover:text-[#4A5D4E] hover:underline underline-offset-2 transition-colors duration-200"
-            >
-              By {post.author}
-            </button>
-          ) : post.author ? (
-            `By ${post.author}`
-          ) : null}
-          {post.author ? " · " : ""}
-          {post.date} · {estimateReadTime(post)}
-        </p>
-        <h1
-          className="text-[#1C1F26] dark:text-[#F2F1EC] text-3xl sm:text-[2.75rem] leading-[1.15] mt-4 mb-5"
-          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-        >
-          {post.title}
-        </h1>
-
-        <div className="no-print flex flex-wrap gap-3 mb-10">
-          <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
-          <button
-            onClick={handleToggleSave}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+    <article className="pb-28">
+      {/* Sticky reading bar: a thin progress line always, plus the title and
+          time left once the title block has scrolled away. Zero layout height,
+          so it never shifts the page. */}
+      <div className="no-print sticky top-[81px] z-20 h-0">
+        <div className={`absolute inset-x-0 top-0 transition-colors duration-200 ${headerGone ? "bg-[#F8F7F3]/95 dark:bg-[#14161B]/95 backdrop-blur-sm border-b border-[#1C1F26]/12 dark:border-[#F2F1EC]/14" : "border-b border-transparent"}`}>
+          <div
+            className={`max-w-[1080px] mx-auto px-6 sm:px-8 flex items-center gap-3.5 overflow-hidden transition-[opacity,transform] duration-200 motion-reduce:transition-none ${
+              headerGone ? "h-[46px] opacity-100" : "h-0 opacity-0 -translate-y-2 pointer-events-none"
+            }`}
           >
-            <Bookmark size={14} strokeWidth={2} className={saved ? "text-[#B08D57]" : ""} fill={saved ? "currentColor" : "none"} />
-            {saved ? "Saved" : "Save for Later"}
-          </button>
-          <button
-            onClick={handleToggleLike}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#C1584A]/50 hover:text-[#C1584A] transition-colors duration-200"
-          >
-            <Heart size={14} strokeWidth={2} className={liked ? "text-[#C1584A]" : ""} fill={liked ? "currentColor" : "none"} />
-            {liked ? "Liked" : "Like"}
-          </button>
+            <button type="button" onClick={() => goBack("blog")} aria-label="Back" className="text-[#4A5D4E] dark:text-[#6E9077] p-1.5 -ml-1.5">
+              <ArrowLeft size={16} strokeWidth={2} />
+            </button>
+            <div className="flex-1 min-w-0 truncate text-[15px] text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>
+              {post.title}
+            </div>
+            <div className="text-[12.5px] whitespace-nowrap tabular-nums text-[#8A8D96] dark:text-[#7C808A]">
+              {pct >= 98 ? "Done" : `${minutesLeft} min left`} · {pct}%
+            </div>
+          </div>
+          <div className="h-[3px] bg-[#4A5D4E]/10 dark:bg-[#6E9077]/15">
+            <div className="h-full bg-[#B08D57]" style={{ width: `${pct}%` }} />
+          </div>
         </div>
+      </div>
 
-        <PostBody
-          blocks={post.blocks}
-          post={post}
-          openScriptureIndex={openScriptureIndex}
-          journalEntries={journalEntries}
-          onSaveAnswer={onSaveAnswer}
-          signedIn={signedIn}
-          openJournal={openJournal}
-        />
-
-        <div className="no-print flex flex-wrap gap-3 mb-6">
-          <ListenButton status={listenStatus} onToggle={toggleListen} onRestart={restartListen} supported={listenSupported} />
-          <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
-          >
-            <Printer size={14} strokeWidth={2} />
-            Print / Save as PDF
-          </button>
-        </div>
-
-        <ShareBar post={post} />
-
-        {seriesId && seriesIndex !== -1 && (
-          <div className="no-print border border-[#9A5B45]/30 dark:border-[#D08A70]/35 bg-[#9A5B45]/[0.05] dark:bg-[#D08A70]/[0.07] rounded-sm px-6 py-6 mt-8">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9A5B45] dark:text-[#E3A98F] font-semibold mb-2">{SERIES[seriesId].name}</p>
-            {nextInSeries ? (
-              <>
-                <p className="text-[#2E323B] dark:text-[#D9D9D9] text-[15px] mb-4">Next in the series, No. {seriesIndex + 2} of {seriesPosts.length}:</p>
-                <button
-                  onClick={() => openPost(nextInSeries)}
-                  className="inline-flex items-center gap-2 bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-[#4A5D4E] dark:hover:bg-white transition-colors duration-200 text-left"
-                >
-                  {nextInSeries.title}
-                  <ArrowRight size={14} strokeWidth={2} className="shrink-0" />
-                </button>
-              </>
-            ) : (
-              <>
-                <p className="text-[#2E323B] dark:text-[#D9D9D9] text-[15px] mb-4">That's the latest in the series so far. More are on the way.</p>
-                <button
-                  onClick={() => openSeries(seriesId)}
-                  className="inline-flex items-center gap-2 border border-[#1C1F26]/20 dark:border-[#F2F1EC]/25 text-[#1C1F26] dark:text-[#F2F1EC] px-5 py-2.5 text-sm font-medium rounded-full hover:border-[#4A5D4E] hover:text-[#4A5D4E] transition-colors duration-200"
-                >
-                  See the whole series
-                  <ArrowRight size={14} strokeWidth={2} />
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {isPlanPost && (
-          <div className="no-print bg-[#1C1F26] dark:bg-[#14161B] border border-[#F2F1EC]/10 rounded-sm px-6 py-6 mt-8">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold mb-2">4-Day Reading Plan</p>
-            {nextPlanPost ? (
-              <>
-                <p className="text-[#F2F1EC] text-[15px] mb-4">
-                  Take a few minutes to think about what you just read. Ready for Day {planIndex + 2}?
-                </p>
-                <button
-                  onClick={() => openPlanPost(nextPlanPost)}
-                  className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-white transition-colors duration-200"
-                >
-                  Continue to Day {planIndex + 2}: {nextPlanPost.title}
-                  <ArrowRight size={14} strokeWidth={2} />
-                </button>
-              </>
-            ) : (
-              <>
-                <p className="text-[#F2F1EC] text-[15px] mb-4">
-                  That's all 4 days — you've read the whole plan. Take a moment to sit with what you've read before you go.
-                </p>
-                <button
-                  onClick={openReadingPlan}
-                  className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-white transition-colors duration-200"
-                >
-                  Review the Plan
-                  <ArrowRight size={14} strokeWidth={2} />
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {(olderPost || newerPost) && (
-          <div className="no-print grid grid-cols-2 gap-4 mt-8">
-            {olderPost ? (
-              <button
-                onClick={() => openPost(olderPost)}
-                className="text-left border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-4 py-3 hover:border-[#4A5D4E]/50 transition-colors duration-200"
-              >
-                <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mb-1">
-                  <ArrowLeft size={11} strokeWidth={2} /> Older
-                </span>
-                <span className="text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] line-clamp-2">{olderPost.title}</span>
-              </button>
-            ) : <div />}
-            {newerPost ? (
-              <button
-                onClick={() => openPost(newerPost)}
-                className="text-right border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-4 py-3 hover:border-[#4A5D4E]/50 transition-colors duration-200"
-              >
-                <span className="flex items-center justify-end gap-1 text-[10px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mb-1">
-                  Newer <ArrowRight size={11} strokeWidth={2} />
-                </span>
-                <span className="text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] line-clamp-2">{newerPost.title}</span>
-              </button>
-            ) : <div />}
-          </div>
-        )}
-
-        <div className="no-print mt-8">
+      <div className="max-w-[1080px] mx-auto px-6 sm:px-8 pt-10 sm:pt-14">
+        <div ref={headerRef} className="max-w-[760px]">
           <button
             onClick={() => goBack("blog")}
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] hover:text-[#4A5D4E] transition-colors duration-300"
+            className="no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-6 hover:gap-3 transition-all duration-300"
           >
             <ArrowLeft size={15} strokeWidth={2} />
             Back
           </button>
+
+          {isPlanPost && (
+            <div className="no-print flex items-center justify-between gap-3 mb-6 bg-[#B08D57]/10 border border-[#B08D57]/30 rounded-sm px-4 py-3">
+              <span className="text-[13px] font-medium text-[#8A6D3F] dark:text-[#D9B77C]">
+                Day {planIndex + 1} of {READING_PLAN_POST_IDS.length} · 4-Day Reading Plan
+              </span>
+              <button onClick={openReadingPlan} className="text-[13px] font-medium text-[#B08D57] hover:underline whitespace-nowrap shrink-0">
+                View Plan
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2 mb-[18px]">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.12em] uppercase text-[#5B5F6B] dark:text-[#A9ADB6] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-full px-3 py-1.5">
+              <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#8A8D96]"}`} />
+              {post.category}
+            </span>
+            {seriesId && seriesIndex !== -1 && (
+              <button
+                type="button"
+                onClick={() => openSeries(seriesId)}
+                className="no-print text-[11px] font-semibold tracking-[0.12em] uppercase text-[#9A5B45] dark:text-[#E3A98F] bg-[#9A5B45]/8 dark:bg-[#D08A70]/10 border border-[#9A5B45]/30 dark:border-[#D08A70]/35 rounded-full px-3 py-1.5 hover:bg-[#9A5B45]/14"
+              >
+                {SERIES[seriesId].name} · No. {seriesIndex + 1} of {seriesPosts.length}
+              </button>
+            )}
+          </div>
+
+          <h1 className="text-[#1C1F26] dark:text-[#F2F1EC] text-[34px] sm:text-5xl lg:text-[56px] leading-[1.1] mb-4" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, textWrap: "balance" }}>
+            {post.title}
+          </h1>
+          <p className="text-[18px] sm:text-[21px] leading-[1.5] italic text-[#5B5F6B] dark:text-[#A9ADB6] mb-5 max-w-[62ch]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {post.excerpt}
+          </p>
+          <p className="post-byline flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[13.5px] text-[#8A8D96] dark:text-[#7C808A]">
+            {post.author && AUTHORS[post.author] ? (
+              <button onClick={() => openCollection(post.author)} className="font-semibold text-[#5B5F6B] dark:text-[#A9ADB6] underline underline-offset-[3px]">
+                By {post.author}
+              </button>
+            ) : post.author ? (
+              <span className="font-semibold text-[#5B5F6B] dark:text-[#A9ADB6]">By {post.author}</span>
+            ) : null}
+            <span>{post.date}</span>
+            <span>
+              <b className="font-semibold text-[#5B5F6B] dark:text-[#A9ADB6]">{minutes} min read</b> · {words.toLocaleString()} words
+            </span>
+          </p>
+
+          <div className="no-print flex flex-wrap items-center gap-2.5 mt-6">
+            {listenSupported && (
+              <>
+                <button
+                  type="button"
+                  onClick={toggleListen}
+                  className="inline-flex items-center gap-2 bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] rounded-full pl-4 pr-5 py-[11px] text-sm font-semibold hover:bg-[#4A5D4E] dark:hover:bg-white transition-colors duration-200"
+                >
+                  {listenIcon}
+                  {listenLabel}
+                  <span className="font-medium opacity-70 text-[12.5px]">{minutes} min</span>
+                </button>
+                {listenStatus !== "idle" && (
+                  <button type="button" onClick={restartListen} aria-label="Restart from the beginning" title="Restart from the beginning" className="w-9 h-9 rounded-full border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 text-[#8A8D96] flex items-center justify-center hover:text-[#4A5D4E]">
+                    <RotateCcw size={13} strokeWidth={2} />
+                  </button>
+                )}
+              </>
+            )}
+            <button type="button" onClick={handleToggleLike} className={`${pill} ${liked ? "!text-[#C1584A] !border-[#C1584A]/45" : "hover:!border-[#C1584A]/50 hover:!text-[#C1584A]"}`}>
+              <Heart size={15} strokeWidth={2} fill={liked ? "currentColor" : "none"} />
+              {liked ? "Liked" : "Like"}
+            </button>
+            <button type="button" onClick={handleToggleSave} className={`${pill} ${saved ? "!text-[#B08D57] !border-[#B08D57]/55" : ""}`}>
+              <Bookmark size={15} strokeWidth={2} fill={saved ? "currentColor" : "none"} />
+              {saved ? "Saved" : "Save for Later"}
+            </button>
+          </div>
+        </div>
+
+        {resumePct !== null && (
+          <div className="no-print flex flex-wrap items-center gap-3 mt-6 max-w-[760px] bg-[#4A5D4E]/8 dark:bg-[#6E9077]/12 border border-[#4A5D4E]/20 dark:border-[#6E9077]/25 rounded-sm px-3.5 py-3 text-sm text-[#2E323B] dark:text-[#D9D9D9]">
+            <span>
+              You were <b className="text-[#1C1F26] dark:text-[#F2F1EC]">{resumePct}%</b> through this post.
+            </span>
+            <button type="button" onClick={resumeNow} className="font-semibold text-[#4A5D4E] dark:text-[#8FAE95] underline underline-offset-[3px]">
+              Continue where you left off
+            </button>
+            <button type="button" onClick={() => { saveReadPosition(post.id, null); setResumePct(null); }} className="font-semibold text-[#8A8D96] underline underline-offset-[3px]">
+              Start over
+            </button>
+          </div>
+        )}
+
+        {/* body: contents rail | text | floating actions (3 columns on wide screens) */}
+        <div className="mt-8 min-[1180px]:mt-10 min-[1180px]:grid min-[1180px]:grid-cols-[200px_minmax(0,680px)_52px] min-[1180px]:gap-x-11 min-[1180px]:justify-center min-[1180px]:items-start">
+          <aside className="no-print hidden min-[1180px]:block sticky top-[151px] pt-1.5">
+            {hasToc && (
+              <>
+                <h2 className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8A8D96] dark:text-[#7C808A] mb-3" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
+                  In this post
+                </h2>
+                <ol className="list-none m-0 p-0 border-l border-[#1C1F26]/12 dark:border-[#F2F1EC]/14">
+                  {headings.map((h, i) => (
+                    <li key={i}>
+                      <a
+                        href={`#post-h${i}`}
+                        onClick={(e) => { e.preventDefault(); scrollToHeading(i); }}
+                        className={`block py-[7px] pl-3.5 -ml-px border-l-2 text-[13.5px] leading-[1.4] transition-colors ${
+                          active === i ? "border-[#B08D57] text-[#1C1F26] dark:text-[#F2F1EC] font-semibold" : "border-transparent text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+                        }`}
+                      >
+                        {h}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
+            <p className="mt-[18px] text-[12.5px] leading-snug text-[#8A8D96] dark:text-[#7C808A]">
+              <b className="tabular-nums font-semibold text-[#1C1F26] dark:text-[#F2F1EC]">{pct >= 98 ? 0 : minutesLeft} min</b> left to read
+            </p>
+          </aside>
+
+          <div className="min-w-0">
+            {hasToc && (
+              <details open={tocOpen} onToggle={(e) => setTocOpen(e.currentTarget.open)} className="no-print min-[1180px]:hidden mb-6 border border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 rounded-sm bg-white dark:bg-[#1E2128]">
+                <summary className="list-none [&::-webkit-details-marker]:hidden flex items-center justify-between px-4 py-3 text-[13px] font-semibold tracking-[0.04em] text-[#1C1F26] dark:text-[#F2F1EC] cursor-pointer">
+                  In this post · {headings.length} sections
+                  <ChevronDown size={15} strokeWidth={2} className={`transition-transform ${tocOpen ? "rotate-180" : ""}`} />
+                </summary>
+                <ol className="list-none m-0 px-4 pb-3">
+                  {headings.map((h, i) => (
+                    <li key={i}>
+                      <a
+                        href={`#post-h${i}`}
+                        onClick={(e) => { e.preventDefault(); scrollToHeading(i); }}
+                        className="block py-2 border-t border-[#1C1F26]/7 dark:border-[#F2F1EC]/8 text-[14.5px] text-[#5B5F6B] dark:text-[#A9ADB6]"
+                      >
+                        {h}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )}
+
+            <div ref={bodyRef}>
+              <PostBody
+                blocks={post.blocks}
+                post={post}
+                prefs={prefs}
+                openScriptureIndex={openScriptureIndex}
+                journalEntries={journalEntries}
+                onSaveAnswer={onSaveAnswer}
+                signedIn={signedIn}
+                openJournal={openJournal}
+              />
+            </div>
+          </div>
+
+          {/* floating actions (wide screens): follow you down the page */}
+          <aside className={`no-print hidden min-[1180px]:flex sticky top-[151px] flex-col items-center gap-2 pt-1.5 transition-opacity duration-200 ${headerGone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+            {listenSupported && (
+              <button type="button" onClick={toggleListen} aria-label={listenLabel} title={listenLabel} className={railBtn}>
+                {listenIcon}
+              </button>
+            )}
+            <button type="button" onClick={handleToggleLike} aria-label={liked ? "Remove from Liked Posts" : "Like this post"} title={liked ? "Liked" : "Like"} className={`${railBtn} ${liked ? "!text-[#C1584A] !border-[#C1584A]/50" : ""}`}>
+              <Heart size={16} strokeWidth={2} fill={liked ? "currentColor" : "none"} />
+            </button>
+            <button type="button" onClick={handleToggleSave} aria-label={saved ? "Remove from Saved Posts" : "Save for later"} title={saved ? "Saved" : "Save for later"} className={`${railBtn} ${saved ? "!text-[#B08D57] !border-[#B08D57]/60" : ""}`}>
+              <Bookmark size={16} strokeWidth={2} fill={saved ? "currentColor" : "none"} />
+            </button>
+            <button type="button" onClick={quickShare} aria-label="Share" title="Share" className={railBtn}>
+              <Share2 size={16} strokeWidth={2} />
+            </button>
+            <div className="relative">
+              <button type="button" onClick={(e) => { e.stopPropagation(); setAaOpen(aaOpen === "rail" ? null : "rail"); }} aria-label="Text settings" title="Text settings" className={railBtn}>
+                <Type size={16} strokeWidth={2} />
+              </button>
+              {aaOpen === "rail" && <TextSettings prefs={prefs} setPrefs={setPrefs} className="right-full mr-3 top-0" />}
+            </div>
+          </aside>
         </div>
       </div>
 
-      {related.length > 0 && (
-        <div className="no-print max-w-5xl mx-auto px-6 sm:px-8 mt-20 pt-14 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
-          <Eyebrow>Keep Reading</Eyebrow>
-          <h3 className="text-2xl text-[#1C1F26] dark:text-[#F2F1EC] mb-8" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
-            More Posts Like This
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-6">
-            {related.map((p) => (
-              <PostCard key={p.id} post={p} onOpen={openPost} />
-            ))}
+      {/* the end of the post */}
+      <div className="max-w-[1080px] mx-auto px-6 sm:px-8 pt-8">
+        <div className="min-[1180px]:ml-[244px] max-w-[760px]">
+          <div className="no-print border-t border-[#1C1F26]/12 dark:border-[#F2F1EC]/14">
+            <div id="post-share" className="scroll-mt-40">
+              <ShareBar post={post} onPrint={() => window.print()} />
+            </div>
+          </div>
+
+          {isPlanPost && (
+            <div className="no-print bg-[#1C1F26] dark:bg-[#14161B] border border-[#F2F1EC]/10 rounded-sm px-6 py-6 mt-8">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold mb-2">4-Day Reading Plan</p>
+              {nextPlanPost ? (
+                <>
+                  <p className="text-[#F2F1EC] text-[15px] mb-4">Take a few minutes to think about what you just read. Ready for Day {planIndex + 2}?</p>
+                  <button onClick={() => openPlanPost(nextPlanPost)} className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-white transition-colors duration-200">
+                    Continue to Day {planIndex + 2}: {nextPlanPost.title}
+                    <ArrowRight size={14} strokeWidth={2} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-[#F2F1EC] text-[15px] mb-4">That's all 4 days — you've read the whole plan. Take a moment to sit with what you've read before you go.</p>
+                  <button onClick={openReadingPlan} className="inline-flex items-center gap-2 bg-[#F2F1EC] text-[#1C1F26] px-5 py-2.5 text-sm font-medium rounded-full hover:bg-white transition-colors duration-200">
+                    Review the Plan
+                    <ArrowRight size={14} strokeWidth={2} />
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {upNext && (
+            <div className="no-print">
+              <h2 className={`${eyebrow} mt-10 mb-3.5`} style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
+                {nextInSeries ? `Next in ${SERIES[seriesId].name} · No. ${seriesIndex + 2} of ${seriesPosts.length}` : "Up next"}
+              </h2>
+              <button
+                type="button"
+                onClick={() => openPost(upNext)}
+                className="block w-full text-left bg-[#1C1F26] dark:bg-[#0B0D10] text-[#F8F7F3] rounded-sm px-6 sm:px-7 py-6 sm:py-[26px] transition-all duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:shadow-[0_14px_34px_-18px_rgba(28,31,38,0.45)]"
+              >
+                <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#D9B77C]">
+                  {nextInSeries ? "Continue the series" : "Because you read this"} · {estimateReadTime(upNext).replace(" read", "")}
+                </span>
+                <span className="block text-2xl sm:text-[28px] leading-[1.2] mt-2 mb-2.5" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                  {upNext.title}
+                </span>
+                <span className="block text-[15.5px] leading-relaxed text-[#C3C6CD] mb-3.5">{upNext.excerpt}</span>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#D9B77C]">
+                  Read next
+                  <ArrowRight size={14} strokeWidth={2} />
+                </span>
+              </button>
+            </div>
+          )}
+
+          {hasReflection && (
+            <div className="no-print flex flex-wrap items-center gap-4 mt-3.5 bg-white dark:bg-[#1E2128] border border-dashed border-[#4A5D4E]/55 dark:border-[#6E9077]/55 rounded-sm px-[22px] py-5">
+              <div className="flex-1 min-w-[200px]">
+                <b className="block text-lg text-[#1C1F26] dark:text-[#F2F1EC] mb-0.5" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                  Put it into words
+                </b>
+                <span className="text-[14.5px] text-[#5B5F6B] dark:text-[#A9ADB6]">Answer this post's reflection questions privately, in your own Journal.</span>
+              </div>
+              <button type="button" onClick={() => document.getElementById("post-reflection")?.scrollIntoView({ behavior: "smooth", block: "start" })} className={pill}>
+                <NotebookPen size={15} strokeWidth={2} />
+                Go to the questions
+              </button>
+            </div>
+          )}
+
+          {related.length > 0 && (
+            <div className="no-print">
+              <h2 className={`${eyebrow} mt-10 mb-3.5`} style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
+                {openTopic && tagsForPost(post.id)[0] ? (
+                  <button type="button" onClick={() => openTopic(tagsForPost(post.id)[0])} className="hover:underline underline-offset-[3px] text-left">
+                    More on {topicName}
+                  </button>
+                ) : (
+                  `More on ${topicName}`
+                )}
+              </h2>
+              <div className="grid sm:grid-cols-3 gap-3.5">
+                {related.map((p) => (
+                  <PostRelatedCard key={p.id} post={p} onOpen={openPost} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="no-print flex flex-wrap items-center justify-between gap-5 mt-10 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 rounded-sm px-6 sm:px-7 py-6">
+            <div className="min-w-0">
+              <h3 className="text-[22px] text-[#1C1F26] dark:text-[#F2F1EC] mb-1" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                Get the next one by email
+              </h3>
+              <p className="text-[14.5px] text-[#5B5F6B] dark:text-[#A9ADB6]">Get new posts in your inbox. Confirm once, unsubscribe anytime.</p>
+            </div>
+            <NewsletterForm />
+          </div>
+
+          {(olderPost || newerPost) && (
+            <div className="no-print grid grid-cols-2 gap-3.5 mt-9">
+              {olderPost ? (
+                <button onClick={() => openPost(olderPost)} className="text-left border border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 rounded-sm px-4 py-3.5 hover:border-[#4A5D4E]/60 transition-colors duration-200">
+                  <span className="flex items-center gap-1 text-[10.5px] font-semibold uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mb-1">
+                    <ArrowLeft size={11} strokeWidth={2} /> Older
+                  </span>
+                  <span className="text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] line-clamp-2">{olderPost.title}</span>
+                </button>
+              ) : (
+                <div />
+              )}
+              {newerPost ? (
+                <button onClick={() => openPost(newerPost)} className="text-right border border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 rounded-sm px-4 py-3.5 hover:border-[#4A5D4E]/60 transition-colors duration-200">
+                  <span className="flex items-center justify-end gap-1 text-[10.5px] font-semibold uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mb-1">
+                    Newer <ArrowRight size={11} strokeWidth={2} />
+                  </span>
+                  <span className="text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] line-clamp-2">{newerPost.title}</span>
+                </button>
+              ) : (
+                <div />
+              )}
+            </div>
+          )}
+
+          <div className="no-print mt-8">
+            <button onClick={() => goBack("blog")} className="inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] hover:text-[#4A5D4E] transition-colors duration-300">
+              <ArrowLeft size={15} strokeWidth={2} />
+              Back
+            </button>
           </div>
         </div>
-      )}
+      </div>
+
+      <SelectionToolbar bodyRef={bodyRef} post={post} />
+
+      {/* bottom action bar (everything narrower than the wide layout) */}
+      <div className={`no-print min-[1180px]:hidden fixed inset-x-0 bottom-0 z-30 border-t border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 bg-white/96 dark:bg-[#1E2128]/96 backdrop-blur-sm transition-transform duration-250 motion-reduce:transition-none ${headerGone ? "translate-y-0" : "translate-y-[110%]"}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <div className="relative flex justify-around gap-1 px-2.5 py-2 max-w-[760px] mx-auto">
+          {[
+            listenSupported && { key: "l", label: listenLabel, icon: listenIcon, on: toggleListen },
+            { key: "h", label: "Like", icon: <Heart size={18} strokeWidth={2} fill={liked ? "currentColor" : "none"} />, on: handleToggleLike, active: liked, tone: "text-[#C1584A]" },
+            { key: "s", label: "Save", icon: <Bookmark size={18} strokeWidth={2} fill={saved ? "currentColor" : "none"} />, on: handleToggleSave, active: saved, tone: "text-[#B08D57]" },
+            { key: "x", label: "Share", icon: <Share2 size={18} strokeWidth={2} />, on: quickShare },
+          ]
+            .filter(Boolean)
+            .map((b) => (
+              <button key={b.key} type="button" onClick={b.on} className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-medium ${b.active ? b.tone : "text-[#5B5F6B] dark:text-[#A9ADB6]"}`}>
+                {b.icon}
+                {b.label}
+              </button>
+            ))}
+          <button type="button" onClick={(e) => { e.stopPropagation(); setAaOpen(aaOpen === "bar" ? null : "bar"); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-medium text-[#5B5F6B] dark:text-[#A9ADB6]">
+            <Type size={18} strokeWidth={2} />
+            Text
+          </button>
+          {aaOpen === "bar" && <TextSettings prefs={prefs} setPrefs={setPrefs} className="bottom-full mb-3 right-2" />}
+        </div>
+      </div>
     </article>
   );
 }
@@ -8784,7 +9242,8 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
 // ROOT APP
 // ---------------------------------------------------------------------------
 
-function BackToTop() {
+// `lift` raises it clear of a post page's bottom action bar on narrow screens.
+function BackToTop({ lift = false }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -8800,7 +9259,7 @@ function BackToTop() {
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Back to top"
-      className="no-print fixed bottom-6 right-6 z-30 w-11 h-11 rounded-full bg-[#1C1F26] text-[#F8F7F3] flex items-center justify-center shadow-lg hover:bg-[#4A5D4E] transition-colors duration-300"
+      className={`no-print fixed ${lift ? "bottom-[88px] min-[1180px]:bottom-6" : "bottom-6"} right-6 z-30 w-11 h-11 rounded-full bg-[#1C1F26] text-[#F8F7F3] flex items-center justify-center shadow-lg hover:bg-[#4A5D4E] transition-colors duration-300`}
     >
       <ArrowRight size={16} strokeWidth={2.5} style={{ transform: "rotate(-90deg)" }} />
     </button>
@@ -9472,6 +9931,7 @@ export default function GospelLensApp() {
             signedIn={Boolean(user)}
             openJournal={openJournal}
             openSeries={openSeries}
+            openTopic={openTopic}
           />
         )}
         {view === "saved" && <SavedPostsView openPost={openPost} setView={changeView} user={user} onSignIn={handleSignIn} />}
@@ -9497,8 +9957,8 @@ export default function GospelLensApp() {
         {view === "notfound" && <NotFoundView setView={changeView} openPost={openPost} />}
       </main>
 
-      <Footer showNewsletter={view !== "home" && view !== "about"} />
-      <BackToTop />
+      <Footer showNewsletter={view !== "home" && view !== "about" && view !== "post"} />
+      <BackToTop lift={view === "post"} />
     </div>
   );
 }
