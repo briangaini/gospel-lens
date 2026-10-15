@@ -8843,8 +8843,19 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
     setResumePct(null);
   };
 
+  // Hand-built hover label (not the native title attribute, which doesn't show
+  // reliably in the installed desktop app -- same approach as the Scripture
+  // Index icon). Sits to the left of the round buttons.
+  const RailTip = ({ children }) => (
+    <span
+      role="tooltip"
+      className="no-print pointer-events-none absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-sm bg-[#1C1F26] dark:bg-[#F2F1EC] px-2.5 py-1 text-[12px] font-medium text-[#F8F7F3] dark:text-[#1C1F26] opacity-0 group-hover/tip:opacity-100 group-focus-visible/tip:opacity-100 transition-opacity duration-150"
+    >
+      {children}
+    </span>
+  );
   const railBtn =
-    "relative w-11 h-11 rounded-full border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 bg-white dark:bg-[#1E2128] text-[#5B5F6B] dark:text-[#A9ADB6] flex items-center justify-center hover:border-[#4A5D4E] hover:text-[#4A5D4E] dark:hover:text-[#8FAE95] transition-colors duration-200";
+    "group/tip relative w-11 h-11 rounded-full border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 bg-white dark:bg-[#1E2128] text-[#5B5F6B] dark:text-[#A9ADB6] flex items-center justify-center hover:border-[#4A5D4E] hover:text-[#4A5D4E] dark:hover:text-[#8FAE95] transition-colors duration-200";
   const listenIcon = listenStatus === "speaking" ? <Pause size={16} strokeWidth={2} /> : <Headphones size={16} strokeWidth={2} />;
   const listenLabel = listenStatus === "speaking" ? "Pause" : listenStatus === "paused" ? "Resume" : "Listen";
   const pill =
@@ -9051,22 +9062,27 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
           {/* floating actions (wide screens): follow you down the page */}
           <aside className={`no-print hidden min-[1180px]:flex sticky top-[151px] flex-col items-center gap-2 pt-1.5 transition-opacity duration-200 ${headerGone ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
             {listenSupported && (
-              <button type="button" onClick={toggleListen} aria-label={listenLabel} title={listenLabel} className={railBtn}>
+              <button type="button" onClick={toggleListen} aria-label={listenLabel} className={railBtn}>
                 {listenIcon}
+                <RailTip>{listenStatus === "idle" ? "Listen to this post" : listenLabel}</RailTip>
               </button>
             )}
-            <button type="button" onClick={handleToggleLike} aria-label={liked ? "Remove from Liked Posts" : "Like this post"} title={liked ? "Liked" : "Like"} className={`${railBtn} ${liked ? "!text-[#C1584A] !border-[#C1584A]/50" : ""}`}>
+            <button type="button" onClick={handleToggleLike} aria-label={liked ? "Remove from Liked Posts" : "Like this post"} className={`${railBtn} ${liked ? "!text-[#C1584A] !border-[#C1584A]/50" : ""}`}>
               <Heart size={16} strokeWidth={2} fill={liked ? "currentColor" : "none"} />
+              <RailTip>{liked ? "Liked" : "Like"}</RailTip>
             </button>
-            <button type="button" onClick={handleToggleSave} aria-label={saved ? "Remove from Saved Posts" : "Save for later"} title={saved ? "Saved" : "Save for later"} className={`${railBtn} ${saved ? "!text-[#B08D57] !border-[#B08D57]/60" : ""}`}>
+            <button type="button" onClick={handleToggleSave} aria-label={saved ? "Remove from Saved Posts" : "Save for later"} className={`${railBtn} ${saved ? "!text-[#B08D57] !border-[#B08D57]/60" : ""}`}>
               <Bookmark size={16} strokeWidth={2} fill={saved ? "currentColor" : "none"} />
+              <RailTip>{saved ? "Saved" : "Save for later"}</RailTip>
             </button>
-            <button type="button" onClick={quickShare} aria-label="Share" title="Share" className={railBtn}>
+            <button type="button" onClick={quickShare} aria-label="Share" className={railBtn}>
               <Share2 size={16} strokeWidth={2} />
+              <RailTip>Share</RailTip>
             </button>
             <div className="relative">
-              <button type="button" onClick={(e) => { e.stopPropagation(); setAaOpen(aaOpen === "rail" ? null : "rail"); }} aria-label="Text settings" title="Text settings" className={railBtn}>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setAaOpen(aaOpen === "rail" ? null : "rail"); }} aria-label="Text settings" className={railBtn}>
                 <Type size={16} strokeWidth={2} />
+                {aaOpen !== "rail" && <RailTip>Text size and font</RailTip>}
               </button>
               {aaOpen === "rail" && <TextSettings prefs={prefs} setPrefs={setPrefs} className="right-full mr-3 top-0" />}
             </div>
