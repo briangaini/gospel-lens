@@ -7224,9 +7224,14 @@ function TopicBento({ openTopic }) {
       <HomeLabel>Explore by topic</HomeLabel>
       <HomeHeading>{topics.length === 13 ? "Thirteen" : topics.length} topics, each with its own page.</HomeHeading>
       <p className={`${HOME_MUTED} text-base mb-7 max-w-[58ch]`}>Every post is tagged, so you can follow one thread as far as it goes.</p>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 [grid-auto-flow:dense]">
+      {/* Phones: one swipeable row (snaps card by card, the next card peeks in
+          so it reads as scrollable) instead of a long vertical stack of 13.
+          sm and up: the original grid, unchanged. */}
+      <div
+        className="flex gap-3.5 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 scroll-px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible sm:snap-none sm:grid sm:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]"
+      >
         {topics.map((t) => (
-          <button key={t.name} onClick={() => openTopic(t.name)} className={`${HOME_CARD} ${HOME_LIFT} text-left p-5 sm:p-[22px] flex flex-col justify-start min-w-0 ${bigNames.has(t.name) ? "col-span-2" : ""}`}>
+          <button key={t.name} onClick={() => openTopic(t.name)} className={`${HOME_CARD} ${HOME_LIFT} text-left p-5 sm:p-[22px] flex flex-col justify-start min-w-0 shrink-0 w-[78%] snap-start sm:w-auto sm:shrink ${bigNames.has(t.name) ? "sm:col-span-2" : ""}`}>
             <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-[17px] sm:text-[19px] leading-[1.2] mb-1.5 break-words" style={HOME_SERIF}>
               {t.name}
             </span>
@@ -7237,6 +7242,7 @@ function TopicBento({ openTopic }) {
           </button>
         ))}
       </div>
+      <p className={`sm:hidden mt-3 text-[12.5px] ${HOME_FAINT}`}>Swipe to see all {topics.length} →</p>
     </HomeSection>
   );
 }
