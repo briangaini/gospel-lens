@@ -38,6 +38,7 @@ backup/
   about-classic.jsx     — plain, never-bundled copy of the pre-2026-10-07 About page, see "About page restore"
   blogs-classic.jsx     — plain, never-bundled copy of the pre-2026-10-07 Blogs page, see "Blogs page restore"
   post-classic.jsx      — plain, never-bundled copy of the pre-2026-10-15 post page, see "Post page restore"
+  cards-classic.jsx     — plain, never-bundled copy of the old PostCard + unfiltered TopicView, see "Cards restore"
 index.html
 vercel.json     — cleanUrls + SPA rewrite fallback
 tailwind.config.js
@@ -274,13 +275,27 @@ Brian asked for a makeover, saw a demo (Claude Artifact, https://claude.ai/artif
 
 **URL state:** filters mirror into the address bar with `history.replaceState` (no extra history entries): `/blog?type=devotional&topic=peace&show=unread&len=quick&sort=old&q=word`. It's read on mount, so going into a post and pressing Back restores the filters, and a filtered view is shareable. It's the same page, so only `/blog` is prerendered and in the sitemap. `GospelLensApp` bumps `blogKey` whenever Blogs is opened fresh from the nav or a nav search (remounts the page and clears filters); a nav search arrives as `initialSearch` and is cleared with `consumeNavSearch` so a stale search can't reapply.
 
-**Plumbing:** `scripts/prerender.js` gives `dist/blog.html` its own description (computed post count). `PostCard` is unchanged and still used by Saved, Liked, Topic and Collection pages. `PAGE_SIZE` was removed (only the old Blogs page used it). Added lucide `Shuffle` and `LayoutGrid` imports. The existing Nav `/` and Cmd/Ctrl+K search shortcut is untouched (the Blogs page does not add a second `/` handler).
+**Plumbing:** `scripts/prerender.js` gives `dist/blog.html` its own description (computed post count). `PostCard` is now a thin wrapper around `BlogCard` (see "One card everywhere" below), so it is no longer a separate design. `PAGE_SIZE` was removed (only the old Blogs page used it). Added lucide `Shuffle` and `LayoutGrid` imports. The existing Nav `/` and Cmd/Ctrl+K search shortcut is untouched (the Blogs page does not add a second `/` handler).
 
 **Phone checks done:** 375px and 360px, no horizontal overflow; four filter rows scroll; sticky bar is about 109px tall on a phone (search + a 128px sort select + count line).
 
 ### Blogs page restore (how to put the OLD Blogs page back)
 
 Saved three ways: git tag `blogs-classic-2026-10-07` (pushed), `backup/blogs-classic.jsx` (plain copy of the old `PAGE_SIZE` and `BlogListView`, never bundled), and the demo Artifact's "Current" tab. **Restore:** in `src/App.jsx` replace everything from the `BLOGS PAGE -- redesigned 2026-10-07` comment through the end of the new `BlogListView` with the contents of `backup/blogs-classic.jsx`; render `<BlogListView openPost={openPost} initialSearch={navSearch} openTopic={openTopic} />` (the extra `key`/`consumeNavSearch` props are harmless to leave, but then a nav search persists, as it did before); remove the `blogKey` bumps if desired; the new `Shuffle`/`LayoutGrid` imports can stay or go; the `/blog` block in `prerender.js` can revert to `writeHtml("blog", template)`. Don't `git checkout` the tag over `App.jsx` (it would discard newer posts). Then `npm run build`, check, push, verify live.
+
+## One card everywhere + Topic filters (2026-10-15)
+
+Brian noticed two card designs coexisting (Blogs had the new one; Saved, Liked, Topic, author and 404 pages still had the old `PostCard`) and that Topic pages could use the Blogs filters. Demoed first (Claude Artifact, https://claude.ai/artifact/QWh31kX7z3kqjHKy3Gkf7k), then "go ahead, implement."
+
+- **`PostCard` (`src/App.jsx`) is now a wrapper around `BlogCard`**: it reads saved/liked state on mount as before (`onToggleSave`/`onToggleLike` still let Saved/Liked drop a card live) and works out Read/New from read history. The old card design and `CategoryTag` are gone from the app. Saved, Liked, Topic, author (`CollectionView`) and 404 pages all use it, with grids at `gap-4 sm:gap-5` to match Blogs.
+- **Author byline:** `BlogCard` and `BlogRow` show "By <author>" on a contributor's posts (new, also on the Blogs page), via the `hideByline` prop; the author's own page passes `hideByline`.
+- **Topic pages (`TopicView`)** get the Blogs filter pieces **only when the topic has `TOPIC_FILTER_MIN` (8) or more posts** (6 of 13 at the time): Type, Yours (unread/read/saved/liked), Length chips with live counts, search scoped to the topic, sort, and the card/list toggle (shares the Blogs layout choice, `gospel-lens-blog-view`). Smaller topics stay a plain card list. Filters mirror into the address bar (`/topics/<slug>?type=devotional&show=unread&len=quick&sort=old&q=word`, via `replaceState`) and are read on mount, same idea as `/blog`; only the bare topic URL is prerendered/in the sitemap. `TopicView` is a thin wrapper that keys the real component by topic so moving between topics resets the filters. Reuses `BlogChip`, `BLOG_STATES`, `BLOG_LENS`, `BLOG_SCROLL_ROW`, `getBlogMeta`, `getSearchIndex`.
+- **Not changed on purpose:** Saved/Liked have no filters (short personal lists), the Series page keeps its numbered timeline.
+- **Phone checks done:** 375px and 360px, no horizontal overflow on a filtered topic, a small topic, Saved, the author page and the 404 page.
+
+### Cards restore (how to put the OLD cards and Topic page back)
+
+Saved three ways: git tag `cards-classic-2026-10-15` (pushed), `backup/cards-classic.jsx` (plain copy of the old `CategoryTag`, `PostCard` and unfiltered `TopicView`, never bundled), and the demo Artifact's "Today" view. **Restore:** in `src/App.jsx` replace the new `PostCard` with the old `CategoryTag` + `PostCard` from the backup, and replace `TOPIC_FILTER_MIN`, `TopicView` and `TopicViewInner` with the old `TopicView`. The `hideByline` prop and the grid gaps are harmless to leave (the byline on `BlogCard`/`BlogRow` is a separate, optional change). Don't `git checkout` the tag over `App.jsx` (it would discard newer posts). Then `npm run build`, check, push, verify live.
 
 ## Series (The Proverbs Series, added 2026-10-12)
 
@@ -505,6 +520,7 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~Topics and the Scripture Index had no presence on the homepage~~ — fixed 2026-10-01, see "Homepage: Explore by Topic + Scripture Index teaser" above. Demoed first (twice — once as part of a full homepage redesign pitch Brian didn't take, once as a narrowly-scoped two-block demo he did approve), then implemented exactly as approved with the one requested trim (no heading/subcopy on the Topics section). Rest of the homepage deliberately untouched.
 - ~~Homepage buried the writing, repeated itself, and gave a visitor no way in~~ — fixed 2026-10-06 with the full makeover, see "Homepage (redesigned 2026-10-06)" above. Also fixed along the way: the archive pick could repeat a post already on the page, the email signup was only in the footer, and the footer signup button was dark-on-dark in dark mode. **The old homepage can be restored on request** — steps are in "Homepage restore" in that same section, backed by git tag `homepage-classic-2026-10-06` and `backup/homepage-classic.jsx`.
 - ~~Post page was a narrow column with no landmarks, actions only at the very top and bottom, and a dead-end finish~~ — redesigned 2026-10-15, see "Post page (redesigned 2026-10-15)". **The old post page can be restored on request** (tag `post-classic-2026-10-15`, `backup/post-classic.jsx`).
+- ~~Two card designs coexisted (Blogs new, everywhere else old) and Topic pages had no filters~~ — fixed 2026-10-15, see "One card everywhere + Topic filters". **The old cards can be restored on request** (tag `cards-classic-2026-10-15`, `backup/cards-classic.jsx`).
 - ~~No way to group related posts into a named, growing series~~ — added 2026-10-12, see "Series (The Proverbs Series)".
 - ~~Blogs page was one endless grid of identical cards with search that gave no help and filters that scrolled away~~ — redesigned 2026-10-07, see "Blogs page (redesigned 2026-10-07)". **The old Blogs page can be restored on request** (tag `blogs-classic-2026-10-07`, `backup/blogs-classic.jsx`).
 - ~~About page was four paragraphs in one column with no face, no next step, no way to reach Brian~~ — redesigned 2026-10-07, see "About page (redesigned 2026-10-07)". **The old About can be restored on request** (tag `about-classic-2026-10-07`, `backup/about-classic.jsx`).
