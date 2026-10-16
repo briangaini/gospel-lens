@@ -4617,7 +4617,7 @@ function getSearchIndex(post) {
 function Eyebrow({ children, center = false }) {
   return (
     <div
-      className={`flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4 ${
+      className={`flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4 ${
         center ? "justify-center" : ""
       }`}
     >
@@ -4632,7 +4632,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
   const [query, setQuery] = useState("");
 
   const linkClass = (v) =>
-    `text-sm tracking-wide transition-colors duration-200 pb-1 border-b ${
+    `hit text-sm tracking-wide transition-colors duration-200 pb-1 border-b ${
       view === v || (v === "blog" && (view === "post" || view === "collection"))
         ? "text-[#1C1F26] dark:text-[#F2F1EC] border-[#B08D57]"
         : "text-[#5B5F6B] dark:text-[#A9ADB6] border-transparent hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] hover:border-[#B08D57]/50"
@@ -4672,12 +4672,12 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
   return (
     <header className="sticky top-0 z-30 bg-[#F8F7F3]/90 dark:bg-[#14161B]/90 backdrop-blur-sm border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
       <div className="max-w-5xl mx-auto px-6 sm:px-8 h-20 flex items-center justify-between gap-3">
-        <button onClick={() => setView("home")} className="flex items-center gap-2.5 group shrink-0">
+        <button onClick={() => setView("home")} className="hit flex items-center gap-2.5 group shrink-0">
           <span className="relative flex items-center justify-center w-8 h-8 rounded-full border border-[#B08D57] text-[#B08D57] group-hover:bg-[#B08D57] group-hover:text-[#F8F7F3] transition-colors duration-300">
             <BookOpen size={15} strokeWidth={1.75} />
           </span>
           <span
-            className="text-[22px] text-[#1C1F26] dark:text-[#F2F1EC] tracking-tight"
+            className="text-[20px] sm:text-[22px] text-[#1C1F26] dark:text-[#F2F1EC] tracking-tight"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
           >
             The Gospel Lens
@@ -4692,9 +4692,9 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search the blog…"
-              className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-3 py-2 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] rounded-sm focus:outline-none focus:border-[#4A5D4E]"
+              className="w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-3 py-2 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#6E717A] rounded-sm focus:outline-none focus:border-[#4A5D4E]"
             />
-            <button type="button" onClick={() => setSearchOpen(false)} className="text-[#8A8D96] dark:text-[#7C808A] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]" aria-label="Close search">
+            <button type="button" onClick={() => setSearchOpen(false)} className="hit text-[#6E717A] dark:text-[#848892] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]" aria-label="Close search">
               <X size={18} />
             </button>
           </form>
@@ -4712,12 +4712,12 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
               </button>
             </nav>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center -mr-[11px]">
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search"
                 title="Search (press / or ⌘K)"
-                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
+                className="flex items-center justify-center w-11 h-11 text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
               >
                 <Search size={18} strokeWidth={2} />
               </button>
@@ -4736,7 +4736,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
                 onClick={() => setView("saved")}
                 aria-label="Saved Posts"
                 title="Saved Posts"
-                className={`hidden sm:inline-block transition-colors duration-200 ${
+                className={`hidden sm:flex items-center justify-center w-11 h-11 transition-colors duration-200 ${
                   view === "saved"
                     ? "text-[#B08D57]"
                     : "text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
@@ -4748,7 +4748,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
                 onClick={() => setView("liked")}
                 aria-label="Liked Posts"
                 title="Liked Posts"
-                className={`hidden sm:inline-block transition-colors duration-200 ${
+                className={`hidden sm:flex items-center justify-center w-11 h-11 transition-colors duration-200 ${
                   view === "liked"
                     ? "text-[#C1584A]"
                     : "text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
@@ -4759,7 +4759,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
               <button
                 onClick={toggleDark}
                 aria-label="Toggle dark mode"
-                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
+                className="flex items-center justify-center w-11 h-11 text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC] transition-colors duration-200"
               >
                 {dark ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
               </button>
@@ -4768,7 +4768,7 @@ function Nav({ view, setView, menuOpen, setMenuOpen, onSearch, dark, toggleDark,
                   even on desktop, alongside (not replacing) the Home/About/Blogs
                   text links and the other icons. Opens the same dropdown list
                   used on mobile at every screen size now. */}
-              <button className="text-[#1C1F26] dark:text-[#F2F1EC]" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+              <button className="flex items-center justify-center w-11 h-11 text-[#1C1F26] dark:text-[#F2F1EC]" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
                 {menuOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
@@ -4886,7 +4886,7 @@ function NewsletterForm() {
   };
 
   const inputClass =
-    "flex-1 min-w-0 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] rounded-sm";
+    "flex-1 min-w-0 sm:w-64 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 px-4 py-2.5 text-base sm:text-sm text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#6E717A] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] rounded-sm";
   const buttonClass =
     "whitespace-nowrap bg-[#1C1F26] dark:bg-[#F2F1EC] text-[#F8F7F3] dark:text-[#1C1F26] px-5 py-2.5 text-sm font-medium hover:bg-[#4A5D4E] dark:hover:bg-[#6E9077] dark:hover:text-[#F8F7F3] transition-colors duration-300 rounded-sm";
 
@@ -4945,12 +4945,12 @@ function Footer({ showNewsletter = true }) {
         {showNewsletter && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10 border-b border-[#1C1F26]/8 dark:border-[#F2F1EC]/10">
             <div>
-              <h3
+              <h2
                 className="text-lg text-[#1C1F26] dark:text-[#F2F1EC] mb-1"
                 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
               >
                 Get new posts by email
-              </h3>
+              </h2>
               <p className="text-sm text-[#5B5F6B] dark:text-[#A9ADB6]">One email, whenever something new is published. No spam.</p>
             </div>
             <NewsletterForm />
@@ -4966,43 +4966,43 @@ function Footer({ showNewsletter = true }) {
           </div>
 
           {CONTACT_EMAIL && (
-            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-0 text-xs">
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+                className="inline-flex items-center min-h-[44px] text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
               >
                 Contact
               </a>
               <a
                 href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Blog Submission — The Gospel Lens")}`}
-                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+                className="inline-flex items-center min-h-[44px] text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
               >
                 Submit a Blog Post
               </a>
               <a
                 href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Share Your Story — The Gospel Lens")}&body=${encodeURIComponent("I wanted to share how a post on The Gospel Lens impacted me:\n\n")}`}
-                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+                className="inline-flex items-center min-h-[44px] text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
               >
                 Share Your Story
               </a>
               <a
                 href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Site Suggestion — The Gospel Lens")}`}
-                className="text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
+                className="inline-flex items-center min-h-[44px] text-[#5B5F6B] dark:text-[#A9ADB6] hover:text-[#4A5D4E] underline underline-offset-2 transition-colors duration-200"
               >
                 Suggest an Idea
               </a>
             </div>
           )}
 
-          <p className="text-xs text-[#8A8D96] dark:text-[#7C808A] tracking-wide">
+          <p className="text-xs text-[#6E717A] dark:text-[#848892] tracking-wide">
             © 2026 The Gospel Lens. Every good gift is from above.
           </p>
         </div>
 
-        <p className="text-[11px] text-[#8A8D96] dark:text-[#7C808A] leading-relaxed mt-6 pt-6 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 max-w-2xl">
+        <p className="text-[12px] text-[#6E717A] dark:text-[#848892] leading-relaxed mt-6 pt-6 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 max-w-2xl">
           Some articles on this site are curated, adapted, or quoted from other Christian teachers, authors, and ministries, and are shared here for devotional and educational purposes. All rights remain with their original creators. Scripture quotations are taken from the translations noted with each verse.
         </p>
-        <p className="text-[11px] text-[#8A8D96] dark:text-[#7C808A] leading-relaxed mt-3 max-w-2xl">
+        <p className="text-[12px] text-[#6E717A] dark:text-[#848892] leading-relaxed mt-3 max-w-2xl">
           Unless otherwise noted, Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.
         </p>
       </div>
@@ -5089,7 +5089,7 @@ function ScriptureShareButton({ post, reference, verses }) {
     <button
       onClick={handleShare}
       disabled={status === "working"}
-      className="no-print inline-flex items-center gap-1.5 text-xs font-medium text-[#4A5D4E] dark:text-[#8FAE95] hover:text-[#B08D57] mt-4 transition-colors duration-200 disabled:opacity-60"
+      className="hit no-print inline-flex items-center gap-1.5 text-xs font-medium text-[#4A5D4E] dark:text-[#8FAE95] hover:text-[#B08D57] mt-4 transition-colors duration-200 disabled:opacity-60"
     >
       {status === "done" || status === "fallback" ? <Check size={13} strokeWidth={2} /> : <Share2 size={13} strokeWidth={2} />}
       {labels[status]}
@@ -5210,10 +5210,10 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
         aria-label="Your private answer"
         // 16px on phones on purpose: iOS Safari zooms the whole page in
         // when a text field under 16px gets focus, and never zooms back out.
-        className="block w-full min-h-[44px] overflow-hidden bg-[#F8F7F3] dark:bg-[#14161B] border border-dashed border-[#1C1F26]/18 dark:border-[#F2F1EC]/20 rounded-sm px-3 py-2.5 text-base sm:text-[13.5px] leading-snug text-[#2E323B] dark:text-[#D9D9D9] placeholder:text-[#8A8D96] resize-none focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] transition-colors duration-150"
+        className="block w-full min-h-[44px] overflow-hidden bg-[#F8F7F3] dark:bg-[#14161B] border border-dashed border-[#1C1F26]/18 dark:border-[#F2F1EC]/20 rounded-sm px-3 py-2.5 text-base sm:text-[13.5px] leading-snug text-[#2E323B] dark:text-[#D9D9D9] placeholder:text-[#6E717A] resize-none focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] transition-colors duration-150"
       />
       <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1.5">
-        <span className="text-[10px] text-[#8A8D96] dark:text-[#7C808A] inline-flex items-center gap-1">
+        <span className="text-[12px] text-[#6E717A] dark:text-[#848892] inline-flex items-center gap-1">
           <Lock size={10} strokeWidth={2} />
           {signedIn ? "Private — synced to your account" : "Private — stored on this device only"}
         </span>
@@ -5221,14 +5221,14 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
           <button
             type="button"
             onClick={() => onViewJournal()}
-            className="text-[10px] text-[#B08D57] font-semibold hover:underline"
+            className="hit text-[12px] text-[#7F6637] dark:text-[#B08D57] font-semibold hover:underline"
           >
             View your full Journal
           </button>
         )}
         <div className="flex items-center gap-3 ml-auto">
           {status === "saved" && draft.trim() && (
-            <span className="text-[10px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Saved</span>
+            <span className="text-[12px] text-[#4A5D4E] dark:text-[#6E9077] font-semibold">Saved</span>
           )}
           {onDelete && draft.trim() && (
             <button
@@ -5240,7 +5240,7 @@ function JournalAnswerBox({ postId, qIndex, savedText, onSave, onDelete, signedI
                   onDelete();
                 }
               }}
-              className="inline-flex items-center gap-1 text-[10px] text-[#8A8D96] dark:text-[#7C808A] hover:text-[#C1584A] transition-colors duration-150"
+              className="inline-flex items-center gap-1 text-[12px] text-[#6E717A] dark:text-[#848892] hover:text-[#C1584A] transition-colors duration-150"
             >
               <Trash2 size={11} strokeWidth={2} />
               Delete
@@ -5274,7 +5274,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
               {isFirst ? (
                 <>
                   <span
-                    className="float-left text-7xl leading-[0.75] pr-3 pt-2 text-[#4A5D4E]"
+                    className="float-left text-7xl leading-[0.75] pr-3 pt-2 text-[#4A5D4E] dark:text-[#6E9077]"
                     style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
                   >
                     {block.text.charAt(0)}
@@ -5321,7 +5321,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
               <div className="flex items-start gap-3">
                 <Sparkles size={16} className="text-[#B08D57] mt-1 shrink-0" strokeWidth={2} />
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-2">
+                  <p className="text-[12px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-2">
                     Wisdom of the Day
                   </p>
                   <p className="text-[17px] leading-relaxed italic" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -5340,7 +5340,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
           return (
             <div key={i} className="not-prose border-l-4 border-[#B08D57] bg-[#4A5D4E]/6 rounded-r-sm px-6 py-6 my-8">
               <div className="flex items-start justify-between gap-3 mb-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold">
+                <p className="text-[12px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold">
                   Scripture Focus · {block.reference}
                 </p>
                 {/* Entry point to the Scripture Index (/verses) -- the ONLY
@@ -5365,12 +5365,12 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
                     <button
                       onClick={openScriptureIndex}
                       aria-label="View Scripture Index"
-                      className="group/tooltip no-print relative w-6 h-6 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
+                      className="group/tooltip hit no-print relative w-6 h-6 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
                     >
                       <List size={13} strokeWidth={2} />
                       <span
                         role="tooltip"
-                        className="no-print pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded-sm bg-[#1C1F26] dark:bg-[#F2F1EC] px-2 py-1 text-[11px] font-medium text-[#F8F7F3] dark:text-[#1C1F26] opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100 transition-opacity duration-150 z-10"
+                        className="no-print pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded-sm bg-[#1C1F26] dark:bg-[#F2F1EC] px-2 py-1 text-[12px] font-medium text-[#F8F7F3] dark:text-[#1C1F26] opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100 transition-opacity duration-150 z-10"
                       >
                         Scripture Index
                       </span>
@@ -5394,7 +5394,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
           return (
             <div key={i} id="post-reflection" className="not-prose scroll-mt-[160px] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-7 py-6 my-8" style={{ fontSize: 16 }}>
               <div className="flex items-start justify-between gap-3 mb-2">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold">
+                <p className="text-[12px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold">
                   Reflection Questions
                 </p>
                 {/* Entry point to the Reflection Journal (/journal) -- same
@@ -5407,12 +5407,12 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
                     <button
                       onClick={() => openJournal()}
                       aria-label="View Your Journal"
-                      className="group/tooltip no-print relative w-6 h-6 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
+                      className="group/tooltip hit no-print relative w-6 h-6 rounded-full flex items-center justify-center text-[#4A5D4E]/50 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 transition-colors duration-200"
                     >
                       <NotebookPen size={13} strokeWidth={2} />
                       <span
                         role="tooltip"
-                        className="no-print pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded-sm bg-[#1C1F26] dark:bg-[#F2F1EC] px-2 py-1 text-[11px] font-medium text-[#F8F7F3] dark:text-[#1C1F26] opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100 transition-opacity duration-150 z-10"
+                        className="no-print pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded-sm bg-[#1C1F26] dark:bg-[#F2F1EC] px-2 py-1 text-[12px] font-medium text-[#F8F7F3] dark:text-[#1C1F26] opacity-0 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100 transition-opacity duration-150 z-10"
                       >
                         Your Journal
                       </span>
@@ -5427,7 +5427,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
                 {block.items.map((q, qi) => (
                   <li key={qi} className="space-y-2">
                     <div className="flex gap-3 text-[16px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9]">
-                      <span className="text-[#B08D57] font-semibold shrink-0" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      <span className="text-[#7F6637] dark:text-[#B08D57] font-semibold shrink-0" style={{ fontFamily: "'Playfair Display', serif" }}>
                         {qi + 1}.
                       </span>
                       <span>{q}</span>
@@ -5457,7 +5457,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
             <div key={i} className="not-prose flex gap-3 items-start bg-[#B08D57]/10 border border-[#B08D57]/30 rounded-sm px-6 py-5 my-8">
               <Quote size={18} className="text-[#B08D57] mt-1 shrink-0" strokeWidth={2} />
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#8a6f42] font-semibold mb-2">
+                <p className="text-[12px] uppercase tracking-[0.2em] text-[#7F6637] font-semibold mb-2">
                   Write This On Your Heart
                 </p>
                 <p className="text-[16px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9]">{block.text}</p>
@@ -5469,7 +5469,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
         if (block.type === "encourage") {
           return (
             <div key={i} className="not-prose text-center border-y border-[#B08D57]/30 py-8 my-10">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">
+              <p className="text-[12px] uppercase tracking-[0.2em] text-[#7F6637] dark:text-[#B08D57] font-semibold mb-3">
                 Be Encouraged
               </p>
               <p
@@ -5485,7 +5485,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
         if (block.type === "share") {
           return (
             <div key={i} className="not-prose bg-[#4A5D4E]/6 rounded-sm px-7 py-6 my-8">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4">
+              <p className="text-[12px] uppercase tracking-[0.2em] text-[#4A5D4E] font-semibold mb-4">
                 Share Your Faith
               </p>
               <ul className="space-y-3">
@@ -5504,7 +5504,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
           return (
             <div key={i} className="not-prose my-8">
               <div className="bg-[#1C1F26]/4 border-l-4 border-[#1C1F26]/20 dark:border-[#F2F1EC]/20 rounded-r-sm px-7 py-6 mb-3">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#5B5F6B] dark:text-[#A9ADB6] font-semibold mb-3">
+                <p className="text-[12px] uppercase tracking-[0.2em] text-[#5B5F6B] dark:text-[#A9ADB6] font-semibold mb-3">
                   A Prayer
                 </p>
                 <p className="text-[17px] leading-relaxed text-[#2E323B] dark:text-[#D9D9D9] italic" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -5518,7 +5518,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
               {openJournal && (
                 <p className="no-print text-[13px] text-[#5B5F6B] dark:text-[#A9ADB6]">
                   Want to keep praying this?{" "}
-                  <button onClick={() => openJournal("prayer")} className="text-[#B08D57] font-semibold hover:underline">
+                  <button onClick={() => openJournal("prayer")} className="text-[#7F6637] dark:text-[#B08D57] font-semibold hover:underline">
                     Add it to your own Prayer List →
                   </button>
                 </p>
@@ -5529,7 +5529,7 @@ function PostBody({ blocks, post, prefs, openScriptureIndex, journalEntries, onS
 
         if (block.type === "closing") {
           return (
-            <p key={i} className="text-sm italic text-[#8A8D96] dark:text-[#7C808A] pt-2">
+            <p key={i} className="text-sm italic text-[#6E717A] dark:text-[#848892] pt-2">
               {block.text}
             </p>
           );
@@ -5658,7 +5658,7 @@ async function generateVerseCardBlob({ text, attribution, eyebrow = "VERSE OF TH
   ctx.font = "700 28px 'Playfair Display', Georgia, serif";
   ctx.fillText("THE GOSPEL LENS", size / 2, size - 110);
 
-  ctx.fillStyle = "#8A8D96";
+  ctx.fillStyle = "#6E717A";
   ctx.font = "400 24px Inter, sans-serif";
   const siteUrl = window.location.href.split("#")[0].replace(/^https?:\/\//, "").replace(/\/$/, "");
   ctx.fillText(siteUrl, size / 2, size - 70);
@@ -5797,7 +5797,7 @@ function AboutView() {
   const mailto = (subject, body) =>
     `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}${body ? `&body=${encodeURIComponent(body)}` : ""}`;
 
-  const eyebrow = "text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A6F42] dark:text-[#D9B77C]";
+  const eyebrow = "text-[12px] font-semibold tracking-[0.2em] uppercase text-[#7F6637] dark:text-[#D9B77C]";
   const h2Class = "text-[#1C1F26] dark:text-[#F2F1EC] leading-[1.2]";
 
   return (
@@ -5869,7 +5869,7 @@ function AboutView() {
             </ul>
           </div>
           <div className="p-7 bg-[#4A5D4E]/10 dark:bg-[#6E9077]/13">
-            <h3 className="text-xs font-semibold tracking-[0.16em] uppercase text-[#4A5D4E] dark:text-[#6E9077] mb-3.5">The actual news</h3>
+            <h3 className="text-xs font-semibold tracking-[0.16em] uppercase text-[#4A5D4E] dark:text-[#8FAE95] mb-3.5">The actual news</h3>
             <p className="text-[#1C1F26] dark:text-[#F2F1EC] text-[23px] leading-[1.45]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>
               That God, in Christ, did for us what we could never do for ourselves.
             </p>
@@ -5896,7 +5896,7 @@ function AboutView() {
       {/* My hope */}
       <section className="bg-[#4A5D4E] text-center">
         <div className="max-w-[860px] mx-auto px-6 sm:px-8 py-14 sm:py-[72px]">
-          <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#E6D3A9]">My hope</div>
+          <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-[#E6D3A9]">My hope</div>
           <p
             className="mt-4 mx-auto max-w-[760px] text-[23px] sm:text-[30px] leading-[1.45] italic text-white"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 500, textWrap: "balance" }}
@@ -5931,7 +5931,7 @@ function AboutView() {
             <div className="flex items-center gap-2.5 flex-wrap mt-[18px] text-[14.5px]">
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="bg-[#4A5D4E]/10 dark:bg-[#6E9077]/13 px-2.5 py-1 rounded-sm text-[#1C1F26] dark:text-[#F2F1EC] break-all hover:underline"
+                className="bg-[#4A5D4E]/10 dark:bg-[#6E9077]/13 px-2.5 py-2.5 rounded-sm text-[#1C1F26] dark:text-[#F2F1EC] break-all hover:underline"
               >
                 {CONTACT_EMAIL}
               </a>
@@ -5983,7 +5983,7 @@ function SavedPostsView({ openPost, setView, user, onSignIn }) {
       ) : (
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
           Posts you've deliberately set aside to come back to — stored privately in this browser only, never sent anywhere.{" "}
-          <button onClick={onSignIn} className="text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
+          <button onClick={onSignIn} className="hit text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
             Sign in with Google
           </button>{" "}
           to sync these across your devices instead.
@@ -5992,7 +5992,7 @@ function SavedPostsView({ openPost, setView, user, onSignIn }) {
 
       {savedPosts.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
-          <Bookmark size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
+          <Bookmark size={28} strokeWidth={1.75} className="mx-auto text-[#6E717A] dark:text-[#848892] mb-4" />
           <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-6">
             Nothing saved yet — tap the bookmark icon on any post to add it here.
           </p>
@@ -6005,6 +6005,7 @@ function SavedPostsView({ openPost, setView, user, onSignIn }) {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <h2 className="sr-only">Your saved posts</h2>
           {savedPosts.map((post) => (
             <PostCard key={post.id} post={post} onOpen={openPost} onToggleSave={handleToggleSave} />
           ))}
@@ -6039,7 +6040,7 @@ function LikedPostsView({ openPost, setView, user, onSignIn }) {
       ) : (
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-10 max-w-lg">
           Posts that meant something to you — stored privately in this browser only, never sent anywhere.{" "}
-          <button onClick={onSignIn} className="text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
+          <button onClick={onSignIn} className="hit text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
             Sign in with Google
           </button>{" "}
           to sync these across your devices instead.
@@ -6048,7 +6049,7 @@ function LikedPostsView({ openPost, setView, user, onSignIn }) {
 
       {likedPosts.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
-          <Heart size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
+          <Heart size={28} strokeWidth={1.75} className="mx-auto text-[#6E717A] dark:text-[#848892] mb-4" />
           <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-6">
             Nothing liked yet — tap the heart icon on any post to add it here.
           </p>
@@ -6061,6 +6062,7 @@ function LikedPostsView({ openPost, setView, user, onSignIn }) {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <h2 className="sr-only">Your liked posts</h2>
           {likedPosts.map((post) => (
             <PostCard key={post.id} post={post} onOpen={openPost} onToggleLike={handleToggleLike} />
           ))}
@@ -6150,14 +6152,14 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
     `text-sm font-semibold pb-2.5 border-b-2 transition-colors duration-200 ${
       tab === t
         ? "text-[#1C1F26] dark:text-[#F2F1EC] border-[#B08D57]"
-        : "text-[#8A8D96] dark:text-[#7C808A] border-transparent hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+        : "text-[#6E717A] dark:text-[#848892] border-transparent hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
     }`;
 
   return (
     <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
+        className="hit inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
@@ -6190,7 +6192,7 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
       ) : (
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-8 max-w-lg">
           Private answers to each post's Reflection Questions, plus your own prayer list — stored on this device only.{" "}
-          <button onClick={onSignIn} className="text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
+          <button onClick={onSignIn} className="hit text-[#4A5D4E] dark:text-[#6E9077] font-medium hover:underline">
             Sign in with Google
           </button>{" "}
           to sync these across your devices instead.
@@ -6215,7 +6217,7 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
       {tab === "reflections" ? (
         groups.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
-            <NotebookPen size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
+            <NotebookPen size={28} strokeWidth={1.75} className="mx-auto text-[#6E717A] dark:text-[#848892] mb-4" />
             <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-6">
               Nothing in your journal yet — answer a Reflection Question on any post to start one.
             </p>
@@ -6237,12 +6239,12 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
                   <p className="text-[15.5px] text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
                     {group.post.title}
                   </p>
-                  <span className="text-[11px] text-[#8A8D96] dark:text-[#7C808A]">{group.post.date}</span>
+                  <span className="text-[12px] text-[#6E717A] dark:text-[#848892]">{group.post.date}</span>
                 </button>
                 <div className="space-y-4">
                   {group.items.map((entry) => (
                     <div key={entry.id} className="bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm px-5 py-4">
-                      <p className="text-[12px] italic text-[#8A8D96] dark:text-[#7C808A] mb-2">
+                      <p className="text-[12px] italic text-[#6E717A] dark:text-[#848892] mb-2">
                         {getReflectionQuestionText(group.postId, entry.qIndex)}
                       </p>
                       <JournalAnswerBox
@@ -6268,7 +6270,7 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
               value={prayerDraft}
               onChange={(e) => setPrayerDraft(e.target.value)}
               placeholder="Add a prayer request…"
-              className="flex-1 min-w-0 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 rounded-sm px-3.5 py-2.5 text-base sm:text-[13.5px] text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E]"
+              className="flex-1 min-w-0 bg-white dark:bg-[#1E2128] border border-[#1C1F26]/15 dark:border-[#F2F1EC]/18 rounded-sm px-3.5 py-2.5 text-base sm:text-[13.5px] text-[#1C1F26] dark:text-[#F2F1EC] placeholder:text-[#6E717A] focus:outline-none focus:border-[#4A5D4E]"
             />
             <button
               type="submit"
@@ -6291,7 +6293,7 @@ function JournalView({ journalEntries, prayerList, onSaveAnswer, onAddPrayer, on
               </div>
               {answered.length > 0 && (
                 <>
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mt-8 mb-3">
+                  <p className="text-[12px] uppercase tracking-[0.15em] text-[#6E717A] dark:text-[#848892] font-semibold mt-8 mb-3">
                     Answered
                   </p>
                   <div className="space-y-2.5">
@@ -6325,10 +6327,10 @@ function PrayerRow({ prayer, onToggleAnswered, onDelete }) {
         {isAnswered && <Check size={11} strokeWidth={3} />}
       </button>
       <div className="flex-1 min-w-0">
-        <p className={`text-[13.5px] leading-relaxed ${isAnswered ? "text-[#8A8D96] dark:text-[#7C808A] line-through decoration-[#8A8D96]/50" : "text-[#2E323B] dark:text-[#D9D9D9]"}`}>
+        <p className={`text-[13.5px] leading-relaxed ${isAnswered ? "text-[#6E717A] dark:text-[#848892] line-through decoration-[#6E717A]/50" : "text-[#2E323B] dark:text-[#D9D9D9]"}`}>
           {prayer.text}
         </p>
-        <span className="text-[10.5px] text-[#8A8D96] dark:text-[#7C808A]">
+        <span className="text-[12px] text-[#6E717A] dark:text-[#848892]">
           Added {new Date(prayer.createdAt).toLocaleDateString()}
           {isAnswered && ` · Answered ${new Date(prayer.answeredAt).toLocaleDateString()}`}
         </span>
@@ -6338,7 +6340,7 @@ function PrayerRow({ prayer, onToggleAnswered, onDelete }) {
           if (window.confirm("Delete this prayer request?")) onDelete(prayer.id);
         }}
         aria-label="Delete prayer request"
-        className="shrink-0 p-2 -m-2 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#C1584A] transition-colors duration-200"
+        className="shrink-0 p-2 -m-2 text-[#6E717A] dark:text-[#848892] hover:text-[#C1584A] transition-colors duration-200"
       >
         <Trash2 size={14} strokeWidth={2} />
       </button>
@@ -6358,7 +6360,7 @@ function ReadingPlanView({ openPlanPost }) {
 
   return (
     <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-24">
-      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Guided Reading Plan</p>
+      <p className="text-[12px] uppercase tracking-[0.2em] text-[#7F6637] dark:text-[#B08D57] font-semibold mb-3">Guided Reading Plan</p>
       <h1
         className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-4"
         style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
@@ -6412,13 +6414,13 @@ function ReadingPlanView({ openPlanPost }) {
                     ? "bg-[#4A5D4E] text-white"
                     : isNext
                       ? "bg-[#B08D57]/15 text-[#B08D57] border-2 border-[#B08D57]"
-                      : "bg-[#1C1F26]/8 dark:bg-[#F2F1EC]/10 text-[#8A8D96] dark:text-[#7C808A]"
+                      : "bg-[#1C1F26]/8 dark:bg-[#F2F1EC]/10 text-[#6E717A] dark:text-[#848892]"
                 }`}
               >
                 {isDone ? "✓" : i + 1}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A] font-semibold">
+                <div className="text-[12px] uppercase tracking-[0.1em] text-[#6E717A] dark:text-[#848892] font-semibold">
                   Day {i + 1}
                   {isNext ? " · Up Next" : ""}
                 </div>
@@ -6474,6 +6476,7 @@ function NotFoundView({ setView, openPost }) {
       <div className="text-left">
         <Eyebrow>In the Meantime</Eyebrow>
         <div className="grid sm:grid-cols-3 gap-4 sm:gap-5">
+          <h2 className="sr-only">Recent posts</h2>
           {recentPosts.map((post) => (
             <PostCard key={post.id} post={post} onOpen={openPost} />
           ))}
@@ -6493,13 +6496,13 @@ function CollectionView({ authorName, openPost, setView, goBack }) {
     <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
+        className="hit inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
       </button>
 
-      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Teaching From</p>
+      <p className="text-[12px] uppercase tracking-[0.2em] text-[#7F6637] dark:text-[#B08D57] font-semibold mb-3">Teaching From</p>
       <h1
         className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-2"
         style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
@@ -6514,10 +6517,11 @@ function CollectionView({ authorName, openPost, setView, goBack }) {
         ))}
       </div>
 
-      <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mb-6">
+      <p className="text-[12px] uppercase tracking-[0.15em] text-[#6E717A] dark:text-[#848892] font-semibold mb-6">
         Collection · {posts.length} {posts.length === 1 ? "post" : "posts"} on The Gospel Lens
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <h2 className="sr-only">Posts by {authorName}</h2>
         {posts.map((post) => (
           <PostCard key={post.id} post={post} onOpen={openPost} hideByline />
         ))}
@@ -6634,13 +6638,13 @@ function ScriptureIndexView({ openPost, setView, goBack }) {
     <section className="max-w-3xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
+        className="hit inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
       </button>
 
-      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Scripture Index</p>
+      <p className="text-[12px] uppercase tracking-[0.2em] text-[#7F6637] dark:text-[#B08D57] font-semibold mb-3">Scripture Index</p>
       <h1
         className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-3"
         style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
@@ -6655,7 +6659,7 @@ function ScriptureIndexView({ openPost, setView, goBack }) {
         {groups.map((group) => (
           <div key={group.book}>
             <h2
-              className="text-[#B08D57] text-lg mb-2"
+              className="text-[#7F6637] dark:text-[#B08D57] text-lg mb-2"
               style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
             >
               {group.book}
@@ -6676,7 +6680,7 @@ function ScriptureIndexView({ openPost, setView, goBack }) {
                   <span className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[13.5px] italic leading-snug line-clamp-2">
                     "{entry.verseText}"
                   </span>
-                  <span className="text-[#B08D57] text-[12.5px] font-medium sm:whitespace-nowrap group-hover:underline underline-offset-2">
+                  <span className="text-[#7F6637] dark:text-[#B08D57] text-[12.5px] font-medium sm:whitespace-nowrap group-hover:underline underline-offset-2">
                     {entry.post.title} →
                   </span>
                 </button>
@@ -6867,13 +6871,13 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
     <section className="max-w-5xl mx-auto px-6 sm:px-8 pt-16 pb-28">
       <button
         onClick={() => goBack("blog")}
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
+        className="hit inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-10 hover:gap-3 transition-all duration-300"
       >
         <ArrowLeft size={15} strokeWidth={2} />
         Back
       </button>
 
-      <p className="text-[11px] uppercase tracking-[0.2em] text-[#B08D57] font-semibold mb-3">Topic</p>
+      <p className="text-[12px] uppercase tracking-[0.2em] text-[#7F6637] dark:text-[#B08D57] font-semibold mb-3">Topic</p>
       <h1
         className="text-[#1C1F26] dark:text-[#F2F1EC] text-4xl sm:text-5xl leading-[1.15] mb-3"
         style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
@@ -6883,7 +6887,7 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
       {TOPIC_DESCRIPTIONS[topicName] && (
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[16px] leading-relaxed max-w-xl mb-3">{TOPIC_DESCRIPTIONS[topicName]}</p>
       )}
-      <p className="text-[#8A8D96] dark:text-[#7C808A] text-[13px] mb-10">
+      <p className="text-[#6E717A] dark:text-[#848892] text-[13px] mb-10">
         {posts.length} {posts.length === 1 ? "post" : "posts"} on The Gospel Lens.
       </p>
 
@@ -6933,7 +6937,7 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
           <div className="grid gap-2.5 pt-3.5">
             <div className="flex items-center gap-2">
               <div className="relative flex-1 sm:max-w-[420px] min-w-0">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8D96] dark:text-[#7C808A]" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6E717A] dark:text-[#848892]" />
                 <input
                   type="search"
                   value={q}
@@ -6941,14 +6945,14 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
                   placeholder={`Search in ${topicName}…`}
                   aria-label={`Search in ${topicName}`}
                   autoComplete="off"
-                  className={`w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm pl-9 pr-9 py-2.5 text-base sm:text-[15px] ${inputText} placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] [&::-webkit-search-cancel-button]:hidden`}
+                  className={`w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm pl-9 pr-9 py-2.5 text-base sm:text-[15px] ${inputText} placeholder:text-[#6E717A] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] [&::-webkit-search-cancel-button]:hidden`}
                 />
                 {q && (
                   <button
                     type="button"
                     onClick={() => onSearchChange("")}
                     aria-label="Clear search"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#6E717A] dark:text-[#848892] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
                   >
                     <X size={14} strokeWidth={2.4} />
                   </button>
@@ -6975,7 +6979,7 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
                     aria-pressed={layout === key}
                     aria-label={label}
                     title={label}
-                    className={`px-[11px] py-[9px] ${layout === key ? "bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]" : "text-[#8A8D96] dark:text-[#7C808A]"}`}
+                    className={`px-[11px] py-[9px] ${layout === key ? "bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]" : "text-[#6E717A] dark:text-[#848892]"}`}
                   >
                     <Icon size={17} strokeWidth={2} />
                   </button>
@@ -6999,7 +7003,7 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
                 </button>
               ))}
               {(active.length > 0 || terms.length > 0) && (
-                <button type="button" onClick={clearAll} className="text-[12.5px] font-semibold text-[#8A8D96] dark:text-[#7C808A] underline underline-offset-[3px]">
+                <button type="button" onClick={clearAll} className="text-[12.5px] font-semibold text-[#6E717A] dark:text-[#848892] underline underline-offset-[3px]">
                   Clear all
                 </button>
               )}
@@ -7010,27 +7014,33 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
 
       {results.length === 0 ? (
         <div className="text-center py-14 px-5 mt-4 mb-14 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
-          <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
             Nothing matches that
-          </h3>
+          </h2>
           <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-5">
             {terms.length ? `Nothing in ${topicName} matches that search and those filters.` : "Those filters don't overlap on any post in this topic yet."} Try removing one.
           </p>
           <BlogChip label="Clear everything" onClick={clearAll} active={false} />
         </div>
       ) : layout === "list" && filterable ? (
-        <div className="mt-4 mb-14 border-t border-[#1C1F26]/12 dark:border-[#F2F1EC]/14">{results.map(renderItem)}</div>
+        <div className="mt-4 mb-14 border-t border-[#1C1F26]/12 dark:border-[#F2F1EC]/14">
+          <h2 className="sr-only">Posts in {topicName}</h2>
+          {results.map(renderItem)}
+        </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-4 mb-14">{results.map(renderItem)}</div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-4 mb-14">
+          <h2 className="sr-only">Posts in {topicName}</h2>
+          {results.map(renderItem)}
+        </div>
       )}
 
-      <p className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mb-4">Other Topics</p>
+      <h2 className="text-[12px] uppercase tracking-[0.15em] text-[#6E717A] dark:text-[#848892] font-semibold mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>Other Topics</h2>
       <div className="flex flex-wrap gap-2">
         {otherTopics.map((t) => (
           <button
             key={t}
             onClick={() => openTopic(t)}
-            className="text-xs text-[#5B5F6B] dark:text-[#A9ADB6] bg-[#4A5D4E]/6 hover:bg-[#4A5D4E]/12 hover:text-[#4A5D4E] px-3 py-1.5 rounded-full transition-colors duration-200"
+            className="text-xs text-[#5B5F6B] dark:text-[#A9ADB6] bg-[#4A5D4E]/6 hover:bg-[#4A5D4E]/12 hover:text-[#4A5D4E] px-3 py-2.5 rounded-full transition-colors duration-200"
           >
             {t}
           </button>
@@ -7060,12 +7070,12 @@ function TopicViewInner({ topicName, openPost, setView, openTopic, goBack }) {
 const LAST_VISIT_KEY = "gospel-lens-last-visit";
 const LAST_VISIT_BASELINE_KEY = "gospel-lens-visit-baseline";
 const HOME_SERIF = { fontFamily: "'Playfair Display', serif", fontWeight: 700 };
-const HOME_GOLD_TEXT = "text-[#8A6F42] dark:text-[#D9B77C]";
+const HOME_GOLD_TEXT = "text-[#7F6637] dark:text-[#D9B77C]";
 const HOME_CARD = "bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 rounded-sm";
 const HOME_LIFT =
   "transition-all duration-300 motion-reduce:transition-none hover:border-[#B08D57]/60 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0";
 const HOME_MUTED = "text-[#5B5F6B] dark:text-[#A9ADB6]";
-const HOME_FAINT = "text-[#7A7E89] dark:text-[#8A8E98]";
+const HOME_FAINT = "text-[#686C77] dark:text-[#8A8E98]";
 
 function shortPostDate(post) {
   const d = new Date(post.date);
@@ -7076,7 +7086,7 @@ function shortPostDate(post) {
 
 function HomeLabel({ children, center = false }) {
   return (
-    <div className={`flex items-center gap-2.5 text-[11px] uppercase tracking-[0.2em] font-semibold mb-3.5 ${HOME_GOLD_TEXT} ${center ? "justify-center" : ""}`}>
+    <div className={`flex items-center gap-2.5 text-[12px] uppercase tracking-[0.2em] font-semibold mb-3.5 ${HOME_GOLD_TEXT} ${center ? "justify-center" : ""}`}>
       {!center && <span className="w-7 h-px bg-[#B08D57]" />}
       {children}
     </div>
@@ -7103,7 +7113,7 @@ function MoreLink({ onClick, children, className = "" }) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none ${className}`}
+      className={`hit inline-flex items-center gap-1.5 text-sm font-semibold text-[#4A5D4E] dark:text-[#6E9077] hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none ${className}`}
     >
       {children}
       <ArrowRight size={14} strokeWidth={2} />
@@ -7150,7 +7160,7 @@ function VerseOfDay() {
         style={{ background: "radial-gradient(ellipse at 50% 28%, rgba(217,183,124,0.17), rgba(217,183,124,0) 62%)" }}
       />
       <div className="relative">
-        <div className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#D9B77C] font-semibold mb-3">
+        <div className="flex items-center justify-center gap-2 text-[12px] uppercase tracking-[0.2em] text-[#D9B77C] font-semibold mb-3">
           <Sunrise size={13} strokeWidth={2} />
           Verse of the Day
         </div>
@@ -7161,7 +7171,7 @@ function VerseOfDay() {
         <button
           onClick={handleShare}
           disabled={status === "working"}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#B7BBC4] hover:text-[#D9B77C] mt-4 transition-colors duration-200 disabled:opacity-60"
+          className="hit inline-flex items-center gap-1.5 text-xs font-medium text-[#B7BBC4] hover:text-[#D9B77C] mt-4 transition-colors duration-200 disabled:opacity-60"
         >
           {status === "done" || status === "fallback" ? <Check size={13} strokeWidth={2} /> : <Share2 size={13} strokeWidth={2} />}
           {labels[status]}
@@ -7206,7 +7216,7 @@ function HomeHero({ latest, openPost, openReadingPlan, setView }) {
 
         <div className="space-y-4">
           <button onClick={() => openPost(latest)} className={`${HOME_CARD} ${HOME_LIFT} group w-full text-left p-6 sm:p-8 block`}>
-            <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+            <span className="text-[12px] uppercase tracking-[0.1em] font-semibold text-[#686C77] dark:text-[#8A8E98]">
               Newest post · {shortPostDate(latest)} · {latest.category} · {estimateReadTime(latest)}
             </span>
             <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-2xl sm:text-[30px] leading-[1.2] mt-2 mb-3" style={HOME_SERIF}>
@@ -7295,7 +7305,7 @@ function MomentsChooser({ openPost, openTopic }) {
 
       <div key={cur} className="g-swap grid md:grid-cols-[1.3fr_1fr] gap-5" aria-live="polite">
         <button onClick={() => openPost(m.primaryPost)} className={`${HOME_CARD} ${HOME_LIFT} group text-left p-6 sm:p-8 flex flex-col justify-start`}>
-          <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+          <span className="text-[12px] uppercase tracking-[0.1em] font-semibold text-[#686C77] dark:text-[#8A8E98]">
             {m.primaryPost.category} · {shortPostDate(m.primaryPost)} · {estimateReadTime(m.primaryPost)}
           </span>
           <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-2xl sm:text-[28px] leading-[1.22] mt-2 mb-3" style={HOME_SERIF}>
@@ -7309,7 +7319,7 @@ function MomentsChooser({ openPost, openTopic }) {
         </button>
 
         <div>
-          <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">Also helpful</span>
+          <span className="text-[12px] uppercase tracking-[0.1em] font-semibold text-[#686C77] dark:text-[#8A8E98]">Also helpful</span>
           <div className="mt-1">
             {m.secondaryPosts.map((p) => (
               <button
@@ -7321,7 +7331,7 @@ function MomentsChooser({ openPost, openTopic }) {
                   <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-lg leading-snug group-hover:text-[#4A5D4E] dark:group-hover:text-[#6E9077] transition-colors duration-200" style={HOME_SERIF}>
                     {p.title}
                   </span>
-                  <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">{p.category}</span>
+                  <span className="text-[12px] uppercase tracking-[0.1em] font-semibold text-[#686C77] dark:text-[#8A8E98]">{p.category}</span>
                 </span>
                 <span className={`${HOME_FAINT} text-[12.5px] shrink-0`}>{shortPostDate(p)}</span>
               </button>
@@ -7348,7 +7358,7 @@ function LatestWriting({ lead, rows, openPost, setView }) {
       </div>
       <div className="grid md:grid-cols-[1.15fr_1fr] gap-7 items-stretch">
         <button onClick={() => openPost(lead)} className={`${HOME_CARD} ${HOME_LIFT} group text-left p-6 sm:p-8 flex flex-col`}>
-          <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+          <span className="text-[12px] uppercase tracking-[0.1em] font-semibold text-[#686C77] dark:text-[#8A8E98]">
             {lead.category} · {shortPostDate(lead)} · {estimateReadTime(lead)}
           </span>
           <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-2xl sm:text-[30px] leading-[1.2] mt-2 mb-3" style={HOME_SERIF}>
@@ -7371,7 +7381,7 @@ function LatestWriting({ lead, rows, openPost, setView }) {
                 <span className="block text-[#1C1F26] dark:text-[#F2F1EC] text-lg leading-snug group-hover:text-[#4A5D4E] dark:group-hover:text-[#6E9077] transition-colors duration-200" style={HOME_SERIF}>
                   {p.title}
                 </span>
-                <span className="text-[11px] uppercase tracking-[0.1em] font-semibold text-[#7A7E89] dark:text-[#8A8E98]">
+                <span className="text-[12px] uppercase tracking-[0.1em] font-semibold text-[#686C77] dark:text-[#8A8E98]">
                   {p.category} · {estimateReadTime(p)}
                 </span>
               </span>
@@ -7409,7 +7419,7 @@ function ProgressRing({ flags }) {
       <text x="95" y="93" textAnchor="middle" fontSize="34" className="fill-[#1C1F26] dark:fill-[#F2F1EC]" style={HOME_SERIF}>
         {done} of {flags.length}
       </text>
-      <text x="95" y="115" textAnchor="middle" fontSize="13" className="fill-[#7A7E89] dark:fill-[#8A8E98]" style={{ fontFamily: "Inter, sans-serif" }}>
+      <text x="95" y="115" textAnchor="middle" fontSize="13" className="fill-[#686C77] dark:fill-[#8A8E98]" style={{ fontFamily: "Inter, sans-serif" }}>
         days read
       </text>
     </svg>
@@ -7508,14 +7518,14 @@ function BeliefBand({ setView }) {
         <path d="M200 120v160M140 175h120" stroke="currentColor" strokeWidth="22" fill="none" />
       </svg>
       <div className="relative max-w-5xl mx-auto px-6 sm:px-8 py-16 sm:py-20">
-        <div className="flex items-center gap-2.5 text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D9B77C] mb-4">
+        <div className="flex items-center gap-2.5 text-[12px] uppercase tracking-[0.2em] font-semibold text-[#D9B77C] mb-4">
           <span className="w-7 h-px bg-[#B08D57]" />
           What we believe
         </div>
         <p className="text-[19px] sm:text-[25px] leading-[1.55] max-w-[30em] mb-5" style={{ fontFamily: "'Playfair Display', serif" }}>
           The gospel is simply this: God loved a broken world enough to enter it. In Jesus Christ, he lived the life we could not live, died the death we deserved, and rose again so that all who trust in him might be forgiven, made new, and brought home to God — not by our effort, but by his grace.
         </p>
-        <button onClick={() => setView("about")} className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#D9B77C] hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
+        <button onClick={() => setView("about")} className="hit inline-flex items-center gap-1.5 text-sm font-semibold text-[#D9B77C] hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none">
           Read the full story
           <ArrowRight size={14} strokeWidth={2} />
         </button>
@@ -7584,7 +7594,7 @@ function FromArchiveCard({ openPost, excludeIds }) {
       >
         <Archive size={26} strokeWidth={1.75} className="text-[#D9B77C] shrink-0 mt-1 sm:mt-0" />
         <div className="min-w-0">
-          <span className="text-[11px] uppercase tracking-[0.2em] text-[#D9B77C] font-semibold">From the Archive</span>
+          <span className="text-[12px] uppercase tracking-[0.2em] text-[#D9B77C] font-semibold">From the Archive</span>
           <p className="text-[13px] text-[#B7BBC4] mt-1 mb-2">A post worth another look — resurfaced from the archive here each week.</p>
           <div className="text-[#F8F7F3] text-xl sm:text-[21px] leading-snug" style={HOME_SERIF}>
             {post.title}
@@ -7719,7 +7729,7 @@ function SeriesView({ seriesId, openPost, goBack }) {
             <path d="M200 120v160M140 175h120" stroke="currentColor" strokeWidth="18" fill="none" />
           </svg>
           <div className="relative">
-            <div className="flex items-center gap-2.5 text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D9B77C] mb-4">
+            <div className="flex items-center gap-2.5 text-[12px] uppercase tracking-[0.2em] font-semibold text-[#D9B77C] mb-4">
               <span className="w-7 h-px bg-[#B08D57]" />A series
             </div>
             <h1 className="text-[38px] sm:text-6xl leading-[1.08] mb-3" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
@@ -7761,7 +7771,7 @@ function SeriesView({ seriesId, openPost, goBack }) {
         </header>
 
         <div className="mt-12 sm:mt-14 mb-6">
-          <div className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#8A6F42] dark:text-[#D9B77C] mb-2">In reading order</div>
+          <div className="text-[12px] uppercase tracking-[0.2em] font-semibold text-[#7F6637] dark:text-[#D9B77C] mb-2">In reading order</div>
           <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] max-w-[60ch]">
             Read them in the order they were published, or jump to any one. Each stands on its own.
           </p>
@@ -7777,7 +7787,7 @@ function SeriesView({ seriesId, openPost, goBack }) {
                   className={`absolute left-0 top-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border flex items-center justify-center text-lg sm:text-xl ${
                     isRead
                       ? "bg-[#4A5D4E] border-[#4A5D4E] text-white dark:bg-[#6E9077] dark:border-[#6E9077] dark:text-[#14161B]"
-                      : "bg-white dark:bg-[#1E2128] border-[#B08D57]/60 text-[#8A6F42] dark:text-[#D9B77C]"
+                      : "bg-white dark:bg-[#1E2128] border-[#B08D57]/60 text-[#7F6637] dark:text-[#D9B77C]"
                   }`}
                   style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
                   aria-hidden="true"
@@ -7789,7 +7799,7 @@ function SeriesView({ seriesId, openPost, goBack }) {
                   onClick={() => openPost(p)}
                   className="group w-full text-left bg-white dark:bg-[#1E2128] border border-[#1C1F26]/10 dark:border-[#F2F1EC]/12 hover:border-[#B08D57]/60 rounded-sm p-5 sm:p-6 transition-all duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:shadow-[0_12px_30px_-18px_rgba(28,31,38,0.3)]"
                 >
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2 text-[11px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A]">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2 text-[12px] uppercase tracking-[0.1em] text-[#6E717A] dark:text-[#848892]">
                     <span className="font-semibold text-[#5B5F6B] dark:text-[#A9ADB6]">
                       {i === 0 && hasIntro ? "The intro" : `No. ${i + 1}`}
                     </span>
@@ -7812,7 +7822,7 @@ function SeriesView({ seriesId, openPost, goBack }) {
           <li className="relative pl-14 sm:pl-[72px]">
             <span
               aria-hidden="true"
-              className="absolute left-0 top-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-dashed border-[#B08D57]/70 flex items-center justify-center text-[#8A6F42] dark:text-[#D9B77C] text-xl"
+              className="absolute left-0 top-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-dashed border-[#B08D57]/70 flex items-center justify-center text-[#7F6637] dark:text-[#D9B77C] text-xl"
             >
               +
             </span>
@@ -7852,7 +7862,7 @@ function SeriesBand({ seriesId, openSeries, openPost }) {
               <p className="text-[#1C1F26] dark:text-[#F2F1EC] text-[18px] sm:text-xl leading-[1.5] italic" style={{ fontFamily: "'Playfair Display', serif" }}>
                 {series.verse}
               </p>
-              <footer className={`text-[11.5px] uppercase tracking-[0.15em] mt-2 ${HOME_GOLD_TEXT}`}>{series.verseRef}</footer>
+              <footer className={`text-[12px] uppercase tracking-[0.15em] mt-2 ${HOME_GOLD_TEXT}`}>{series.verseRef}</footer>
             </blockquote>
           )}
           <button
@@ -7867,11 +7877,11 @@ function SeriesBand({ seriesId, openSeries, openPost }) {
           </span>
         </div>
         <div>
-          <div className={`text-[11px] uppercase tracking-[0.2em] font-semibold mb-3 ${HOME_GOLD_TEXT}`}>Latest in the series</div>
+          <div className={`text-[12px] uppercase tracking-[0.2em] font-semibold mb-3 ${HOME_GOLD_TEXT}`}>Latest in the series</div>
           <div className="grid gap-3">
             {latest.map((p) => (
               <button key={p.id} onClick={() => openPost(p)} className={`${HOME_CARD} ${HOME_LIFT} text-left p-4 sm:p-5 flex items-start gap-4`}>
-                <span className="shrink-0 w-9 h-9 rounded-full border border-[#B08D57]/60 flex items-center justify-center text-[15px] text-[#8A6F42] dark:text-[#D9B77C]" style={HOME_SERIF} aria-hidden="true">
+                <span className="shrink-0 w-9 h-9 rounded-full border border-[#B08D57]/60 flex items-center justify-center text-[15px] text-[#7F6637] dark:text-[#D9B77C]" style={HOME_SERIF} aria-hidden="true">
                   {numberOf(p)}
                 </span>
                 <span className="min-w-0">
@@ -7885,7 +7895,7 @@ function SeriesBand({ seriesId, openSeries, openPost }) {
               </button>
             ))}
           </div>
-          <button onClick={() => openSeries(seriesId)} className={`mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${HOME_GOLD_TEXT} hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none`}>
+          <button onClick={() => openSeries(seriesId)} className={`hit mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${HOME_GOLD_TEXT} hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none`}>
             See all {posts.length}, in order
             <ArrowRight size={14} strokeWidth={2} />
           </button>
@@ -7910,7 +7920,7 @@ const BLOG_CAT_DOT = {
   Foundations: "bg-[#1C1F26] dark:bg-[#F2F1EC]",
   "Wisdom from Proverbs": "bg-[#9A5B45] dark:bg-[#D08A70]",
 };
-const BLOG_LABEL = "text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8A8D96] dark:text-[#7C808A] flex-none";
+const BLOG_LABEL = "text-[12px] font-semibold tracking-[0.14em] uppercase text-[#6E717A] dark:text-[#848892] flex-none";
 const BLOG_SCROLL_ROW =
   "flex flex-nowrap gap-[7px] overflow-x-auto pb-1 -mb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-webkit-mask-image:linear-gradient(90deg,#000_92%,transparent)] [mask-image:linear-gradient(90deg,#000_92%,transparent)]";
 
@@ -7984,14 +7994,14 @@ function BlogChip({ label, count, active, onClick, dotClass }) {
       {dotClass && <span className={`w-2 h-2 rounded-full ${dotClass}`} />}
       {label}
       {count != null && (
-        <span className={`text-[11.5px] tabular-nums ${active ? "opacity-75" : "text-[#8A8D96] dark:text-[#7C808A]"}`}>{count}</span>
+        <span className={`text-[12px] tabular-nums ${active ? "opacity-75" : "text-[#6E717A] dark:text-[#848892]"}`}>{count}</span>
       )}
     </button>
   );
 }
 
 function BlogPostActions({ liked, saved, onToggleLike, onToggleSave, className = "" }) {
-  const base = "w-8 h-8 flex items-center justify-center rounded-full text-[#8A8D96] dark:text-[#7C808A] hover:bg-[#4A5D4E]/10 transition-colors duration-200";
+  const base = "w-8 h-8 flex items-center justify-center rounded-full text-[#6E717A] dark:text-[#848892] hover:bg-[#4A5D4E]/10 transition-colors duration-200";
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       <button
@@ -8019,14 +8029,14 @@ function BlogPostActions({ liked, saved, onToggleLike, onToggleSave, className =
 function BlogStatePill({ isRead, isNew }) {
   if (isRead) {
     return (
-      <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold tracking-[0.08em] uppercase rounded-full px-2 py-0.5 bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]">
+      <span className="inline-flex items-center gap-1 text-[12px] font-semibold tracking-[0.08em] uppercase rounded-full px-2 py-0.5 bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]">
         <Check size={10} strokeWidth={3.2} />
         Read
       </span>
     );
   }
   if (isNew) {
-    return <span className="text-[10.5px] font-semibold tracking-[0.08em] uppercase rounded-full px-2 py-0.5 bg-[#B08D57] text-[#1C1F26]">New</span>;
+    return <span className="text-[12px] font-semibold tracking-[0.08em] uppercase rounded-full px-2 py-0.5 bg-[#B08D57] text-[#1C1F26]">New</span>;
   }
   return null;
 }
@@ -8042,9 +8052,9 @@ function BlogCard({ post, meta, terms, isRead, isNew, liked, saved, hideByline =
       <button type="button" onClick={() => onOpen(post)} aria-label={`Read ${post.title}`} className="absolute inset-0 z-0 rounded-sm" />
       <BlogPostActions liked={liked} saved={saved} onToggleLike={onToggleLike} onToggleSave={onToggleSave} className="absolute top-3 right-3 z-10" />
       <div className="pointer-events-none flex flex-col flex-1">
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pr-[72px] mb-3 text-[11px] uppercase tracking-[0.1em] text-[#8A8D96] dark:text-[#7C808A]">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pr-[72px] mb-3 text-[12px] uppercase tracking-[0.1em] text-[#6E717A] dark:text-[#848892]">
           <span className="inline-flex items-center gap-1.5 font-semibold text-[#5B5F6B] dark:text-[#A9ADB6]">
-            <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#8A8D96]"}`} />
+            <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#6E717A]"}`} />
             {post.category}
           </span>
           <span>{meta.minutes} min</span>
@@ -8053,12 +8063,12 @@ function BlogCard({ post, meta, terms, isRead, isNew, liked, saved, hideByline =
         <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-xl leading-[1.28] mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
           <BlogHighlight text={post.title} terms={terms} />
         </h3>
-        {why && <div className="text-xs text-[#8A6F42] dark:text-[#D9B77C] mb-2.5">{why}</div>}
+        {why && <div className="text-xs text-[#7F6637] dark:text-[#D9B77C] mb-2.5">{why}</div>}
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[14.5px] leading-relaxed line-clamp-3 mb-4">
           <BlogHighlight text={post.excerpt} terms={terms} />
         </p>
-        {post.author && !hideByline && <div className="text-xs text-[#8A8D96] dark:text-[#7C808A] -mt-1 mb-3">By {post.author}</div>}
-        <div className="mt-auto flex items-center justify-between gap-2.5 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 pt-3 text-[12.5px] text-[#8A8D96] dark:text-[#7C808A]">
+        {post.author && !hideByline && <div className="text-xs text-[#6E717A] dark:text-[#848892] -mt-1 mb-3">By {post.author}</div>}
+        <div className="mt-auto flex items-center justify-between gap-2.5 border-t border-[#1C1F26]/8 dark:border-[#F2F1EC]/10 pt-3 text-[12.5px] text-[#6E717A] dark:text-[#848892]">
           <span className="truncate min-w-0 font-medium text-[#4A5D4E] dark:text-[#8FAE95]">{meta.tags[0] || ""}</span>
           <span className="whitespace-nowrap">{post.date}</span>
         </div>
@@ -8077,7 +8087,7 @@ function BlogRow({ post, meta, terms, isRead, isNew, liked, saved, hideByline = 
       }`}
     >
       <button type="button" onClick={() => onOpen(post)} aria-label={`Read ${post.title}`} className="absolute inset-0 z-0" />
-      <div className="hidden sm:block pointer-events-none text-[12.5px] leading-snug text-[#8A8D96] dark:text-[#7C808A]">
+      <div className="hidden sm:block pointer-events-none text-[12.5px] leading-snug text-[#6E717A] dark:text-[#848892]">
         {d.toLocaleString("en-US", { month: "short", day: "numeric" })}
         <br />
         {d.getFullYear()}
@@ -8092,15 +8102,15 @@ function BlogRow({ post, meta, terms, isRead, isNew, liked, saved, hideByline = 
         <p className="text-[14px] text-[#5B5F6B] dark:text-[#A9ADB6] line-clamp-2 sm:line-clamp-1">
           <BlogHighlight text={post.excerpt} terms={terms} />
         </p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-[#8A8D96] dark:text-[#7C808A]">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5B5F6B] dark:text-[#A9ADB6]">
-            <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#8A8D96]"}`} />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-[#6E717A] dark:text-[#848892]">
+          <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#5B5F6B] dark:text-[#A9ADB6]">
+            <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#6E717A]"}`} />
             {post.category}
           </span>
           <span>{meta.minutes} min</span>
           {meta.tags[0] && <span>{meta.tags[0]}</span>}
           {post.author && !hideByline && <span>By {post.author}</span>}
-          {why && <span className="text-[#8A6F42] dark:text-[#D9B77C]">{why}</span>}
+          {why && <span className="text-[#7F6637] dark:text-[#D9B77C]">{why}</span>}
         </div>
       </div>
       <BlogPostActions liked={liked} saved={saved} onToggleLike={onToggleLike} onToggleSave={onToggleSave} className="relative z-10" />
@@ -8349,10 +8359,10 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
     const { Icon } = stateEmptyCopy;
     body = (
       <div className="text-center py-16 px-5 mt-5 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
-        <Icon size={28} strokeWidth={1.75} className="mx-auto text-[#8A8D96] dark:text-[#7C808A] mb-4" />
-        <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+        <Icon size={28} strokeWidth={1.75} className="mx-auto text-[#6E717A] dark:text-[#848892] mb-4" />
+        <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
           {stateEmptyCopy.title}
-        </h3>
+        </h2>
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] leading-relaxed max-w-md mx-auto mb-6">{stateEmptyCopy.text}</p>
         <div className="flex flex-wrap justify-center gap-2">
           <BlogChip label="Show all posts" onClick={() => { setState(null); resetPaging(); }} active={false} />
@@ -8363,9 +8373,9 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
   } else if (!results.length) {
     body = (
       <div className="text-center py-16 px-5 mt-5 border border-dashed border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm">
-        <h3 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+        <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-2xl mb-2" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
           Nothing matches that
-        </h3>
+        </h2>
         <p className="text-[#5B5F6B] dark:text-[#A9ADB6] text-[15px] mb-5">
           {terms.length && active.length
             ? "Your search and filters together are too narrow."
@@ -8395,7 +8405,7 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
             <h2 className="text-[#1C1F26] dark:text-[#F2F1EC] text-[22px]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
               {key}
             </h2>
-            <span className="text-[13px] text-[#8A8D96] dark:text-[#7C808A]">
+            <span className="text-[13px] text-[#6E717A] dark:text-[#848892]">
               {monthTotals[key]} {monthTotals[key] === 1 ? "post" : "posts"}
             </span>
             <span aria-hidden="true" className="flex-1 h-px bg-[#1C1F26]/12 dark:bg-[#F2F1EC]/14 self-center" />
@@ -8407,7 +8417,12 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
     if (bucket.length) out.push(renderBucket(bucket, `b-${current}`));
     body = <>{out}</>;
   } else {
-    body = <div className="mt-5">{renderBucket(shown, "flat")}</div>;
+    body = (
+      <div className="mt-5">
+        <h2 className="sr-only">Results</h2>
+        {renderBucket(shown, "flat")}
+      </div>
+    );
   }
 
   const readCount = readIds.size;
@@ -8418,7 +8433,7 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
     <div>
       <header className="max-w-5xl mx-auto px-6 sm:px-8 pt-9 sm:pt-14 pb-5 sm:pb-6 flex flex-wrap items-end justify-between gap-5 sm:gap-7">
         <div>
-          <div className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A6F42] dark:text-[#D9B77C]">The library</div>
+          <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-[#7F6637] dark:text-[#D9B77C]">The library</div>
           <h1 className={`${inputText} text-[40px] sm:text-[54px] leading-[1.05] mt-2.5 mb-3`} style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
             Blogs
           </h1>
@@ -8451,7 +8466,7 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
             <Shuffle size={15} strokeWidth={2} />
             Surprise me with something unread
           </button>
-          {surpriseNote && <p className="text-xs text-[#8A8D96] dark:text-[#7C808A] text-center">{surpriseNote}</p>}
+          {surpriseNote && <p className="text-xs text-[#6E717A] dark:text-[#848892] text-center">{surpriseNote}</p>}
         </div>
       </header>
 
@@ -8525,7 +8540,7 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
         <div className="max-w-5xl mx-auto px-6 sm:px-8 py-3 grid gap-2.5">
           <div className="flex items-center gap-2">
             <div className="relative flex-1 sm:max-w-[420px] min-w-0">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8D96] dark:text-[#7C808A]" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6E717A] dark:text-[#848892]" />
               <input
                 type="search"
                 value={q}
@@ -8533,14 +8548,14 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
                 placeholder="Search posts…"
                 aria-label="Search posts"
                 autoComplete="off"
-                className={`w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm pl-9 pr-9 py-2.5 text-base sm:text-[15px] ${inputText} placeholder:text-[#8A8D96] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] [&::-webkit-search-cancel-button]:hidden`}
+                className={`w-full bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-sm pl-9 pr-9 py-2.5 text-base sm:text-[15px] ${inputText} placeholder:text-[#6E717A] focus:outline-none focus:border-[#4A5D4E] dark:focus:border-[#6E9077] [&::-webkit-search-cancel-button]:hidden`}
               />
               {q && (
                 <button
                   type="button"
                   onClick={() => onSearchChange("")}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#8A8D96] dark:text-[#7C808A] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#6E717A] dark:text-[#848892] hover:text-[#1C1F26] dark:hover:text-[#F2F1EC]"
                 >
                   <X size={14} strokeWidth={2.4} />
                 </button>
@@ -8570,7 +8585,7 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
                   aria-pressed={layout === key}
                   aria-label={label}
                   title={label}
-                  className={`px-[11px] py-[9px] ${layout === key ? "bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]" : "text-[#8A8D96] dark:text-[#7C808A]"}`}
+                  className={`px-[11px] py-[9px] ${layout === key ? "bg-[#4A5D4E]/10 text-[#4A5D4E] dark:text-[#8FAE95]" : "text-[#6E717A] dark:text-[#848892]"}`}
                 >
                   <Icon size={17} strokeWidth={2} />
                 </button>
@@ -8599,7 +8614,7 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
               </button>
             )}
             {(active.length > 0 || terms.length > 0) && (
-              <button type="button" onClick={clearAll} className="text-[12.5px] font-semibold text-[#8A8D96] dark:text-[#7C808A] underline underline-offset-[3px]">
+              <button type="button" onClick={clearAll} className="text-[12.5px] font-semibold text-[#6E717A] dark:text-[#848892] underline underline-offset-[3px]">
                 Clear all
               </button>
             )}
@@ -8607,10 +8622,10 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-6 sm:px-8 pt-2 pb-20 sm:pb-24">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-2 pb-20 sm:pb-24">
         {body}
         {results.length > 0 && hasMore && (
-          <div className="grid justify-items-center gap-3 mt-10 text-[13px] text-[#8A8D96] dark:text-[#7C808A]">
+          <div className="grid justify-items-center gap-3 mt-10 text-[13px] text-[#6E717A] dark:text-[#848892]">
             <div>
               Showing {shown.length} of {results.length}
             </div>
@@ -8627,9 +8642,9 @@ function BlogListView({ openPost, initialSearch = "", openTopic, consumeNavSearc
           </div>
         )}
         {results.length > BLOG_PAGE && !hasMore && (
-          <p className="text-center mt-10 text-[13px] text-[#8A8D96] dark:text-[#7C808A]">That's all {results.length}.</p>
+          <p className="text-center mt-10 text-[13px] text-[#6E717A] dark:text-[#848892]">That's all {results.length}.</p>
         )}
-      </main>
+      </div>
     </div>
   );
 }
@@ -8657,7 +8672,7 @@ function ListenButton({ status, onToggle, onRestart, supported }) {
           onClick={onRestart}
           aria-label="Restart from the beginning"
           title="Restart from the beginning"
-          className="inline-flex items-center justify-center w-8 h-8 text-[#8A8D96] dark:text-[#7C808A] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
+          className="inline-flex items-center justify-center w-8 h-8 text-[#6E717A] dark:text-[#848892] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200"
         >
           <RotateCcw size={13} strokeWidth={2} />
         </button>
@@ -8725,7 +8740,7 @@ function ShareBar({ post, onPrint }) {
 
   return (
     <div className="no-print flex flex-wrap items-center gap-3 py-6">
-      <span className="text-[11px] uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] font-semibold mr-1">Share</span>
+      <span className="text-[12px] uppercase tracking-[0.15em] text-[#6E717A] dark:text-[#848892] font-semibold mr-1">Share</span>
       <button
         onClick={handleNativeShare}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B5F6B] dark:text-[#A9ADB6] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-3.5 py-2 rounded-full hover:border-[#4A5D4E]/50 hover:text-[#4A5D4E] transition-colors duration-200 sm:hidden"
@@ -8864,7 +8879,7 @@ function TextSettings({ prefs, setPrefs, className = "" }) {
     }`;
   return (
     <div role="dialog" aria-label="Text settings" onClick={(e) => e.stopPropagation()} className={`no-print absolute z-40 w-[250px] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-md shadow-[0_14px_34px_-18px_rgba(28,31,38,0.45)] p-4 text-left ${className}`}>
-      <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8A8D96] dark:text-[#7C808A] mb-2">Text size</p>
+      <p className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#6E717A] dark:text-[#848892] mb-2">Text size</p>
       <div className="flex gap-1.5 mb-4">
         {POST_TEXT_SIZES.map(([label, n]) => (
           <button key={n} type="button" aria-pressed={prefs.size === n} onClick={() => setPrefs({ ...prefs, size: n })} className={btn(prefs.size === n)} style={{ fontSize: n - 4 }}>
@@ -8872,7 +8887,7 @@ function TextSettings({ prefs, setPrefs, className = "" }) {
           </button>
         ))}
       </div>
-      <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8A8D96] dark:text-[#7C808A] mb-2">Typeface</p>
+      <p className="text-[12px] font-semibold tracking-[0.14em] uppercase text-[#6E717A] dark:text-[#848892] mb-2">Typeface</p>
       <div className="flex gap-1.5">
         <button type="button" aria-pressed={prefs.font === "sans"} onClick={() => setPrefs({ ...prefs, font: "sans" })} className={btn(prefs.font === "sans")}>
           Sans
@@ -8960,7 +8975,7 @@ function PostRelatedCard({ post, onOpen }) {
         {post.title}
       </span>
       <span className="text-[13.5px] leading-relaxed text-[#5B5F6B] dark:text-[#A9ADB6] line-clamp-3">{post.excerpt}</span>
-      <span className="mt-auto flex justify-between gap-2 text-xs text-[#8A8D96] dark:text-[#7C808A]">
+      <span className="mt-auto flex justify-between gap-2 text-xs text-[#6E717A] dark:text-[#848892]">
         <span className="truncate font-medium text-[#4A5D4E] dark:text-[#8FAE95]">{tag}</span>
         <span className="whitespace-nowrap">{estimateReadTime(post).replace(" read", "")}</span>
       </span>
@@ -9117,7 +9132,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
   const listenLabel = listenStatus === "speaking" ? "Pause" : listenStatus === "paused" ? "Resume" : "Listen";
   const pill =
     "inline-flex items-center gap-1.5 text-[13.5px] font-medium text-[#5B5F6B] dark:text-[#A9ADB6] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 px-[15px] py-2.5 rounded-full hover:border-[#4A5D4E]/60 hover:text-[#4A5D4E] transition-colors duration-200";
-  const eyebrow = "text-[11px] font-semibold tracking-[0.2em] uppercase text-[#8A6F42] dark:text-[#D9B77C]";
+  const eyebrow = "text-[12px] font-semibold tracking-[0.2em] uppercase text-[#7F6637] dark:text-[#D9B77C]";
   const topicName = tagsForPost(post.id)[0] || post.category;
 
   return (
@@ -9132,13 +9147,13 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
               headerGone ? "h-[46px] opacity-100" : "h-0 opacity-0 -translate-y-2 pointer-events-none"
             }`}
           >
-            <button type="button" onClick={() => goBack("blog")} aria-label="Back" className="text-[#4A5D4E] dark:text-[#6E9077] p-1.5 -ml-1.5">
+            <button type="button" onClick={() => goBack("blog")} aria-label="Back" className="flex items-center justify-center w-11 h-11 -ml-3.5 text-[#4A5D4E] dark:text-[#6E9077]">
               <ArrowLeft size={16} strokeWidth={2} />
             </button>
             <div className="flex-1 min-w-0 truncate text-[15px] text-[#1C1F26] dark:text-[#F2F1EC]" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>
               {post.title}
             </div>
-            <div className="text-[12.5px] whitespace-nowrap tabular-nums text-[#8A8D96] dark:text-[#7C808A]">
+            <div className="text-[12.5px] whitespace-nowrap tabular-nums text-[#6E717A] dark:text-[#848892]">
               {pct >= 98 ? "Done" : `${minutesLeft} min left`} · {pct}%
             </div>
           </div>
@@ -9152,7 +9167,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
         <div ref={headerRef} className="max-w-[760px]">
           <button
             onClick={() => goBack("blog")}
-            className="no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-6 hover:gap-3 transition-all duration-300"
+            className="hit no-print inline-flex items-center gap-2 text-sm font-medium text-[#4A5D4E] dark:text-[#6E9077] mb-6 hover:gap-3 transition-all duration-300"
           >
             <ArrowLeft size={15} strokeWidth={2} />
             Back
@@ -9160,25 +9175,25 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
 
           {isPlanPost && (
             <div className="no-print flex items-center justify-between gap-3 mb-6 bg-[#B08D57]/10 border border-[#B08D57]/30 rounded-sm px-4 py-3">
-              <span className="text-[13px] font-medium text-[#8A6D3F] dark:text-[#D9B77C]">
+              <span className="text-[13px] font-medium text-[#7F6637] dark:text-[#D9B77C]">
                 Day {planIndex + 1} of {READING_PLAN_POST_IDS.length} · 4-Day Reading Plan
               </span>
-              <button onClick={openReadingPlan} className="text-[13px] font-medium text-[#B08D57] hover:underline whitespace-nowrap shrink-0">
+              <button onClick={openReadingPlan} className="text-[13px] font-medium text-[#7F6637] dark:text-[#B08D57] hover:underline whitespace-nowrap shrink-0">
                 View Plan
               </button>
             </div>
           )}
 
           <div className="flex flex-wrap items-center gap-2 mb-[18px]">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.12em] uppercase text-[#5B5F6B] dark:text-[#A9ADB6] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-full px-3 py-1.5">
-              <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#8A8D96]"}`} />
+            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold tracking-[0.12em] uppercase text-[#5B5F6B] dark:text-[#A9ADB6] bg-white dark:bg-[#1E2128] border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 rounded-full px-3 py-1.5">
+              <span className={`w-2 h-2 rounded-full ${BLOG_CAT_DOT[post.category] || "bg-[#6E717A]"}`} />
               {post.category}
             </span>
             {seriesId && seriesIndex !== -1 && (
               <button
                 type="button"
                 onClick={() => openSeries(seriesId)}
-                className="no-print text-[11px] font-semibold tracking-[0.12em] uppercase text-[#9A5B45] dark:text-[#E3A98F] bg-[#9A5B45]/8 dark:bg-[#D08A70]/10 border border-[#9A5B45]/30 dark:border-[#D08A70]/35 rounded-full px-3 py-1.5 hover:bg-[#9A5B45]/14"
+                className="no-print text-[12px] font-semibold tracking-[0.12em] uppercase text-[#9A5B45] dark:text-[#E3A98F] bg-[#9A5B45]/8 dark:bg-[#D08A70]/10 border border-[#9A5B45]/30 dark:border-[#D08A70]/35 rounded-full px-3 py-1.5 hover:bg-[#9A5B45]/14"
               >
                 {SERIES[seriesId].name} · No. {seriesIndex + 1} of {seriesPosts.length}
               </button>
@@ -9191,9 +9206,9 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
           <p className="text-[18px] sm:text-[21px] leading-[1.5] italic text-[#5B5F6B] dark:text-[#A9ADB6] mb-5 max-w-[62ch]" style={{ fontFamily: "'Playfair Display', serif" }}>
             {post.excerpt}
           </p>
-          <p className="post-byline flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[13.5px] text-[#8A8D96] dark:text-[#7C808A]">
+          <p className="post-byline flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[13.5px] text-[#6E717A] dark:text-[#848892]">
             {post.author && AUTHORS[post.author] ? (
-              <button onClick={() => openCollection(post.author)} className="font-semibold text-[#5B5F6B] dark:text-[#A9ADB6] underline underline-offset-[3px]">
+              <button onClick={() => openCollection(post.author)} className="hit font-semibold text-[#5B5F6B] dark:text-[#A9ADB6] underline underline-offset-[3px]">
                 By {post.author}
               </button>
             ) : post.author ? (
@@ -9218,7 +9233,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
                   <span className="font-medium opacity-70 text-[12.5px]">{minutes} min</span>
                 </button>
                 {listenStatus !== "idle" && (
-                  <button type="button" onClick={restartListen} aria-label="Restart from the beginning" title="Restart from the beginning" className="w-9 h-9 rounded-full border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 text-[#8A8D96] flex items-center justify-center hover:text-[#4A5D4E]">
+                  <button type="button" onClick={restartListen} aria-label="Restart from the beginning" title="Restart from the beginning" className="w-9 h-9 rounded-full border border-[#1C1F26]/12 dark:border-[#F2F1EC]/15 text-[#6E717A] flex items-center justify-center hover:text-[#4A5D4E]">
                     <RotateCcw size={13} strokeWidth={2} />
                   </button>
                 )}
@@ -9243,7 +9258,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
             <button type="button" onClick={resumeNow} className="font-semibold text-[#4A5D4E] dark:text-[#8FAE95] underline underline-offset-[3px]">
               Continue where you left off
             </button>
-            <button type="button" onClick={() => { saveReadPosition(post.id, null); setResumePct(null); }} className="font-semibold text-[#8A8D96] underline underline-offset-[3px]">
+            <button type="button" onClick={() => { saveReadPosition(post.id, null); setResumePct(null); }} className="font-semibold text-[#6E717A] underline underline-offset-[3px]">
               Start over
             </button>
           </div>
@@ -9254,7 +9269,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
           <aside className="no-print hidden min-[1180px]:block sticky top-[151px] pt-1.5">
             {hasToc && (
               <>
-                <h2 className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8A8D96] dark:text-[#7C808A] mb-3" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
+                <h2 className="text-[12px] font-semibold tracking-[0.16em] uppercase text-[#6E717A] dark:text-[#848892] mb-3" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
                   In this post
                 </h2>
                 <ol className="list-none m-0 p-0 border-l border-[#1C1F26]/12 dark:border-[#F2F1EC]/14">
@@ -9274,7 +9289,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
                 </ol>
               </>
             )}
-            <p className="mt-[18px] text-[12.5px] leading-snug text-[#8A8D96] dark:text-[#7C808A]">
+            <p className="mt-[18px] text-[12.5px] leading-snug text-[#6E717A] dark:text-[#848892]">
               <b className="tabular-nums font-semibold text-[#1C1F26] dark:text-[#F2F1EC]">{pct >= 98 ? 0 : minutesLeft} min</b> left to read
             </p>
           </aside>
@@ -9358,7 +9373,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
 
           {isPlanPost && (
             <div className="no-print bg-[#1C1F26] dark:bg-[#14161B] border border-[#F2F1EC]/10 rounded-sm px-6 py-6 mt-8">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold mb-2">4-Day Reading Plan</p>
+              <p className="text-[12px] uppercase tracking-[0.15em] text-[#B08D57] font-semibold mb-2">4-Day Reading Plan</p>
               {nextPlanPost ? (
                 <>
                   <p className="text-[#F2F1EC] text-[15px] mb-4">Take a few minutes to think about what you just read. Ready for Day {planIndex + 2}?</p>
@@ -9389,7 +9404,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
                 onClick={() => openPost(upNext)}
                 className="block w-full text-left bg-[#1C1F26] dark:bg-[#0B0D10] text-[#F8F7F3] rounded-sm px-6 sm:px-7 py-6 sm:py-[26px] transition-all duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:shadow-[0_14px_34px_-18px_rgba(28,31,38,0.45)]"
               >
-                <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#D9B77C]">
+                <span className="text-[12px] font-semibold tracking-[0.2em] uppercase text-[#D9B77C]">
                   {nextInSeries ? "Continue the series" : "Because you read this"} · {estimateReadTime(upNext).replace(" read", "")}
                 </span>
                 <span className="block text-2xl sm:text-[28px] leading-[1.2] mt-2 mb-2.5" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
@@ -9423,7 +9438,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
             <div className="no-print">
               <h2 className={`${eyebrow} mt-10 mb-3.5`} style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
                 {openTopic && tagsForPost(post.id)[0] ? (
-                  <button type="button" onClick={() => openTopic(tagsForPost(post.id)[0])} className="hover:underline underline-offset-[3px] text-left">
+                  <button type="button" onClick={() => openTopic(tagsForPost(post.id)[0])} className="hit hover:underline underline-offset-[3px] text-left">
                     More on {topicName}
                   </button>
                 ) : (
@@ -9452,7 +9467,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
             <div className="no-print grid grid-cols-2 gap-3.5 mt-9">
               {olderPost ? (
                 <button onClick={() => openPost(olderPost)} className="text-left border border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 rounded-sm px-4 py-3.5 hover:border-[#4A5D4E]/60 transition-colors duration-200">
-                  <span className="flex items-center gap-1 text-[10.5px] font-semibold uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mb-1">
+                  <span className="flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.15em] text-[#6E717A] dark:text-[#848892] mb-1">
                     <ArrowLeft size={11} strokeWidth={2} /> Older
                   </span>
                   <span className="text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] line-clamp-2">{olderPost.title}</span>
@@ -9462,7 +9477,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
               )}
               {newerPost ? (
                 <button onClick={() => openPost(newerPost)} className="text-right border border-[#1C1F26]/12 dark:border-[#F2F1EC]/14 rounded-sm px-4 py-3.5 hover:border-[#4A5D4E]/60 transition-colors duration-200">
-                  <span className="flex items-center justify-end gap-1 text-[10.5px] font-semibold uppercase tracking-[0.15em] text-[#8A8D96] dark:text-[#7C808A] mb-1">
+                  <span className="flex items-center justify-end gap-1 text-[12px] font-semibold uppercase tracking-[0.15em] text-[#6E717A] dark:text-[#848892] mb-1">
                     Newer <ArrowRight size={11} strokeWidth={2} />
                   </span>
                   <span className="text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] line-clamp-2">{newerPost.title}</span>
@@ -9474,7 +9489,7 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
           )}
 
           <div className="no-print mt-8">
-            <button onClick={() => goBack("blog")} className="inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] hover:text-[#4A5D4E] transition-colors duration-300">
+            <button onClick={() => goBack("blog")} className="hit inline-flex items-center gap-2 text-sm font-medium text-[#1C1F26] dark:text-[#F2F1EC] hover:text-[#4A5D4E] transition-colors duration-300">
               <ArrowLeft size={15} strokeWidth={2} />
               Back
             </button>
@@ -9495,12 +9510,12 @@ function SinglePostView({ post, setView, goBack, openPost, openPlanPost, openCol
           ]
             .filter(Boolean)
             .map((b) => (
-              <button key={b.key} type="button" onClick={b.on} className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-medium ${b.active ? b.tone : "text-[#5B5F6B] dark:text-[#A9ADB6]"}`}>
+              <button key={b.key} type="button" onClick={b.on} className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 text-[12px] font-medium ${b.active ? b.tone : "text-[#5B5F6B] dark:text-[#A9ADB6]"}`}>
                 {b.icon}
                 {b.label}
               </button>
             ))}
-          <button type="button" onClick={(e) => { e.stopPropagation(); setAaOpen(aaOpen === "bar" ? null : "bar"); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-medium text-[#5B5F6B] dark:text-[#A9ADB6]">
+          <button type="button" onClick={(e) => { e.stopPropagation(); setAaOpen(aaOpen === "bar" ? null : "bar"); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 text-[12px] font-medium text-[#5B5F6B] dark:text-[#A9ADB6]">
             <Type size={18} strokeWidth={2} />
             Text
           </button>
@@ -10155,6 +10170,24 @@ export default function GospelLensApp() {
         }
       `}</style>
 
+      {/* Skip link: the first tab stop on every page. Hidden until a keyboard user tabs
+          to it (sr-only until focused). Moves focus to <main> by hand instead of using
+          the #hash, because the router treats a bare #hash as an old-style link. */}
+      <a
+        href="#main-content"
+        onClick={(e) => {
+          e.preventDefault();
+          const m = document.getElementById("main-content");
+          if (m) {
+            m.focus();
+            m.scrollIntoView();
+          }
+        }}
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:bg-[#4A5D4E] focus:text-white dark:focus:bg-[#6E9077] dark:focus:text-[#14161B] focus:px-4 focus:py-2.5 focus:rounded-sm focus:text-sm focus:font-semibold"
+      >
+        Skip to content
+      </a>
+
       <Nav
         view={view}
         setView={changeView}
@@ -10168,7 +10201,7 @@ export default function GospelLensApp() {
         onSignOut={handleSignOut}
       />
 
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none scroll-mt-20">
         {view === "home" && (
           <HomeView
             setView={changeView}

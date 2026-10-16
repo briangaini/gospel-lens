@@ -380,7 +380,7 @@ function build404Page() {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        font-size: 11px;
+        font-size: 12px;
         letter-spacing: 0.2em;
         text-transform: uppercase;
         color: #4A5D4E;

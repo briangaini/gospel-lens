@@ -23,3 +23,23 @@
     animation: none;
   }
 }
+
+
+/* Tap area: makes a small control at least 44 x 44 px to tap, without changing how it looks or
+   its layout (an invisible, centered pseudo-element). Used on header icons' neighbors, small
+   inline links and icon-only buttons. Lives in the components layer so Tailwind utilities
+   like `absolute` still win over its `position: relative`. */
+@layer components {
+  .hit {
+    position: relative;
+  }
+  .hit::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
