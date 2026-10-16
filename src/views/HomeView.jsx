@@ -99,7 +99,7 @@ function VerseOfDay() {
     </div>
   );
 }
-function HomeHero({ latest, openPost, openReadingPlan, setView }) {
+function HomeHero({ latest, openPost, openReadingPlan, setView, openSeries }) {
   return (
     <section>
       <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-10 sm:pt-14 pb-16 sm:pb-20 grid lg:grid-cols-[1.08fr_0.92fr] gap-10 lg:gap-14 items-start">
@@ -129,7 +129,16 @@ function HomeHero({ latest, openPost, openReadingPlan, setView }) {
               Read the latest
             </button>
           </div>
-          <p className={`${HOME_FAINT} text-[13px] mt-4`}>You don't have to believe anything to read. No ads, no account needed.</p>
+          {openSeries && SERIES.proverbs && (
+            <button
+              onClick={() => openSeries("proverbs")}
+              className={`hit mt-4 inline-flex items-center gap-1.5 text-sm font-semibold ${HOME_GOLD_TEXT} hover:gap-2.5 transition-all duration-300 motion-reduce:transition-none`}
+            >
+              Or explore {SERIES.proverbs.name}
+              <ArrowRight size={14} strokeWidth={2} />
+            </button>
+          )}
+          <p className={`${HOME_FAINT} text-[13px] mt-2`}>You don't have to believe anything to read. No ads, no account needed.</p>
         </div>
 
         <div className="space-y-4">
@@ -583,7 +592,7 @@ export function HomeView({ setView, openPost, openPlanPost, openReadingPlan, ope
 
   return (
     <>
-      <HomeHero latest={hero} openPost={openPost} openReadingPlan={openReadingPlan} setView={setView} />
+      <HomeHero latest={hero} openPost={openPost} openReadingPlan={openReadingPlan} setView={setView} openSeries={openSeries} />
       {hasHistory && lastRead && <ContinueStrip post={lastRead} newCount={newCount} openPost={openPost} />}
       <MomentsChooser openPost={openPost} openTopic={openTopic} />
       {!hasHistory && path}
@@ -591,8 +600,8 @@ export function HomeView({ setView, openPost, openPlanPost, openReadingPlan, ope
       {hasHistory && path}
       <TopicBento openTopic={openTopic} />
       <BeliefBand setView={setView} />
-      <ToolsPair openScriptureIndex={openScriptureIndex} openJournal={openJournal} />
       <SeriesBand seriesId="proverbs" openSeries={openSeries} openPost={openPost} />
+      <ToolsPair openScriptureIndex={openScriptureIndex} openJournal={openJournal} />
       <FromArchiveCard openPost={openPost} excludeIds={shownIds} />
       <NewsletterBand />
     </>
