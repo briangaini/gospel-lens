@@ -1,0 +1,24 @@
+{
+  "id": 18,
+  "title": "Morning Mercies",
+  "author": null,
+  "date": "April 8, 2026",
+  "category": "Devotional",
+  "readTime": "4 min read",
+  "excerpt": "Each sunrise is an invitation — to hear of God's unfailing love again, to trust Him again, and to surrender all over again.",
+  "blocks": [
+    {"type":"p","text":"Each morning, when the sun pours over the horizon, you have an opportunity."},
+    {"type":"p","text":"David—who held many titles throughout his lifetime: shepherd, warrior, giant-slayer, King of Israel, and a man after God's own heart—said it like this when he was talking to God:"},
+    {"type":"scripture","reference":"Psalm 143:8 NLT","verses":["Let me hear of your unfailing love each morning, for I am trusting you. Show me where to walk, for I give myself to you."]},
+    {"type":"p","text":"David recognized that each day was an opportunity…"},
+    {"type":"heading","text":"To Hear of God's Unfailing Love"},
+    {"type":"p","text":"His mercies are new every morning (Lamentations 3:23) and His love endures forever (Psalm 118:2). But sometimes, we forget. Most times, we need to be reminded. Just as winter can't be stopped from blooming into spring, we can't stop the mercies of a brand new day."},
+    {"type":"heading","text":"To Trust Him Again"},
+    {"type":"p","text":"God is good, constant, faithful, merciful, honest, loving, unlimited, all-powerful, and the source of everything that exists. In fact, He can't not be those things! No matter what we're facing, we can know that He's trustworthy. We can trust His character and we can trust His heart."},
+    {"type":"heading","text":"To Watch, Listen, and Discern His Leading"},
+    {"type":"p","text":"We can fix our eyes on the God who fixes His loving gaze onto us. Let us echo David's words: \"Show us where to walk…\" Let us recognize His promptings, pay attention to His guidance, and listen for His \"voice.\""},
+    {"type":"heading","text":"To Surrender Our Lives to Him"},
+    {"type":"p","text":"We can cling to our plans, dismiss His warnings, and fight for self-sufficiency, or, we can give ourselves to Him—fully. When we rely on ourselves, we will never be enough. But when we die to ourselves, we are choosing to live for Him."},
+    {"type":"p","text":"No matter how dark the night, the sun rises again. And when that morning light pours over the horizon, you have a fresh opportunity to draw near to the One who loves you."}
+  ]
+}

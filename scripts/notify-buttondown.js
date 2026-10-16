@@ -1,6 +1,6 @@
 // Runs in CI (see .github/workflows/newsletter-draft.yml) after every build,
-// on every push to main. Compares the full post list (loaded via
-// load-posts-data.js) against .buttondown-notified.json — a small list of
+// on every push to main. Compares the full post list (read from the post
+// files in src/content/posts, via scripts/lib/content.js) against .buttondown-notified.json — a small list of
 // post URLs already drafted — and creates a DRAFT email in Buttondown for
 // anything new, with the full post rendered as styled HTML (see
 // post-to-email-html.js) rather than just a title+excerpt+link. Never
@@ -13,7 +13,8 @@
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
-import { loadPostsData } from "./load-posts-data.js";
+import { readPosts } from "./lib/content.js";
+import { slugify } from "../src/lib/slug.js";
 import { postToEmailHtml } from "./post-to-email-html.js";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -21,14 +22,6 @@ const STATE_FILE = path.join(ROOT, ".buttondown-notified.json");
 const SITE_URL = "https://the-gospel-lens.vercel.app";
 const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const API_KEY = process.env.BUTTONDOWN_API_KEY;
-
-function slugify(title) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
 
 function loadState() {
   if (!existsSync(STATE_FILE)) return { notified: [] };
@@ -61,7 +54,8 @@ async function main() {
     return;
   }
 
-  const { POSTS } = await loadPostsData();
+  // Oldest first, so new drafts appear in Buttondown in the order they were written.
+  const POSTS = readPosts().reverse();
   const state = loadState();
   const notified = new Set(state.notified);
 

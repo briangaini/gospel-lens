@@ -22,12 +22,21 @@ Other scripts: `npm run build` (production build), `npm run preview` (preview th
 
 ```
 src/
-  App.jsx       — everything: POSTS data, block renderer, all views/components
-  main.jsx      — React entry point
-  index.css     — Tailwind base + global styles
+  App.jsx          — the shell: GospelLensApp (router, global state) + the lazy page wiring
+  main.jsx         — React entry point (service worker registration)
+  index.css        — Tailwind base + global styles (+ the `.hit` tap-area helper)
+  firebase.js      — Google sign-in + cloud sync (lazy-loaded, see "Google sign-in")
+  content/         — everything that is words: posts/ (one JSON file per post), topics, series, authors, moments, verses, site settings. See src/content/README.md
+  lib/             — logic with no screen of its own: posts.js (the post list + on-demand bodies), storage.js (read history/saved/liked/journal + sync), search.js, blog.js, postText.js, slug.js, listen.js (text-to-speech), verseCard.js, scriptureIndex.js, lazyContent.js, chunkSafe.js, firebaseLoader.js
+  components/      — shared pieces: Nav, Footer (+ newsletter form), BlogCards (BlogCard/BlogRow/PostCard/chips), JournalAnswerBox, homeParts, Eyebrow, BackToTop, inline
+  views/           — one file per page, each loaded only when visited: HomeView, BlogListView, PostView (+ PostRoute, which loads a post's body), TopicView, SeriesView, AboutView, JournalView, SavedLikedViews, ScriptureIndexView, ReadingPlanView, CollectionView, NotFoundView; lazy.js lists them
+vite-plugins/
+  gospel-content.js — feeds the post files to the app in small pieces, see "Code layout and how pages load"
 scripts/
   prerender.js          — runs after `vite build`, see "Routing & per-post URLs" below
   build-share-cards.js  — generates per-post share images, see "Share-link preview image" below
+  new-post.mjs          — `npm run new-post -- "Title" --category Devotional` creates the next post file
+  lib/content.js        — reads and validates the post files; shared by the plugin and every script
   fonts/                — real Playfair Display/Inter font files, used by build-share-cards.js
   notify-buttondown.js  — runs in CI, see "Newsletter auto-draft" below
 .github/workflows/
@@ -40,23 +49,48 @@ backup/
   post-classic.jsx      — plain, never-bundled copy of the pre-2026-10-15 post page, see "Post page restore"
   cards-classic.jsx     — plain, never-bundled copy of the old PostCard + unfiltered TopicView, see "Cards restore"
 index.html
-vercel.json     — cleanUrls + SPA rewrite fallback
+vercel.json     — cleanUrls + SPA rewrite fallback + long caching for the hashed files in /assets
 tailwind.config.js
-vite.config.js  — includes vite-plugin-pwa config
+vite.config.js  — the content plugin, vite-plugin-pwa config, chunk naming
 ```
 
-Almost the entire app is in `src/App.jsx` (~2,300+ lines). There is no CMS — adding a post means editing this file directly. **`npm run build` is `vite build && node scripts/prerender.js` — always use `npm run build`, never call `vite build` directly**, or the per-post static pages and sitemap won't regenerate and will go stale.
+**Where things moved (2026-10-16).** Until then almost everything lived in one `src/App.jsx` of about 10,000 lines, and many sections below still say "in `App.jsx`". That is where they *were*. Now: posts → `src/content/posts/*.json`; `AUTHORS`, `POST_TAGS`, `TOPIC_DESCRIPTIONS`, `SERIES`, `MOMENTS`, `VERSES_OF_DAY`, `CATEGORIES`, `READING_PLAN_POST_IDS`, `CONTACT_EMAIL`, `BUTTONDOWN_USERNAME` → `src/content/*.js`; read history / saved / liked / journal / sync functions → `src/lib/storage.js`; `PostBody`, `SinglePostView` and the other post-page pieces → `src/views/PostView.jsx`; `HomeView` and the `Home*` pieces → `src/views/HomeView.jsx` (+ `components/homeParts.jsx`); `BlogListView` → `src/views/BlogListView.jsx`; `BlogCard`/`BlogRow`/`PostCard` → `src/components/BlogCards.jsx`; helpers like `estimateReadTime`/`slugify`/`getRelatedPosts`/`tagsForPost` → `src/lib/`; `Nav`, `Footer`, `NewsletterForm` → `src/components/`; every other `*View` has its own file in `src/views/`. Search the code for the function name if unsure. **Restore point for the whole restructure:** git tag `app-monolith-2026-10-16` (the last commit with the single big file). Don't `git checkout` it over `src/` (it would discard everything added since); use `git diff app-monolith-2026-10-16` to look.
+
+**`npm run build` is `vite build && node scripts/prerender.js` — always use `npm run build`, never call `vite build` directly**, or the per-post static pages and sitemap won't regenerate and will go stale. There is no CMS: adding a post means adding a file to `src/content/posts/` (see "Content model" below).
+
+## Code layout and how pages load (restructured 2026-10-16)
+
+Brian asked for point 1 and 3 of an audit list: stop every visitor downloading every post's text, and make posts plain files. Done together, verified before and after (see "Verification" below).
+
+**The three pieces of post data, loaded differently** (`vite-plugins/gospel-content.js`, `scripts/lib/content.js`, `src/lib/posts.js`):
+- **The index** (`POSTS`, always loaded, about 8 KB compressed): each post's details with no body, plus numbers worked out at build time: `minutes` (read time), `words`, `refs` (its scripture references). Sorted newest first (same day: higher `id` is newer, unless a post has the optional `order` field). Because `minutes` is precomputed, `estimateReadTime(post)` returns instantly for an index entry and never needs the text.
+- **A post's body** (its `blocks`): one small file per post, fetched by `loadPostBody(id)` when the post is opened, then remembered. `views/PostRoute.jsx` shows the title and summary at once, loads the body and the post page's code **in parallel** (and `App.jsx` starts both before React even draws, from the address bar), then renders the existing `SinglePostView` with the full post. `SinglePostView` itself is unchanged: it still receives a post with `blocks`.
+- **Other on-demand pieces** (`src/lib/lazyContent.js`): the search text (Blogs and Topic search; fetched on first search or when the search box is focused, results fill in when it arrives), the Scripture Index verses, and the Journal's reflection questions.
+
+**Pages are lazy** (`src/views/lazy.js`): each page's code downloads the first time it's visited. `GospelLensApp` starts with `view === null` and sets it from the address bar right after the first render, so a post link never downloads the homepage. When the browser is idle it quietly prefetches the post page and the Blogs page.
+
+**Stale-tab safety** (`src/lib/chunkSafe.js`): every on-demand download goes through `importOrReload`. A tab left open across a deploy asks for a file whose name has changed; instead of breaking, the page reloads once (at most once per 15 seconds, so a real outage can't loop). Same idea as the existing `getFirebase()` reload.
+
+**Firebase is no longer downloaded by visitors who have never signed in** (about 165 KB compressed, it was the biggest download on every page). `hasSignedInBefore()` (`storage.js`) checks the remembered email (`CACHED_USER_KEY`); the mount-time subscription and all the `sync…ToCloudIfSignedIn` functions skip Firebase unless it's set. Pressing "Sign in with Google" loads Firebase, and after the popup succeeds `handleSignIn` remembers the email and reloads, so the page then starts the normal signed-in way. The popup itself can't be tested from this environment (same limit as before): confirm a real sign-in works next time Brian signs in.
+
+**Offline/installed app** (`vite.config.js`): the on-demand pieces (`assets/posts/**`, `assets/content/**`) and the Firebase chunk are left out of the service worker's precache so installing the app doesn't download every post. Chunk names are set in `build.rollupOptions.output.chunkFileNames`. `vercel.json` gives `/assets/*` a one-year immutable cache (the file names change whenever the content does).
+
+**Results, measured 2026-10-16:** the always-downloaded JavaScript went from 668 KB (209 KB compressed) to 229 KB (73 KB compressed). A cold visit to a post is now about 101 KB compressed in total (it was about 219 KB for the page plus 165 KB of Firebase afterwards). Adding posts no longer grows what a visitor downloads.
+
+**Verification done, so it's trustworthy:** the rendered text, headings and page title of **all 109 pages** (home, Blogs, About, Scripture Index, every topic, the author page, the series, all 85 posts, Saved, Liked, Journal, Start Here, a 404) were fingerprinted before and after and are identical; the prerendered files (203 files including all 85 post pages, topic pages, RSS and the share images) are byte-identical, and the sitemap has the same 104 entries (in a different order). The one deliberate rule: same-day ordering. Six older posts (6, 28, 48, 49, 55, 56) carry an `"order"` number so their display order stays exactly as it was.
+
+**Known, accepted limits:** the first search on a slow connection shows results from titles/summaries/topics for a moment before the body-text matches arrive; the Scripture Index and the Journal's question text appear a moment after the page opens; the app can't be opened offline from cold (unchanged since the 2026-09-25 service-worker fix).
 
 ## Routing & per-post URLs
 
 Real per-post URLs (`/down-but-not-out`, not `/#down-but-not-out`) as of 2026-08-04. Client-side routing in `GospelLensApp` uses `history.pushState`/`popstate` on `location.pathname`, not hash. Old-style `#slug`, `#post-N`, and `#collection-name` links (from before this existed) are silently upgraded via `history.replaceState` the moment they're loaded — no visible redirect, so anything already shared still works.
 
 `scripts/prerender.js` runs after every `vite build` and:
-- Extracts `id`/`title`/`excerpt` for every post and `name`/`role`/`bio` for every `AUTHORS` entry straight out of `src/App.jsx` via regex (deliberately *not* by importing/executing the module — that would drag React/JSX evaluation into a plain Node script for no benefit, since this is just reading plain string literals).
+- Reads every post, author, topic, series and homepage-chooser entry from `src/content` through `scripts/lib/content.js` (plain JSON and plain data modules, so no scraping and no special format rules any more; this replaced a set of regexes over `App.jsx`).
 - Writes a real static `dist/<slug>.html` per post and `dist/collection/<author-slug>.html` per author, each with that specific post's `<title>`/description/OG/Twitter meta baked in (properly HTML-escaped — some excerpts contain literal `"` or `'`, verified against post 14 which has both). This is what makes link-preview bots (iMessage, X, Facebook — none of which run our JS) show that post's own title/excerpt instead of the generic site-wide one.
 - Also writes flat `dist/blog.html` and `dist/about.html` (generic site-wide meta, same as the template) — **required**, not optional: see the `vercel.json` note below for why.
 - Regenerates `dist/sitemap.xml` with real URLs (overwrites whatever `vite build` copied from `public/`, since that's just a stale placeholder now — there's no static `public/sitemap.xml` file anymore, it's fully generated).
-- Fails loudly (throws, breaking the build) if it can't extract a post's fields, if two post titles slugify to the same URL, or if a post title's slug collides with a reserved route (`blog`/`about`/`collection`) — better than silently shipping a broken or overwritten page. If you ever add a post titled something like "Blog" or "About", the build will stop you and say so.
+- Fails loudly (throws, breaking the build) if a post file is malformed (`readPosts()` checks the file name matches the id, required fields, block shapes), if two post titles slugify to the same URL, or if a post title's slug collides with a reserved route (`blog`/`about`/`collection`) — better than silently shipping a broken or overwritten page. If you ever add a post titled something like "Blog" or "About", the build will stop you and say so.
 
 **`vercel.json` — a genuine gotcha, verified live, don't "simplify" this without re-testing on the real deployment:** `cleanUrls: true` makes Vercel serve `<path>.html` for a request to `/<path>` with no extension — that's what makes `/down-but-not-out` work. The `rewrites` catch-all to `/index.html` was *supposed* to be the fallback for routes without a prerendered file (like `/blog`, `/about`, or a typo), but **verified live on 2026-08-04 that it does not reliably fire** even with `cleanUrls` on — `/blog` and `/about` 404'd until `scripts/prerender.js` started generating real `blog.html`/`about.html` files for them specifically. The `rewrites` rule is left in place (harmless, might help edge cases) but don't rely on it for any route that actually matters — give it a real prerendered file instead. Genuinely unknown/mistyped paths now get a real branded 404 (fixed 2026-08-15) — see "Custom 404 page" below.
 
@@ -218,7 +252,7 @@ Brian asked for a complete makeover with full creative freedom, saw a full-size 
 **Section order** (all in `HomeView`, `src/App.jsx`, each its own small component right above it): `HomeHero` (headline, a plain "New here? Start with the 4-day path" button, a "Read the latest" button that opens the **Blogs page** (not the newest post; Brian asked for this 2026-10-12, the lead card beside it still opens the newest post), "You don't have to believe anything to read. No ads, no account needed.", the newest post as a lead card, and the compact `VerseOfDay`) → `ContinueStrip` (only with read history; shows "N new posts since your last visit") → `MomentsChooser` ("What are you carrying today?") → `FourDayPath` → `LatestWriting` → `TopicBento` → `BeliefBand` → `ToolsPair` → `FromArchiveCard` → `NewsletterBand`. **Order depends on the visitor:** a brand-new visitor (no read history) gets `FourDayPath` *before* `LatestWriting`; a returning reader gets Latest first and the path after it.
 
 **How each piece works**
-- **Chooser:** `MOMENTS` (beside `POST_TAGS`) is seven first-person feelings, each with a primary post id, two secondary ids, and a topic name. All seven are real buttons always on the page (`aria-pressed`), not a hidden quiz. **`scripts/prerender.js` fails the build if any id or topic in `MOMENTS` no longer exists**, so a removed post or renamed topic can't leave a dead link. These are editorial picks, not an algorithm; change them freely, one entry per line in the existing format (the build check reads that format).
+- **Chooser:** `MOMENTS` (beside `POST_TAGS`) is seven first-person feelings, each with a primary post id, two secondary ids, and a topic name. All seven are real buttons always on the page (`aria-pressed`), not a hidden quiz. **`scripts/prerender.js` fails the build if any id or topic in `MOMENTS` no longer exists**, so a removed post or renamed topic can't leave a dead link. These are editorial picks, not an algorithm; change them freely in `src/content/moments.js` (the build check reads the entries directly).
 - **4-day path:** Start Here and the 4-Day Plan are now one thing, using `READING_PLAN_POST_IDS`. The logo ring (`ProgressRing`) fills one gold segment per day read, from local read history. Days open via `openPlanPost`, so the "Day X of 4" banner appears exactly as it does from `/start-here`. Nothing is locked.
 - **Topics:** `TopicBento` shows all topics with their real `TOPIC_DESCRIPTIONS` and counts; the three biggest topics get a wider tile (derived, not hardcoded). Each tile calls `openTopic`. **On phones (below `sm`) it is a single swipeable row** that snaps card by card, with the next card peeking in and a "Swipe to see all 13 →" hint (added 2026-10-15 at Brian's request, to save vertical scrolling); from `sm` up it is the original grid. Brian likes the desktop grid and it was deliberately left as is: a grid shows all 13 at a glance, a slider hides most of them.
 - **From the Archive** no longer repeats a post already on the page: `getFromArchivePost(excludeIds)` takes every post shown above it (hero lead, latest lead and rows, the four plan posts) and still skips the 3 newest. Still deterministic per week.
@@ -316,15 +350,15 @@ Saved as git tag `a11y-before-2026-10-16` (pushed). Unlike the redesigns there i
 
 Brian asked for "The Proverbs Series": its own page with a description, kept open for future Proverbs posts, a spot on the homepage after the main sections, and posts that keep their category but may overlap categories. Built straight from his instructions (no demo round).
 
-**How it works:** `SERIES` (near `TOPIC_DESCRIPTIONS` in `src/App.jsx`) defines each series on one line (`slug`, `name`, `tag`, `description`, pull `verse`/`verseRef`, `introId`). **A post joins a series with `series: "proverbs"` in its object**, independent of its category, so one post can be a Devotional AND in the series (post 77 is). The Proverbs Series also auto-includes any post whose category is `"Wisdom from Proverbs"`. **To add a future Proverbs post: add it like any post with `series: "proverbs"` and `category: "Wisdom from Proverbs"` (or another category), and it appears on the series page, the homepage band, the post's banner and the "Next in the series" card automatically.** Series read oldest-first (publication order), unlike the rest of the site.
+**How it works:** `SERIES` (`src/content/series.js`) defines each series (`slug`, `name`, `tag`, `description`, pull `verse`/`verseRef`, `introId`). **A post joins a series with `series: "proverbs"` in its object**, independent of its category, so one post can be a Devotional AND in the series (post 77 is). The Proverbs Series also auto-includes any post whose category is `"Wisdom from Proverbs"`. **To add a future Proverbs post: add it like any post with `series: "proverbs"` and `category: "Wisdom from Proverbs"` (or another category), and it appears on the series page, the homepage band, the post's banner and the "Next in the series" card automatically.** Series read oldest-first (publication order), unlike the rest of the site.
 
-**Pieces:** `SeriesView` (`/series/<slug>`: dark hero with description + pull verse + a "Start with the intro / Continue / Read it again" button and "you've read N of M"; a numbered timeline of the posts with Read / New pills; a dashed "More to come" closing card), `SeriesBand` (homepage, right after `ToolsPair`, before From the Archive: description, verse, "Explore the series", and the three latest posts), and on every series post a clay-colored banner ("The Proverbs Series · No. 3 of 6", View series) at the top plus a "Next in the series" card after the share bar. Router: `/series/<slug>`, `openSeries()`, `activeSeries` state, `view === "series"`. `scripts/prerender.js` has `loadSeries()` (regex over the `SERIES` block, so keep each entry on ONE line and put no double quotes inside the strings), writes `dist/series/<slug>.html` with its own meta, adds it to the sitemap, and reserves the slug `series`.
+**Pieces:** `SeriesView` (`/series/<slug>`: dark hero with description + pull verse + a "Start with the intro / Continue / Read it again" button and "you've read N of M"; a numbered timeline of the posts with Read / New pills; a dashed "More to come" closing card), `SeriesBand` (homepage, right after `ToolsPair`, before From the Archive: description, verse, "Explore the series", and the three latest posts), and on every series post a clay-colored banner ("The Proverbs Series · No. 3 of 6", View series) at the top plus a "Next in the series" card after the share bar. Router: `/series/<slug>`, `openSeries()`, `activeSeries` state, `view === "series"`. `scripts/prerender.js` reads `SERIES` straight from `src/content/series.js` (the old one-line/no-double-quotes rule is gone), writes `dist/series/<slug>.html` with its own meta, adds it to the sitemap, and reserves the slug `series`.
 
 **New category "Wisdom from Proverbs"** was added to `CATEGORIES` (so it shows as a Type chip on the Blogs page) with a clay dot color in `BLOG_CAT_DOT`. Posts 78 to 85 use it; post 77 (the intro) is a Devotional. The series now has 9 posts (ids 77 to 85); ids 84 and 83 (both Oct 13) are listed newest-first in the array like the earlier pairs. Brian's pasted posts said "Wisdom from Proverbs" (one said lowercase "proverbs", normalized).
 
 **Inline formatting in `p` and `list` blocks:** `**bold**` and `*italic*` are supported **only in `p` blocks and `list` items** (list support added 2026-10-14 for bold lead-ins) (`renderInline()` in `PostBody`, `stripInline()` for search and listen-to-post, `inlineHtml()` in `scripts/post-to-email-html.js` for newsletter drafts). Don't put asterisks in other block types (prayer, reflection, headings, scripture, quote); they aren't processed. Markdown pastes: `## Heading` becomes a `heading` block, a blockquote with a reference becomes a `scripture` block, `### For Reflection` becomes a `reflection` block (bold stripped, question + sentence joined), the final italic paragraph becomes `prayer`, `---` rules are dropped, curly quotes become straight.
 
-**Same-day order:** for pairs sharing a date, the entry earlier in the `POSTS` array shows as newer, so ids 82 down to 77 are listed newest-first in the array (with a comment). Scripture blocks in these posts carry no Bible translation (none was supplied), same gap as noted in the audit.
+**Same-day order:** for two posts on the same date, the one with the higher `id` shows as newer (so 82 is newer than 81 on a shared day). An optional `"order"` number in a post file overrides its id for this tie-break only; six older posts (6, 28, 48, 49, 55, 56) use it to keep their original order. Scripture blocks in these posts carry no Bible translation (none was supplied), same gap as noted in the audit.
 
 ## Post page (redesigned 2026-10-15)
 
@@ -409,46 +443,19 @@ All five route through one new `openJournal(tab)` navigation function in `Gospel
 
 Not changed, flagged to Brian instead: signing out leaves the Journal's entries in that browser's `localStorage` (same as Saved/Liked always did), so on a shared device the next person could open `/journal` and read them. Clearing local copies on explicit sign-out would fix it but changes behavior (and loses anything not yet synced), so it's his call.
 
-## Content model: the `blocks` system
+## Content model: posts are files
 
-Every blog post is an object in the `POSTS` array (`src/App.jsx`). Shape:
+Every post is its own JSON file, `src/content/posts/NNN-the-title.json` (NNN is the post's id). **The full, current guide is `src/content/README.md`** (fields, block types, formatting rules, optional `series` and `order`). Short version:
 
-```js
-{
-  id: 5,
-  title: "Post Title",
-  author: "Name or null",       // null = written by the blog itself
-  date: "July 31, 2026",
-  category: "Teaching",         // e.g. Foundations, Devotional, Teaching
-  readTime: "6 min read",   // NOTE: cosmetic only — the UI actually computes read time live via estimateReadTime() (word count / 200wpm) and ignores this field. Fill it in for consistency but don't expect it to control what's displayed.
-  excerpt: "One or two sentence teaser shown on the post list.",
-  blocks: [ /* array of content blocks, rendered in order by PostBody() */ ],
-}
-```
-
-`PostBody` (in `App.jsx`) renders each block by `type`. Block types:
-
-| type | shape | renders as |
-|---|---|---|
-| `p` | `p("text")` helper, or `{ type: "p", text }` | paragraph (first paragraph gets a drop-cap) |
-| `heading` | `{ type: "heading", text }` | section heading |
-| `list` | `{ type: "list", items: [...] }` | bulleted list |
-| `quote` | `{ type: "quote", text, attribution? }` | "Wisdom of the Day" styled callout |
-| `scripture` | `{ type: "scripture", reference, verses: [...] }` | "Scripture Focus" callout, one or more verses |
-| `reflection` | `{ type: "reflection", items: [...] }` | numbered "Reflection Questions" box |
-| `heart` | `{ type: "heart", text }` | "Write This On Your Heart" callout |
-| `encourage` | `{ type: "encourage", text }` | centered "Be Encouraged" statement |
-| `share` | `{ type: "share", items: [...] }` | "Share Your Faith" bulleted box |
-| `prayer` | `{ type: "prayer", text }` | "A Prayer" callout |
-| `closing` | `{ type: "closing", text }` | small italic closing line |
-
-There's a `p(text)` shorthand helper (`const p = (text) => ({ type: "p", text })`) used for plain paragraphs — prefer it over writing out `{ type: "p", text: ... }` by hand.
-
-To add a new post: pick the next `id`, write `blocks` using the types above to match the sermon/devotional structure of the content, and prepend or append to `POSTS` (existing posts are ordered by content, not strictly by array position — check surrounding dates).
+- **To add a post:** `npm run new-post -- "The Title" --category Devotional` (also `--author`, `--series`, `--date`). It picks the next id, names the file, and leaves a placeholder paragraph. Fill it in, then add the id to a topic in `src/content/topics.js`. Everything else (the post's page, sitemap, RSS, share image, newsletter draft) follows from that file. Writing the file directly with the Write tool is equally fine; the build rejects a malformed one with a clear message (`scripts/lib/content.js`).
+- **Shape:** `{ id, title, author, date, category, series?, order?, readTime, excerpt, blocks: [...] }`. `readTime` is cosmetic (the UI works the real time out from the word count). The whole file is data: straight quotes, with a `"` inside a text value written `\"`. `**bold**`/`*italic*` only inside `p` blocks and `list` items.
+- **Block types** (rendered by `PostBody` in `src/views/PostView.jsx`): `p`, `heading`, `list`, `quote` ("Wisdom of the Day"), `scripture` (`reference` + `verses`), `reflection` (`items`), `heart`, `encourage`, `share`, `prayer`, `closing`. Table of fields in the README.
+- **Order on the site is by `date`**, newest first; same-day ties go to the higher id (optional `order` overrides). Where a file sits is irrelevant (files are read in name order and sorted).
+- **Markdown pastes** convert as before: `## Heading` → `heading`, a blockquote with a reference → `scripture`, `### For Reflection` → `reflection` (bold stripped, question + sentence joined), the final italic paragraph → `prayer`, `---` dropped, curly quotes → straight.
 
 ## Contributor author pages
 
-Contributors with more than one post (currently Jonny Ardavanis) can get a "Teaching From" collection page — a bio plus every post where `post.author` matches their name, sorted by date. To add one for a new contributor: add an entry to the `AUTHORS` object (near `POST_TAGS`) with `role` and `bio` (array of paragraph strings). That's it — `postsByAuthor()` filters `POSTS` by the exact `author` string, no separate tagging array to maintain. The byline on `SinglePostView` automatically becomes a clickable link to `/collection/<slugified-name>` for any author present in `AUTHORS`; authors not in `AUTHORS` just show plain (non-clickable) byline text.
+Contributors with more than one post (currently Jonny Ardavanis) can get a "Teaching From" collection page — a bio plus every post where `post.author` matches their name, sorted by date. To add one for a new contributor: add an entry to the `AUTHORS` object in `src/content/authors.js` with `role` and `bio` (array of paragraph strings). That's it — `postsByAuthor()` filters `POSTS` by the exact `author` string, no separate tagging array to maintain. The byline on `SinglePostView` automatically becomes a clickable link to `/collection/<slugified-name>` for any author present in `AUTHORS`; authors not in `AUTHORS` just show plain (non-clickable) byline text.
 
 **Deliberately no top-nav link to these pages** — Brian wants the site to clearly stay *his*, not read like a co-owned or contributor-branded site. Reachable only via the byline click. Bio text should always be paraphrased in original wording from facts Brian supplies, never copied verbatim from an external bio/church page — see the git history for how the Jonny Ardavanis bio was written as a real example.
 
@@ -535,6 +542,7 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~Topics and the Scripture Index had no presence on the homepage~~ — fixed 2026-10-01, see "Homepage: Explore by Topic + Scripture Index teaser" above. Demoed first (twice — once as part of a full homepage redesign pitch Brian didn't take, once as a narrowly-scoped two-block demo he did approve), then implemented exactly as approved with the one requested trim (no heading/subcopy on the Topics section). Rest of the homepage deliberately untouched.
 - ~~Homepage buried the writing, repeated itself, and gave a visitor no way in~~ — fixed 2026-10-06 with the full makeover, see "Homepage (redesigned 2026-10-06)" above. Also fixed along the way: the archive pick could repeat a post already on the page, the email signup was only in the footer, and the footer signup button was dark-on-dark in dark mode. **The old homepage can be restored on request** — steps are in "Homepage restore" in that same section, backed by git tag `homepage-classic-2026-10-06` and `backup/homepage-classic.jsx`.
 - ~~Post page was a narrow column with no landmarks, actions only at the very top and bottom, and a dead-end finish~~ — redesigned 2026-10-15, see "Post page (redesigned 2026-10-15)". **The old post page can be restored on request** (tag `post-classic-2026-10-15`, `backup/post-classic.jsx`).
+- ~~Everything lived in one 10,000-line `App.jsx`, every visitor downloaded the text of every post, and adding posts meant editing that file~~ — fixed 2026-10-16, see "Code layout and how pages load". Posts are now one plain JSON file each (`npm run new-post`), pages and post bodies load on demand, and Firebase is no longer downloaded by visitors who have never signed in. Always-loaded JavaScript went from 209 KB to 73 KB compressed. **Restorable** via tag `app-monolith-2026-10-16`.
 - ~~Accessibility audit items: no skip link, small tap targets, text under 12px, faint grays (3:1), skipped heading levels, two `<main>` regions on Blogs~~ — fixed 2026-10-16, see "Accessibility pass". **Can be undone on request** (tag `a11y-before-2026-10-16`).
 - ~~Two card designs coexisted (Blogs new, everywhere else old) and Topic pages had no filters~~ — fixed 2026-10-15, see "One card everywhere + Topic filters". **The old cards can be restored on request** (tag `cards-classic-2026-10-15`, `backup/cards-classic.jsx`).
 - ~~No way to group related posts into a named, growing series~~ — added 2026-10-12, see "Series (The Proverbs Series)".
@@ -543,6 +551,8 @@ Brian explicitly asked (2026-08-03) for every response in this project to end wi
 - ~~No private place to answer a post's Reflection Questions or keep a prayer list~~ — fixed 2026-10-02, see "Reflection Journal" above. Demoed first, including how the deletion-sync bug and the Firebase-console-access catch would be solved, not just the UI — approved ("go ahead, build it") before implementation.
 
 **Proposed "next level" ideas (not yet greenlit):**
+- **Automatic checks before deploy** (point 2 of the 2026-10-16 audit list; Brian asked for an explanation and demo only, not to build it). A `npm run check` that validates content (excerpt length, scripture translation named, topics/series/moments/plan ids exist, curly quotes, asterisks in blocks that don't format them, future dates) and runs the build, wired into the Vercel build command so a bad post can't go live, plus a GitHub Action for a visible red X. Measured on the real content 2026-10-16: 0 broken links, 46 excerpts over 158 characters, 58 of 100 scripture boxes with no translation named. Waiting for Brian's decision.
+- **"Your Gospel Journey" page** (private reading stats from read history, topics, Scripture Index; no streaks, optional "days you've read" log). Demoed 2026-10-16; Brian said he wants to think about it. Not to be built until he says so.
 - **Switch newsletter automation to Option B (Zapier)** — Brian explicitly asked to keep this suggested to him "at any cost" even though Option C is live and working. Free Zapier account + their pre-built "RSS by Zapier + Buttondown" template pointed at `/rss.xml`. Simpler to maintain long-term (Zapier/Buttondown's own supported integration, not bespoke code) at the cost of one more third-party account.
 - **A truly natural/emotive Listen-to-Post voice** — the current version is now reliable (pause/resume genuinely works, see Fixed above) and, as of 2026-09-14, deterministically uses Brian's actual chosen voice ("Google US English") on any browser that offers it — but voice quality is still capped by what the browser ships free, and that pin only ever applies where the exact voice exists (Chrome and other Chromium browsers). A real narrator-quality voice needs a paid cloud TTS API (e.g. ElevenLabs, Amazon Polly, Google Cloud TTS) plus a small serverless function, since a paid API key can't live in this client-only app the same way the Buttondown key couldn't. Real ongoing cost, bigger scope — Brian's call if worth pursuing. **Explained to Brian 2026-09-08, why the voice differs between his laptop and phone:** laptop and phone run genuinely different operating systems with genuinely different built-in voice sets (macOS's system voices aren't the same list as iOS's, and Google's cloud voices are Chrome-only, not something Apple's Safari/WebKit exposes at all) — so a device/browser with no matching voice still falls back to the best *local* option there (see the pinning fix above). This is inherent to the free, browser-based approach, not a bug to fix — the only way to get the *exact same* voice everywhere, including on devices with no Google voice at all, is this same paid cloud TTS idea above, which renders the audio server-side once rather than relying on each device's own local voices.
 - **Comment section** — Brian wants this eventually but said do it later; keep proposing it each round rather than dropping it. His site has no backend, so this needs a third-party embeddable widget. Recommended: **Cusdis** (lightweight, no ads, simple name+comment for visitors, free tier). Disqus is the well-known alternative but ad-heavy on free tier; Giscus/Utterances need the *commenter* to have a GitHub account, wrong fit for this audience. Whichever is picked, "one comment visible, click to see more" is the widget's default behavior, not something to hand-build. Needs Brian to create the free account himself and hand over the embed/site ID (same pattern as Buttondown) — can't be done for him.
@@ -595,4 +605,4 @@ Needs `BUTTONDOWN_API_KEY` as a GitHub repo secret (Settings → Secrets and var
 
 **Drafts contain the full post, styled like the site — not just an excerpt (upgraded 2026-08-12).** `scripts/post-to-email-html.js` renders every block type (`quote` → "Wisdom of the Day", `scripture` → "Scripture Focus", `reflection`, `heart` → "Write This On Your Heart", etc.) as inline-styled, table-based HTML in the site's actual color palette — inline styles only, no `<style>` blocks, since most email clients strip those. A clickable preview card (thumbnail from `og-image.png` + title + excerpt + domain) sits at the top linking to the live post, and a button at the end. The email body is prefixed with Buttondown's `<!-- buttondown-editor-mode: fancy -->` comment so their API treats it as HTML, not Markdown.
 
-Getting the full `blocks` data (nested, varied-shape objects — a much bigger ask than the flat strings `prerender.js` extracts via regex) uses a different technique: `scripts/load-posts-data.js` bundles `src/App.jsx` with esbuild (`react`/`react-dom`/`lucide-react` marked external, resolved normally by Node from `node_modules` — the temp output file must live *inside* the project tree, e.g. under `node_modules/.gospel-lens-data-tmp/`, or Node's module resolution can't find them) and imports the result to read the real `POSTS`/`AUTHORS` constants directly — robust by construction since it's the actual data the site renders, not a regex guess at it. `App.jsx` has one small additive `export { POSTS, AUTHORS };` at the bottom for this; nothing else about the app changed.
+The full post data (every block) comes from the post files through `scripts/lib/content.js` (`readPosts()`), the same loader the site build uses; there is no longer any bundling of `App.jsx` (`scripts/load-posts-data.js` was removed 2026-10-16). Drafts are created oldest-first so they read in order in Buttondown.

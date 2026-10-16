@@ -5,24 +5,17 @@
 // site-wide description. Also regenerates sitemap.xml with real URLs now
 // that real per-post paths exist.
 //
-// Reads post/author data straight out of src/App.jsx via targeted regexes
-// (not by importing/executing the module) to avoid pulling React/JSX
-// evaluation into a plain Node build script.
+// Reads post/author/topic data from the content files in src/content (plain JSON and
+// plain data modules, see scripts/lib/content.js), so there is nothing to scrape.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import path from "node:path";
 import { buildAllShareCards } from "./build-share-cards.js";
+import { readPosts, loadSiteData } from "./lib/content.js";
+import { slugify } from "../src/lib/slug.js";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const SITE_URL = "https://the-gospel-lens.vercel.app";
-
-function slugify(title) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
 
 function escapeHtml(str) {
   return String(str)
@@ -33,118 +26,19 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
-function extractField(field, chunk) {
-  let m = chunk.match(new RegExp(`${field}:\\s*\\n?\\s*"((?:[^"\\\\]|\\\\.)*)"`));
-  if (m) return m[1].replace(/\\(.)/g, "$1");
-  m = chunk.match(new RegExp(`${field}:\\s*\\n?\\s*'((?:[^'\\\\]|\\\\.)*)'`));
-  if (m) return m[1].replace(/\\(.)/g, "$1");
-  return null;
-}
-
-function loadPosts(src) {
-  const start = src.indexOf("const POSTS = [");
-  const end = src.indexOf("\n];", start);
-  if (start === -1 || end === -1) throw new Error("Could not locate POSTS array in src/App.jsx");
-  const block = src.slice(start, end);
-  const chunks = block
-    .split(/\n(?=\s*\{\s*\n\s*id:\s*\d+,)/)
-    .filter((c) => /id:\s*\d+,/.test(c));
-
-  return chunks.map((chunk) => {
-    const idMatch = chunk.match(/id:\s*(\d+),/);
-    const title = extractField("title", chunk);
-    const excerpt = extractField("excerpt", chunk);
-    const date = extractField("date", chunk);
-    const category = extractField("category", chunk);
-    const authorMatch = chunk.match(/author:\s*"((?:[^"\\]|\\.)*)"/);
-    const author = authorMatch ? authorMatch[1].replace(/\\(.)/g, "$1") : null;
-    if (!idMatch || !title || !excerpt || !date || !category) {
-      throw new Error(`Failed to extract post fields near: ${chunk.slice(0, 60)}...`);
-    }
-    const seriesMatch = chunk.match(/series:\s*"([^"]+)"/);
-    return { id: Number(idMatch[1]), title, excerpt, date, category, author, series: seriesMatch ? seriesMatch[1] : null, slug: slugify(title) };
-  });
-}
-
-function loadAuthors(src) {
-  const start = src.indexOf("const AUTHORS = {");
-  if (start === -1) return [];
-  const end = src.indexOf("\n};", start);
-  const block = src.slice(start, end);
-  const chunks = block
-    .split(/\n(?=\s*"[^"]+":\s*\{)/)
-    .filter((c) => /^\s*"[^"]+":\s*\{/.test(c));
-
-  return chunks.map((chunk) => {
-    const nameMatch = chunk.match(/"([^"]+)":\s*\{/);
-    const roleMatch = chunk.match(/role:\s*"((?:[^"\\]|\\.)*)"/);
-    const bioMatch = chunk.match(/bio:\s*\[\s*\n?\s*"((?:[^"\\]|\\.)*)"/);
-    if (!nameMatch) throw new Error(`Failed to extract author name near: ${chunk.slice(0, 60)}...`);
-    const name = nameMatch[1];
-    const role = roleMatch ? roleMatch[1].replace(/\\(.)/g, "$1") : "";
-    const description = bioMatch ? bioMatch[1].replace(/\\(.)/g, "$1") : role;
-    return { name, role, description, slug: slugify(name) };
-  });
-}
-
-// POST_TAGS is a flat object: "Topic Name": [id, id, ...]. Much simpler
-// shape than AUTHORS, so a single regex over the whole block is enough --
-// no need to split into per-entry chunks first.
-// SERIES (added 2026-10-12): one entry per line in App.jsx, e.g.
-//   proverbs: { slug: "proverbs", name: "...", tag: "...", description: "...", ... },
-// read with a regex like everything else here (so descriptions must not
-// contain double quotes). Each becomes /series/<slug> with its own meta.
-function loadSeries(src) {
-  const start = src.indexOf("const SERIES = {");
-  if (start === -1) return [];
-  const end = src.indexOf("\n};", start);
-  const block = src.slice(start, end);
-  const re = /^\s*(\w+): \{ slug: "([^"]+)", name: "([^"]+)", tag: "([^"]*)", description: "([^"]*)"/gm;
-  const out = [];
-  let m;
-  while ((m = re.exec(block))) out.push({ id: m[1], slug: m[2], name: m[3], tag: m[4], description: m[5] });
-  return out;
-}
-
-function loadTopics(src) {
-  const start = src.indexOf("const POST_TAGS = {");
-  if (start === -1) return [];
-  const end = src.indexOf("\n};", start);
-  const block = src.slice(start, end);
-  const entryRe = /"([^"]+)":\s*\[([^\]]*)\]/g;
-  const topics = [];
-  let m;
-  while ((m = entryRe.exec(block))) {
-    const name = m[1];
-    const ids = m[2]
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map(Number);
-    topics.push({ name, ids, slug: slugify(name), description: null });
-  }
-
-  // TOPIC_DESCRIPTIONS (added 2026-09-08) -- a real per-topic description,
-  // shown on TopicView and reused here as that page's meta description
-  // instead of a generic "N posts about X" line. Same regex-extraction
-  // approach as everything else in this file, deliberately not importing
-  // the module.
-  const descStart = src.indexOf("const TOPIC_DESCRIPTIONS = {");
-  if (descStart !== -1) {
-    const descEnd = src.indexOf("\n};", descStart);
-    const descBlock = src.slice(descStart, descEnd);
-    const descRe = /"([^"]+)":\s*"([^"]*)"/g;
-    const descriptions = {};
-    let dm;
-    while ((dm = descRe.exec(descBlock))) {
-      descriptions[dm[1]] = dm[2];
-    }
-    for (const topic of topics) {
-      if (descriptions[topic.name]) topic.description = descriptions[topic.name];
-    }
-  }
-
-  return topics;
+// Posts, authors, topics and series come from the site's content files (see
+// scripts/lib/content.js), the same ones the app itself is built from.
+function toPrerenderPost(post) {
+  return {
+    id: post.id,
+    title: post.title,
+    excerpt: post.excerpt,
+    date: post.date,
+    category: post.category,
+    author: post.author ?? null,
+    series: post.series ?? null,
+    slug: slugify(post.title),
+  };
 }
 
 function truncateAtWord(str, max) {
@@ -348,7 +242,7 @@ ${items}
 // serving auto-detects a 404.html at the output root and serves it, with a
 // real 404 status, for any request that doesn't match a file/rewrite — the
 // same convention GitHub Pages/Netlify use. This is the fallback of last
-// resort; NotFoundView in App.jsx (src/App.jsx) is what visitors actually
+// resort; NotFoundView (src/views/NotFoundView.jsx) is what visitors actually
 // see for any dead link the SPA's own router catches once JS has loaded.
 function build404Page() {
   return `<!doctype html>
@@ -437,13 +331,10 @@ async function main() {
   const distDir = path.join(ROOT, "dist");
   if (!existsSync(distDir)) throw new Error("dist/ not found — run `vite build` before this script.");
 
-  const src = readFileSync(path.join(ROOT, "src", "App.jsx"), "utf8");
   const template = readFileSync(path.join(distDir, "index.html"), "utf8");
 
-  const posts = loadPosts(src);
-  const authors = loadAuthors(src);
-  const topics = loadTopics(src);
-  const seriesList = loadSeries(src);
+  const posts = readPosts().map(toPrerenderPost);
+  const { authors, topics, series: seriesList, moments } = await loadSiteData();
 
   const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved", "liked", "journal", "start-here", "topics", "verses", "series"]);
   const seenSlugs = new Set();
@@ -459,27 +350,18 @@ async function main() {
   }
 
   // The homepage's "What are you carrying today?" chooser (MOMENTS in
-  // src/App.jsx, added 2026-10-06) points at specific posts and topics by id
-  // and name. Fail the build if any of them no longer exists, so a renamed
-  // topic or a removed post can't quietly leave a dead link on the homepage.
-  const momentsStart = src.indexOf("const MOMENTS = [");
-  if (momentsStart === -1) throw new Error("MOMENTS not found in src/App.jsx -- the homepage chooser needs it.");
-  const momentsBlock = src.slice(momentsStart, src.indexOf("\n];", momentsStart));
+  // src/content/moments.js) points at specific posts and topics by id and name.
+  // Fail the build if any of them no longer exists, so a renamed topic or a
+  // removed post can't quietly leave a dead link on the homepage.
   const knownPostIds = new Set(posts.map((p) => Number(p.id)));
   const knownTopicNames = new Set(topics.map((t) => t.name));
-  let momentsChecked = 0;
-  for (const line of momentsBlock.split("\n")) {
-    const lm = line.match(/label:\s*"([^"]+)",\s*topic:\s*"([^"]+)",\s*primary:\s*(\d+),\s*secondary:\s*\[([^\]]*)\]/);
-    if (!lm) continue;
-    const [, label, topic, primary, secondary] = lm;
+  if (moments.length === 0) throw new Error("MOMENTS is empty -- the homepage chooser needs it.");
+  for (const { label, topic, primary, secondary } of moments) {
     if (!knownTopicNames.has(topic)) throw new Error(`MOMENTS "${label}" points at topic "${topic}", which isn't in POST_TAGS.`);
-    const ids = [Number(primary), ...secondary.split(",").map((s) => s.trim()).filter(Boolean).map(Number)];
-    for (const id of ids) {
-      if (!knownPostIds.has(id)) throw new Error(`MOMENTS "${label}" points at post id ${id}, which doesn't exist in POSTS.`);
+    for (const id of [primary, ...secondary]) {
+      if (!knownPostIds.has(id)) throw new Error(`MOMENTS "${label}" points at post id ${id}, which doesn't exist in the posts.`);
     }
-    momentsChecked += 1;
   }
-  if (momentsChecked === 0) throw new Error("Couldn't read any entries from MOMENTS -- did its one-entry-per-line format change?");
 
   const ogImageUrl = `${SITE_URL}/og-image.png`;
 
@@ -520,7 +402,7 @@ async function main() {
   // instead of only existing as a filter chip.
   for (const topic of topics) {
     const count = topic.ids.length;
-    // Real description (TOPIC_DESCRIPTIONS in App.jsx) when there is one --
+    // Real description (TOPIC_DESCRIPTIONS in src/content/topics.js) when there is one --
     // matches what a visitor actually sees on the page itself, better for
     // search results than a generic count. Falls back to the old generic
     // line only if a topic is ever added without a description.
@@ -592,8 +474,8 @@ async function main() {
   // saved/liked/start-here above -- it's a genuinely public, indexable page
   // (every visitor sees the same content), so unlike those it gets a real,
   // specific meta description and a sitemap entry. Its actual content
-  // (every verse, grouped by book) is derived client-side from POSTS in
-  // App.jsx (buildScriptureIndex()) rather than duplicated here in Node --
+  // (every verse, grouped by book) is derived client-side from the posts
+  // (src/lib/scriptureIndex.js) rather than duplicated here in Node --
   // this file only needs the page's title/description to exist, the same
   // "meta-only" static file every other list-style page (topics,
   // collections) already gets.

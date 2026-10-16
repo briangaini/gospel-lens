@@ -1,7 +1,7 @@
 name: Draft newsletter email for new posts
 
 # Runs after every push to main and checks the live post data (read
-# directly from src/App.jsx, no build needed) for posts not yet drafted in
+# directly from the post files in src/content/posts, no build needed) for posts not yet drafted in
 # Buttondown — see scripts/notify-buttondown.js for the full explanation.
 # Shows green even before BUTTONDOWN_API_KEY is added as a repo secret; it
 # just skips.

@@ -1,0 +1,19 @@
+{
+  "id": 50,
+  "title": "Let There Be Light",
+  "author": null,
+  "date": "September 13, 2026",
+  "category": "Devotional",
+  "readTime": "2 min read",
+  "excerpt": "Light and darkness can't coexist — and neither can sin and perfection. Jesus, the Light of the World, didn't just rescue us from the dark; He gave us His Spirit so we could carry that same light to others.",
+  "blocks": [
+    {"type":"p","text":"The word \"light\" appears hundreds of times in the Bible. It first appears just three verses into the first book, Genesis, during the creation story:"},
+    {"type":"scripture","reference":"Genesis 1:3-4, NIV","verses":["And God said, 'Let there be light,' and there was light. God saw that the light was good, and he separated the light from the darkness."]},
+    {"type":"p","text":"Later, when the prophet Isaiah foretold Jesus' coming, he framed the Messiah as a \"great light\" that would dawn on those who were \"walking in darkness\" (Isaiah 9:2). Jesus fulfilled the prophecy in John 8:12 when He declared, \"I am the light of the world. Whoever follows me will never walk in darkness, but will have the light of life.\""},
+    {"type":"p","text":"Darkness cannot exist where there is light. Genesis 1 says that God separated the light from the darkness that covered a formless, empty earth—because the two things cannot coexist. And the same is true of sin and perfection. The world fell into darkness when sin entered it."},
+    {"type":"p","text":"But the world wasn't completely consumed by darkness—we were only separated from God. That's why He sent Jesus, the Great Light, to guide us back to Him."},
+    {"type":"p","text":"Just as a flame burns brightly, its fire also spreads. When He returned to Heaven, Jesus gave us His Spirit, so that we might also be light to others! The Apostle Paul writes in Ephesians 5:8, \"For you were once darkness, but now you are light in the Lord. Live as children of light.\""},
+    {"type":"p","text":"As a child of light, you can be a light in our dark world by the way you live, speak, and act. Ask yourself: How will I continue to walk in step with Jesus as my guiding light? What will I do to be a light in my world? Who will I share His light with today?"},
+    {"type":"prayer","text":"God, thank You for creating light, and for sending Your Son to be the Light of the world! Without it, I would be lost in darkness. Give me a passion to want others to experience Your Light. Empower me with boldness and love. In Jesus' name, Amen."}
+  ]
+}

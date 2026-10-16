@@ -1,9 +1,28 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import gospelContent from "./vite-plugins/gospel-content.js";
 
 export default defineConfig({
+  // JSON files (the posts) are shipped as one compact string each, instead of
+  // as a JavaScript object with a named export per field.
+  json: { stringify: true },
+  build: {
+    rollupOptions: {
+      output: {
+        // Group the on-demand pieces of the site so they are easy to tell apart
+        // (and to keep out of the installed-app download below).
+        chunkFileNames(chunk) {
+          const id = chunk.facadeModuleId || "";
+          if (/\/src\/content\/posts\/.*\.json$/.test(id)) return "assets/posts/[name]-[hash].js";
+          if (id.includes("gospel-content-")) return "assets/content/[name]-[hash].js";
+          return "assets/[name]-[hash].js";
+        },
+      },
+    },
+  },
   plugins: [
+    gospelContent(),
     react(),
     VitePWA({
       registerType: "autoUpdate",
@@ -43,7 +62,11 @@ export default defineConfig({
         // person ever uses sign-in. Excluded from the precache list; it's
         // still fetched (and then cached by the browser normally) the
         // moment someone actually clicks "Sign in with Google."
-        globIgnores: ["**/assets/firebase-*.js"],
+        //
+        // The post files (assets/posts) and the search/Scripture-Index/Journal data
+        // (assets/content) are on-demand pieces for the same reason: installing the
+        // app shouldn't download every post. They are fetched when first needed.
+        globIgnores: ["**/assets/firebase-*.js", "**/assets/posts/**", "**/assets/content/**"],
         // Found live 2026-09-25: a shared link (e.g. a brand-new post) could
         // flash the client-side "Page Not Found" view for a split second on
         // any *returning* visitor's device before correcting itself.
