@@ -12,17 +12,17 @@
 
 export const POST_TAGS = {
   "The Gospel Explained": [1, 9, 12, 19, 28, 57],
-  "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70, 78, 80, 85],
-  "Sin & Repentance": [8, 17, 47, 69, 70, 73, 78, 83, 85],
+  "Grace & Assurance": [3, 14, 7, 31, 53, 63, 68, 70, 78, 80, 85, 86],
+  "Sin & Repentance": [8, 17, 47, 69, 70, 73, 78, 83, 85, 86],
   "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74, 76, 77],
   "Prayer": [2, 18, 73],
   "Worship": [4, 38, 43],
   "Friendship": [20, 34, 49, 67, 81],
   "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64, 75, 79, 80],
-  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66, 82, 83],
-  "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75, 84],
-  "God's Love & Faithfulness": [32, 57, 58, 65, 72, 84],
+  "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66, 82, 83, 87],
+  "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75, 84, 88, 89],
+  "God's Love & Faithfulness": [32, 57, 58, 65, 72, 84, 88, 89],
   "Heaven & Eternity": [27, 44, 62],
 };
 export const TOPIC_DESCRIPTIONS = {
