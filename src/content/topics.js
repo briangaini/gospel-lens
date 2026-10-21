@@ -17,12 +17,12 @@ export const POST_TAGS = {
   "Grief & Comfort": [6, 21, 22, 30],
   "Purpose & Calling": [5, 13, 23, 26, 29, 50, 59, 74, 76, 77],
   "Prayer": [2, 18, 73],
-  "Worship": [4, 38, 43],
-  "Friendship": [20, 34, 49, 67, 81],
+  "Worship": [4, 38, 43, 91],
+  "Friendship": [20, 34, 49, 67, 81, 90],
   "Discipline & Growth": [10, 11, 24, 25, 39, 33, 35, 42, 45, 48, 52, 61, 64, 75, 79, 80],
   "Identity in Christ": [16, 37, 40, 46, 47, 55, 56, 66, 82, 83, 87],
-  "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75, 84, 88, 89],
-  "God's Love & Faithfulness": [32, 57, 58, 65, 72, 84, 88, 89],
+  "Peace": [36, 41, 15, 43, 51, 54, 60, 71, 75, 84, 88, 89, 91],
+  "God's Love & Faithfulness": [32, 57, 58, 65, 72, 84, 88, 89, 90],
   "Heaven & Eternity": [27, 44, 62],
 };
 export const TOPIC_DESCRIPTIONS = {
