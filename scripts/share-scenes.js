@@ -52,7 +52,7 @@ function ridge(x, rnd, { base, amp, color, peaky = false, freq = 0.011 }) {
   x.fillStyle = color;
   x.beginPath();
   x.moveTo(0, W);
-  for (let px = 0; px <= W; px += 4) {
+  for (let px = 0; px <= W + 4; px += 4) {
     let v = 0;
     for (const w of waves) v += w.a * Math.sin(px * w.f + w.p);
     v /= norm;
