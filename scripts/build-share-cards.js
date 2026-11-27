@@ -19,8 +19,8 @@
 import { GlobalFonts, createCanvas, loadImage } from "@napi-rs/canvas";
 import { writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
-import { drawScene } from "./share-scenes.js";
-import { sceneFor } from "./lib/scene-names.js";
+import { drawPicture } from "./share-scenes.js";
+import { pictureFor } from "./lib/scene-names.js";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const SIZE = 630;
@@ -215,11 +215,11 @@ async function buildTitleCard(post) {
 
 // Picture version: a drawn landscape (see share-scenes.js) with the category and
 // title set over a darkened bottom. Every post draws its own copy, seeded by its id.
-async function buildSceneCard(post, scene) {
+async function buildSceneCard(post, picture) {
   registerFonts();
   const canvas = createCanvas(SIZE, SIZE);
   const ctx = canvas.getContext("2d");
-  drawScene(ctx, scene, post.id);
+  drawPicture(ctx, picture, post.id);
 
   let g = ctx.createLinearGradient(0, SIZE * 0.48, 0, SIZE);
   g.addColorStop(0, "rgba(18,14,12,0)");
@@ -273,8 +273,8 @@ async function buildSceneCard(post, scene) {
 }
 
 export async function buildShareCard(post) {
-  const scene = sceneFor(post);
-  return scene ? buildSceneCard(post, scene) : buildTitleCard(post);
+  const picture = pictureFor(post);
+  return picture ? buildSceneCard(post, picture) : buildTitleCard(post);
 }
 
 export async function buildAllShareCards(posts, outDir) {

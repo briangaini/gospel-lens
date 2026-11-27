@@ -13,7 +13,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { estimateReadTime, countPostWords, stripInline } from "../../src/lib/postText.js";
 import { slugify } from "../../src/lib/slug.js";
-import { SCENE_NAMES } from "./scene-names.js";
 
 export const ROOT = path.resolve(import.meta.dirname, "..", "..");
 export const POSTS_DIR = path.join(ROOT, "src", "content", "posts");
@@ -65,7 +64,6 @@ export function readPosts() {
       if (typeof post[key] !== "string" || !post[key].trim()) fail(file, `"${key}" is missing or empty`);
     }
     if (post.order !== undefined && !Number.isInteger(post.order)) fail(file, '"order" must be a whole number');
-    if (post.scene !== undefined && !SCENE_NAMES.includes(post.scene)) fail(file, `"scene" must be one of: ${SCENE_NAMES.join(", ")}`);
     if (Number.isNaN(new Date(post.date).getTime())) fail(file, `"date" (${post.date}) is not a date the site can read`);
     if (!Array.isArray(post.blocks) || post.blocks.length === 0) fail(file, '"blocks" must be a non-empty list');
     post.blocks.forEach((block, i) => {
@@ -91,7 +89,7 @@ export function postSlug(post) {
 // never has to read a post's text just to show a card.
 export function buildIndex(posts) {
   return posts.map((post) => {
-    const { blocks, order, scene, ...meta } = post;
+    const { blocks, order, ...meta } = post;
     return {
       ...meta,
       minutes: parseInt(estimateReadTime(post), 10) || 1,
