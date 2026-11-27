@@ -37,6 +37,7 @@ function toPrerenderPost(post) {
     category: post.category,
     author: post.author ?? null,
     series: post.series ?? null,
+    scene: post.scene ?? null,
     slug: slugify(post.title),
   };
 }
@@ -335,6 +336,8 @@ async function main() {
 
   const posts = readPosts().map(toPrerenderPost);
   const { authors, topics, series: seriesList, moments } = await loadSiteData();
+  // Each post's topic names, in POST_TAGS order -- the share card picks its picture from the first one.
+  for (const p of posts) p.topics = topics.filter((t) => t.ids.includes(Number(p.id))).map((t) => t.name);
 
   const RESERVED_SLUGS = new Set(["blog", "about", "collection", "404", "saved", "liked", "journal", "start-here", "topics", "verses", "series"]);
   const seenSlugs = new Set();

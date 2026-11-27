@@ -56,6 +56,7 @@ image and the newsletter draft are all produced from that one file. You never ne
   the higher id counts as newer (an optional whole-number `"order"` overrides the id for that
   tie-break only; six older posts use it to keep their original order).
 - `category`: `Foundations`, `Teaching`, `Devotional` or `Wisdom from Proverbs`.
+- `scene`: optional. Picks the picture behind the post's share card (the image shown when the link is shared): `road`, `walkers` (the road with two figures), `sea`, `night`, `mountains`, `desert`, `hill` (a cross at dawn) or `window`. Leave it out and the picture comes from the post's first topic (see `scripts/lib/scene-names.js`); a post with no topic gets the plain dark title card.
 - `series`: optional. `"proverbs"` puts the post in the Proverbs Series regardless of its category
   (posts whose category is `Wisdom from Proverbs` join it automatically).
 - `readTime`: not shown anywhere (the real time is worked out from the word count); fill it in for tidiness.

@@ -19,6 +19,8 @@
 import { GlobalFonts, createCanvas, loadImage } from "@napi-rs/canvas";
 import { writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
+import { drawScene } from "./share-scenes.js";
+import { sceneFor } from "./lib/scene-names.js";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const SIZE = 630;
@@ -121,7 +123,7 @@ async function getBrandMark() {
   return brandMarkImage;
 }
 
-export async function buildShareCard(post) {
+async function buildTitleCard(post) {
   registerFonts();
   const canvas = createCanvas(SIZE, SIZE);
   const ctx = canvas.getContext("2d");
@@ -208,6 +210,71 @@ export async function buildShareCard(post) {
   ctx.letterSpacing = "0px";
 
   return canvas.toBuffer("image/png");
+}
+
+
+// Picture version: a drawn landscape (see share-scenes.js) with the category and
+// title set over a darkened bottom. Every post draws its own copy, seeded by its id.
+async function buildSceneCard(post, scene) {
+  registerFonts();
+  const canvas = createCanvas(SIZE, SIZE);
+  const ctx = canvas.getContext("2d");
+  drawScene(ctx, scene, post.id);
+
+  let g = ctx.createLinearGradient(0, SIZE * 0.48, 0, SIZE);
+  g.addColorStop(0, "rgba(18,14,12,0)");
+  g.addColorStop(0.55, "rgba(18,14,12,.78)");
+  g.addColorStop(1, "rgba(18,14,12,.94)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, SIZE * 0.48, SIZE, SIZE * 0.52);
+  g = ctx.createLinearGradient(0, 0, 0, 90);
+  g.addColorStop(0, "rgba(18,14,12,.55)");
+  g.addColorStop(1, "rgba(18,14,12,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, SIZE, 90);
+
+  const centerX = SIZE / 2;
+  const mark = await getBrandMark();
+  ctx.drawImage(mark, centerX - 13, 22, 26, 26);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#E7C88E";
+  ctx.font = `600 11px "${FONT.interSemiBold}"`;
+  ctx.letterSpacing = "2.4px";
+  ctx.fillText("THE GOSPEL LENS", centerX, 66);
+
+  ctx.font = `600 11px "${FONT.interSemiBold}"`;
+  ctx.letterSpacing = "2.2px";
+  ctx.fillText(post.category.toUpperCase(), centerX, 440);
+  ctx.letterSpacing = "0px";
+
+  const { lines, fontSize } = fitTitle(ctx, post.title, {
+    maxWidth: SIZE * 0.8,
+    maxHeight: 134,
+    maxLines: 3,
+    maxFontSize: 46,
+    minFontSize: 22,
+    lineHeightRatio: 1.2,
+  });
+  ctx.font = `700 ${fontSize}px "${FONT.playfair}"`;
+  ctx.fillStyle = COLOR.cream;
+  let y = 452;
+  for (const line of lines) {
+    y += fontSize * 1.2;
+    ctx.fillText(line, centerX, y - fontSize * 0.2);
+  }
+
+  ctx.font = `500 11px "${FONT.inter}"`;
+  ctx.letterSpacing = ".7px";
+  ctx.fillStyle = "rgba(248,247,243,.6)";
+  ctx.fillText("the-gospel-lens.vercel.app", centerX, SIZE - 22);
+  ctx.letterSpacing = "0px";
+  return canvas.toBuffer("image/png");
+}
+
+export async function buildShareCard(post) {
+  const scene = sceneFor(post);
+  return scene ? buildSceneCard(post, scene) : buildTitleCard(post);
 }
 
 export async function buildAllShareCards(posts, outDir) {
