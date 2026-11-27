@@ -37,6 +37,7 @@ function toPrerenderPost(post) {
     category: post.category,
     author: post.author ?? null,
     series: post.series ?? null,
+    scene: post.scene ?? null,
     slug: slugify(post.title),
   };
 }
